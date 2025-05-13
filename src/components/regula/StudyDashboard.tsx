@@ -1,8 +1,41 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { WordCloud } from "./WordCloud";
+import { SubPlanHistory } from "./SubPlanHistory";
+
+interface SummaryCardProps {
+  generalPlan: {
+    name: string;
+    course: string;
+    grade: string;
+  };
+  subPlans: {
+    total: number;
+    active: number;
+    completed: number;
+  };
+  weeklyHours: number;
+  onNewSubPlan: () => void;
+}
 
 export function StudyDashboard() {
+  // MOCK: dados de exemplo
+  const summaryData: SummaryCardProps = {
+    generalPlan: {
+      name: "My Study Plan",
+      course: "Java Programming",
+      grade: "Grade A (90-100%)",
+    },
+    subPlans: {
+      total: 4,
+      active: 3,
+      completed: 1,
+    },
+    weeklyHours: 20,
+    onNewSubPlan: () => alert("New Sub-Plan"),
+  };
+
   return (
     <div className="min-h-screen bg-white px-12 py-10">
       {/* Título e subtítulo */}
@@ -18,28 +51,39 @@ export function StudyDashboard() {
         <div className="flex flex-1 gap-6">
           <div className="flex-1 rounded-xl border bg-white p-6 shadow-sm">
             <div className="mb-1 text-sm text-gray-500">General Plan</div>
-            <div className="text-2xl font-bold">My Study Plan</div>
+            <div className="text-2xl font-bold">
+              {summaryData.generalPlan.name}
+            </div>
             <div className="mt-1 text-sm text-gray-400">
-              Java Programming • Grade A (90-100%)
+              {summaryData.generalPlan.course} • {summaryData.generalPlan.grade}
             </div>
           </div>
           <div className="flex-1 rounded-xl border bg-white p-6 shadow-sm">
             <div className="mb-1 text-sm text-gray-500">Sub-Plans</div>
-            <div className="text-2xl font-bold">4</div>
+            <div className="text-2xl font-bold">
+              {summaryData.subPlans.total}
+            </div>
             <div className="mt-1 text-sm">
-              <span className="font-semibold text-blue-600">● Active: 3</span>
-              <span className="ml-4 text-gray-400">● Completed: 1</span>
+              <span className="font-semibold text-blue-600">
+                ● Active: {summaryData.subPlans.active}
+              </span>
+              <span className="ml-4 text-gray-400">
+                ● Completed: {summaryData.subPlans.completed}
+              </span>
             </div>
           </div>
           <div className="flex-1 rounded-xl border bg-white p-6 shadow-sm">
             <div className="mb-1 text-sm text-gray-500">Weekly Hours</div>
-            <div className="text-2xl font-bold">20</div>
+            <div className="text-2xl font-bold">{summaryData.weeklyHours}</div>
             <div className="mt-1 text-sm text-gray-400">
               Hours committed per week
             </div>
           </div>
         </div>
-        <Button className="h-12 bg-blue-600 px-6 text-base font-semibold text-white hover:bg-blue-700">
+        <Button
+          className="h-12 bg-blue-600 px-6 text-base font-semibold text-white hover:bg-blue-700"
+          onClick={summaryData.onNewSubPlan}
+        >
           + New Sub-Plan
         </Button>
       </div>
@@ -59,17 +103,11 @@ export function StudyDashboard() {
           <div className="mt-6 grid grid-cols-2 gap-6">
             <div className="rounded-xl border bg-white p-6 shadow-sm">
               <div className="mb-2 font-semibold">Word Cloud</div>
-              {/* Word Cloud aqui */}
-              <div className="flex h-48 items-center justify-center rounded-lg bg-gray-50 text-gray-300">
-                Plan Topics Word Cloud
-              </div>
+              <WordCloud />
             </div>
             <div className="rounded-xl border bg-white p-6 shadow-sm">
               <div className="mb-2 font-semibold">Sub-Plan History</div>
-              {/* Sub-Plan History aqui */}
-              <div className="flex h-48 items-center justify-center rounded-lg bg-gray-50 text-gray-300">
-                Sub-Plan History Content
-              </div>
+              <SubPlanHistory />
             </div>
           </div>
         </TabsContent>

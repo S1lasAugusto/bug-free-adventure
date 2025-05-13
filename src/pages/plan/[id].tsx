@@ -119,9 +119,9 @@ export default function PlanDetailPage() {
               </div>
             </CardContent>
           </Card>
-          {/* Card de ações */}
-          <Card className="flex flex-col justify-between">
-            <CardHeader>
+          {/* Card de ações compacto */}
+          <Card className="w-full max-w-xs self-start md:w-auto">
+            <CardHeader className="pb-2">
               <div className="mb-2 flex items-center gap-2">
                 <BadgeCheck className="h-5 w-5 text-gray-700" />
                 <span className="text-lg font-semibold">Actions</span>

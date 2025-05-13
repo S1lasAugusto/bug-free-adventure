@@ -16,8 +16,8 @@ const words = [
   { text: "Exceptions", value: 8 },
 ];
 
-const width = 350;
-const height = 200;
+const width = 500;
+const height = 300;
 
 type WordDatum = {
   text: string;
@@ -46,8 +46,10 @@ export function WordCloud() {
       .on("end", (cloudWords: WordDatum[]) => {
         const svg = d3
           .select(svgRef.current)
-          .attr("width", width)
+          .attr("width", "100%")
           .attr("height", height)
+          .attr("viewBox", `0 0 ${width} ${height}`)
+          .attr("preserveAspectRatio", "xMidYMid meet")
           .append("g")
           .attr("transform", `translate(${width / 2},${height / 2})`);
 
@@ -74,14 +76,12 @@ export function WordCloud() {
 
   return (
     <div
-      className="flex items-center justify-center rounded-lg bg-gray-50"
-      style={{ height, width }}
+      className="flex w-full items-center justify-center rounded-lg bg-gray-50"
+      style={{ height }}
     >
       <svg
         ref={svgRef}
-        width={width}
-        height={height}
-        style={{ display: "block", margin: "auto" }}
+        style={{ display: "block", width: "100%", height: "100%" }}
       ></svg>
     </div>
   );

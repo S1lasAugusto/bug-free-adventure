@@ -8,11 +8,15 @@ import Sidebar from "../components/Sidebar";
 import "../styles/globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { api } from "../utils/api";
+import { useRouter } from "next/router";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
   pageProps: { session, ...pageProps },
 }) => {
+  const router = useRouter();
+  const isRegula = router.pathname.startsWith("/regula");
+
   return (
     <ThemeProvider attribute="class" enableSystem={false}>
       <Head>
@@ -23,9 +27,13 @@ const MyApp: AppType<{ session: Session | null }> = ({
       </Head>
       <SessionProvider session={session}>
         <div className="fixed w-full">
-          <Sidebar>
+          {isRegula ? (
             <Component {...pageProps} />
-          </Sidebar>
+          ) : (
+            <Sidebar>
+              <Component {...pageProps} />
+            </Sidebar>
+          )}
         </div>
       </SessionProvider>
       <Analytics />

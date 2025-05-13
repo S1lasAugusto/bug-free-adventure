@@ -77,7 +77,12 @@ export function WordCloud() {
       className="flex items-center justify-center rounded-lg bg-gray-50"
       style={{ height, width }}
     >
-      <svg ref={svgRef}></svg>
+      <svg
+        ref={svgRef}
+        width={width}
+        height={height}
+        style={{ display: "block", margin: "auto" }}
+      ></svg>
     </div>
   );
 }

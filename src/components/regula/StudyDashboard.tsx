@@ -37,7 +37,10 @@ export function StudyDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-white px-12 py-10">
+    <div
+      className="min-h-screen overflow-y-auto bg-white px-12 py-10"
+      style={{ maxHeight: "100vh" }}
+    >
       {/* Título e subtítulo */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold">Study Dashboard</h1>

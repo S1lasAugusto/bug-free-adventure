@@ -6,8 +6,10 @@ export default function MyPlanPage() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <StudySidebar />
-      <div className="flex-1 px-12 py-10">
-        <MyPlanDashboard />
+      <div className="h-screen flex-1 overflow-y-auto">
+        <div className="px-12 py-10">
+          <MyPlanDashboard />
+        </div>
       </div>
     </div>
   );

@@ -7,39 +7,17 @@ interface SubPlan {
   lastModified: string;
   topic: string;
   changes: number;
+  mastery?: number;
 }
 
-const mockSubPlans: SubPlan[] = [
-  {
-    id: "1",
-    name: "Java Fundamentals",
-    status: "active",
-    lastModified: "10/15/2023",
-    topic: "Java Fundamentals",
-    changes: 4,
-  },
-  {
-    id: "2",
-    name: "OOP Concepts",
-    status: "active",
-    lastModified: "10/10/2023",
-    topic: "OOP Concepts",
-    changes: 2,
-  },
-  {
-    id: "3",
-    name: "Collections",
-    status: "completed",
-    lastModified: "09/30/2023",
-    topic: "Collections",
-    changes: 5,
-  },
-];
+interface SubPlanHistoryProps {
+  subPlans: SubPlan[];
+}
 
-export function SubPlanHistory() {
+export function SubPlanHistory({ subPlans }: SubPlanHistoryProps) {
   return (
     <div className="space-y-4">
-      {mockSubPlans.map((plan) => (
+      {subPlans.map((plan) => (
         <div
           key={plan.id}
           className="mb-2 rounded-lg border bg-white p-4 shadow-sm"
@@ -68,6 +46,12 @@ export function SubPlanHistory() {
               <span className="font-medium">Changes:</span> {plan.changes}{" "}
               records
             </div>
+            {plan.mastery !== undefined && (
+              <div>
+                <span className="font-medium">Mastery goal:</span>{" "}
+                {plan.mastery}%
+              </div>
+            )}
           </div>
           <div className="mt-2">
             <a

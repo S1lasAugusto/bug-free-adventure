@@ -12,9 +12,13 @@ interface SubPlan {
 
 interface SubPlanHistoryProps {
   subPlans: SubPlan[];
+  onViewHistory?: (plan: SubPlan) => void;
 }
 
-export function SubPlanHistory({ subPlans }: SubPlanHistoryProps) {
+export function SubPlanHistory({
+  subPlans,
+  onViewHistory,
+}: SubPlanHistoryProps) {
   return (
     <div className="space-y-4">
       {subPlans.map((plan) => (
@@ -54,12 +58,13 @@ export function SubPlanHistory({ subPlans }: SubPlanHistoryProps) {
             )}
           </div>
           <div className="mt-2">
-            <a
-              href="#"
+            <button
+              type="button"
               className="text-sm font-medium text-blue-600 hover:underline"
+              onClick={() => onViewHistory && onViewHistory(plan)}
             >
               Click to view detailed history
-            </a>
+            </button>
           </div>
         </div>
       ))}

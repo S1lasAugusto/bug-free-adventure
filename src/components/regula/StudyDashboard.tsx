@@ -4,6 +4,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WordCloud } from "./WordCloud";
 import { SubPlanHistory } from "./SubPlanHistory";
 import { SubPlanWizard } from "./SubPlanWizard";
+import { SubPlanHistoryModal } from "./SubPlanHistoryModal";
+import { GraduationCap, List, Clock } from "lucide-react";
+import { Plus } from "lucide-react";
 
 interface SummaryCardProps {
   generalPlan: {
@@ -59,6 +62,8 @@ export function StudyDashboard() {
     },
   ]);
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [historyModalOpen, setHistoryModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<SubPlan | null>(null);
 
   const summaryData: SummaryCardProps = {
     generalPlan: {
@@ -90,6 +95,11 @@ export function StudyDashboard() {
     ]);
   }
 
+  function handleViewHistory(plan: SubPlan) {
+    setSelectedPlan(plan);
+    setHistoryModalOpen(true);
+  }
+
   return (
     <div
       className="min-h-screen overflow-y-auto bg-white px-12 py-10"
@@ -102,6 +112,64 @@ export function StudyDashboard() {
         onComplete={handleCreateSubPlan}
       />
 
+      {/* Modal de histórico detalhado */}
+      {selectedPlan && (
+        <SubPlanHistoryModal
+          open={historyModalOpen}
+          onClose={() => setHistoryModalOpen(false)}
+          onViewDetails={() => alert("View Plan Details clicked!")}
+          title={`${selectedPlan.name} - Modification History`}
+          subtitle="Detailed log of all changes made to this sub-plan"
+          events={[
+            {
+              type: "progress",
+              title: "Progress Updated",
+              date: "Oct 21, 2023 at 8:10 PM",
+              from: "45",
+              to: "65",
+              reflection: {
+                impact: "Completed chapter exercises",
+                reason: "Applied new learning strategies",
+                effectiveness: "high",
+              },
+              relativeTime: "over 1 year ago",
+            },
+            {
+              type: "strategy",
+              title: "Strategy Changed",
+              date: "Oct 19, 2023 at 11:20 AM",
+              from: "Pomodoro Technique, Active Recall",
+              to: "Pomodoro Technique, Active Recall, Practice Tests",
+              reflection: {
+                impact: "Added practice tests to improve retention",
+                reason: "Needed more hands-on practice",
+                effectiveness: "high",
+              },
+              relativeTime: "over 1 year ago",
+            },
+            {
+              type: "progress",
+              title: "Progress Updated",
+              date: "Oct 17, 2023 at 5:45 PM",
+              from: "30",
+              to: "45",
+              reflection: {
+                impact: "Completed two practice exercises",
+                reason: "Dedicated more time to studying",
+                effectiveness: "medium",
+              },
+              relativeTime: "over 1 year ago",
+            },
+            {
+              type: "created",
+              title: "Plan Created",
+              date: "Oct 15, 2023 at 12:30 PM",
+              relativeTime: "over 1 year ago",
+            },
+          ]}
+        />
+      )}
+
       {/* Título e subtítulo */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold">Study Dashboard</h1>
@@ -110,55 +178,70 @@ export function StudyDashboard() {
         </p>
       </div>
 
-      {/* Grid de cards de resumo e botão */}
-      <div className="mb-6 flex items-start justify-between gap-6">
-        <div className="flex flex-1 gap-6">
-          <div className="flex-1 rounded-xl border bg-white p-6 shadow-sm">
-            <div className="mb-1 text-sm text-gray-500">General Plan</div>
-            <div className="text-2xl font-bold">
-              {summaryData.generalPlan.name}
-            </div>
-            <div className="mt-1 text-sm text-gray-400">
-              {summaryData.generalPlan.course} • {summaryData.generalPlan.grade}
-            </div>
-          </div>
-          <div className="flex-1 rounded-xl border bg-white p-6 shadow-sm">
-            <div className="mb-1 text-sm text-gray-500">Sub-Plans</div>
-            <div className="text-2xl font-bold">
-              {summaryData.subPlans.total}
-            </div>
-            <div className="mt-1 text-sm">
-              <span className="font-semibold text-blue-600">
-                ● Active: {summaryData.subPlans.active}
-              </span>
-              <span className="ml-4 text-gray-400">
-                ● Completed: {summaryData.subPlans.completed}
-              </span>
-            </div>
-          </div>
-          <div className="flex-1 rounded-xl border bg-white p-6 shadow-sm">
-            <div className="mb-1 text-sm text-gray-500">Weekly Hours</div>
-            <div className="text-2xl font-bold">{summaryData.weeklyHours}</div>
-            <div className="mt-1 text-sm text-gray-400">
-              Hours committed per week
-            </div>
-          </div>
-        </div>
+      {/* Botão no topo alinhado à direita */}
+      <div className="mb-4 flex justify-end">
         <Button
-          className="h-12 bg-blue-600 px-6 text-base font-semibold text-white hover:bg-blue-700"
+          className="flex h-12 items-center gap-2 rounded-xl bg-blue-600 px-6 text-base font-semibold text-white shadow-md hover:bg-blue-700"
           onClick={summaryData.onNewSubPlan}
         >
-          + New Sub-Plan
+          <Plus className="h-5 w-5" /> New Sub-Plan
         </Button>
+      </div>
+
+      {/* Grid de cards de resumo */}
+      <div className="mb-6 grid w-full grid-cols-3 gap-6">
+        <div className="min-w-[220px] rounded-2xl border bg-white p-6 shadow-sm">
+          <div className="mb-1 flex items-center justify-between text-sm text-gray-500">
+            <span>General Plan</span>
+            <GraduationCap className="h-5 w-5 text-gray-400" />
+          </div>
+          <div className="text-3xl font-bold">
+            {summaryData.generalPlan.name}
+          </div>
+          <div className="mt-1 text-base text-gray-400">
+            {summaryData.generalPlan.course} • {summaryData.generalPlan.grade}
+          </div>
+        </div>
+        <div className="min-w-[220px] rounded-2xl border bg-white p-6 shadow-sm">
+          <div className="mb-1 flex items-center justify-between text-sm text-gray-500">
+            <span>Sub-Plans</span>
+            <List className="h-5 w-5 text-gray-400" />
+          </div>
+          <div className="text-3xl font-bold">{summaryData.subPlans.total}</div>
+          <div className="mt-1 text-base">
+            <span className="font-semibold text-blue-600">
+              ● Active: {summaryData.subPlans.active}
+            </span>
+            <span className="ml-4 text-gray-400">
+              ● Completed: {summaryData.subPlans.completed}
+            </span>
+          </div>
+        </div>
+        <div className="min-w-[220px] rounded-2xl border bg-white p-6 shadow-sm">
+          <div className="mb-1 flex items-center justify-between text-sm text-gray-500">
+            <span>Weekly Hours</span>
+            <Clock className="h-5 w-5 text-gray-400" />
+          </div>
+          <div className="text-3xl font-bold">{summaryData.weeklyHours}</div>
+          <div className="mt-1 text-base text-gray-400">
+            Hours committed per week
+          </div>
+        </div>
       </div>
 
       {/* Abas */}
       <Tabs defaultValue="overview" className="mb-6">
-        <TabsList className="flex w-full rounded-lg bg-gray-100">
-          <TabsTrigger value="overview" className="flex-1">
+        <TabsList className="flex w-full rounded-xl bg-[#f5f8fd] p-1">
+          <TabsTrigger
+            value="overview"
+            className="flex-1 rounded-lg text-base data-[state=active]:bg-white data-[state=active]:shadow-sm"
+          >
             Overview
           </TabsTrigger>
-          <TabsTrigger value="tracking" className="flex-1">
+          <TabsTrigger
+            value="tracking"
+            className="flex-1 rounded-lg text-base data-[state=active]:bg-white data-[state=active]:shadow-sm"
+          >
             Tracking
           </TabsTrigger>
         </TabsList>
@@ -171,7 +254,10 @@ export function StudyDashboard() {
             </div>
             <div className="rounded-xl border bg-white p-6 shadow-sm">
               <div className="mb-2 font-semibold">Sub-Plan History</div>
-              <SubPlanHistory subPlans={subPlans} />
+              <SubPlanHistory
+                subPlans={subPlans}
+                onViewHistory={handleViewHistory}
+              />
             </div>
           </div>
         </TabsContent>

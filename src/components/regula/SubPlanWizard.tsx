@@ -153,7 +153,7 @@ export function SubPlanWizard({
         aria-hidden="true"
       />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="w-full max-w-xl rounded-2xl bg-white p-0 shadow-2xl transition-all duration-300">
+        <Dialog.Panel className="w-full max-w-2xl rounded-2xl bg-white p-0 shadow-2xl transition-all duration-300">
           {/* Barra de progresso */}
           <div className="h-2 w-full rounded-t-2xl bg-zinc-100">
             <div
@@ -161,7 +161,7 @@ export function SubPlanWizard({
               style={{ width: `${progress}%` }}
             />
           </div>
-          <div className="p-8">
+          <div className="p-10">
             <Dialog.Title className="mb-2 text-2xl font-bold text-zinc-900">
               Sub-Plan Wizard
             </Dialog.Title>

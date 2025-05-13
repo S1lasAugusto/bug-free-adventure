@@ -261,6 +261,49 @@ const Settings: NextPage = () => {
               <label htmlFor="select">Select</label>
             </div>
           </div>
+
+          <div
+            className={classNames(
+              checkboxIndexes.includes(SelectedEnum.REGULA)
+                ? "border-[#0de890] dark:border-[#0de890]"
+                : "border-zinc-400 dark:border-zinc-600",
+              " course-card relative h-auto grid-cols-1 rounded-2xl border-2 border  px-6 pt-6"
+            )}
+          >
+            <h5 className="mb-2 text-2xl font-bold tracking-tight">Regula</h5>
+            <p className="col-start-1 text-sm text-gray-700 dark:text-gray-400">
+              Este componente é um placeholder para futuras funcionalidades de
+              autorregulação.
+            </p>
+            <div className="scale-90">
+              <div className="rounded bg-zinc-100 p-4 text-center text-zinc-500 dark:bg-zinc-800">
+                Regula Preview
+              </div>
+            </div>
+            <div className="absolute bottom-1 my-6 ml-4 flex items-center gap-2 ">
+              <Checkbox
+                onClick={() =>
+                  checkboxIndexes?.includes(SelectedEnum.REGULA)
+                    ? setCheckboxIndexes(
+                        checkboxIndexes.filter((e) => e !== SelectedEnum.REGULA)
+                      )
+                    : setCheckboxIndexes([
+                        ...checkboxIndexes,
+                        SelectedEnum.REGULA,
+                      ])
+                }
+                {...register("newSelectedComponents")}
+                id="select"
+                value={SelectedEnum.REGULA}
+                defaultChecked={userPreferences?.selectedComponents?.includes(
+                  SelectedEnum.REGULA
+                )}
+                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                required={false}
+              />
+              <label htmlFor="select">Select</label>
+            </div>
+          </div>
         </div>
 
         <p className="text-color mb-6 mt-8 text-xl font-semibold uppercase opacity-75">

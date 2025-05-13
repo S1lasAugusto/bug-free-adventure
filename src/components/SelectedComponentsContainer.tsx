@@ -5,6 +5,7 @@ import { SelectedEnum } from "@prisma/client";
 import ToDoComp from "./todo/ToDoComp";
 import CourseCard from "./CourseCard";
 import Stats from "./Stats";
+import Regula from "./Regula";
 
 interface ISelectedComponentsProps {
   selected: Array<SelectedEnum>;
@@ -53,6 +54,14 @@ const SelectedComponentsContainer = (props: ISelectedComponentsProps) => {
           history
         </div>
         <ExerciseHistory />
+      </div>
+    ),
+    REGULA: (
+      <div>
+        <div className="text-color mb-6 text-xl font-semibold uppercase opacity-75">
+          regula
+        </div>
+        <Regula />
       </div>
     ),
   };

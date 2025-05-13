@@ -141,4 +141,5 @@ enum SelectedEnum {
   LEADERBOARD
   EXERCISEHISTORY
   TODO
+  REGULA
 }

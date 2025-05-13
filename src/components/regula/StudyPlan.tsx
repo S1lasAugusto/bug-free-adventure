@@ -28,10 +28,10 @@ export function StudyPlan() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Planos de Estudo</h2>
+        <h2 className="text-2xl font-bold">Study Plans</h2>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
-          Novo Plano
+          New Plan
         </Button>
       </div>
 
@@ -39,8 +39,7 @@ export function StudyPlan() {
         <Card>
           <CardContent className="flex h-32 items-center justify-center">
             <p className="text-zinc-500">
-              Nenhum plano de estudo criado ainda. Clique em "Novo Plano" para
-              começar.
+              No study plans created yet. Click "New Plan" to get started.
             </p>
           </CardContent>
         </Card>
@@ -57,10 +56,10 @@ export function StudyPlan() {
               <CardContent>
                 <div className="space-y-2">
                   <p className="text-sm text-zinc-500">
-                    Nota Alvo: {plan.targetGrade}
+                    Target Grade: {plan.targetGrade}
                   </p>
                   <p className="text-sm text-zinc-500">
-                    Criado em: {plan.createdAt.toLocaleDateString()}
+                    Created: {plan.createdAt.toLocaleDateString()}
                   </p>
                 </div>
               </CardContent>

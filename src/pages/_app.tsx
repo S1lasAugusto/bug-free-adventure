@@ -15,7 +15,9 @@ const MyApp: AppType<{ session: Session | null }> = ({
   pageProps: { session, ...pageProps },
 }) => {
   const router = useRouter();
-  const isRegula = router.pathname.startsWith("/regula");
+  const isRegula =
+    router.pathname.startsWith("/regula") ||
+    router.pathname.startsWith("/plan/");
 
   return (
     <ThemeProvider attribute="class" enableSystem={false}>

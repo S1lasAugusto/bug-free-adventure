@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, MoreVertical, BookOpen, BadgeCheck } from "lucide-react";
 import { SubPlanWizard } from "./SubPlanWizard";
+import Link from "next/link";
 
 const mockGeneralPlan = {
   name: "My Study Plan",
@@ -184,9 +185,11 @@ export function MyPlanDashboard() {
                 style={{ width: `${sp.mastery}%` }}
               />
             </div>
-            <Button variant="outline" className="w-full">
-              View Details
-            </Button>
+            <Link href={`/plan/${sp.id}`} className="block w-full">
+              <Button variant="outline" className="w-full">
+                View Details
+              </Button>
+            </Link>
           </div>
         ))}
       </div>

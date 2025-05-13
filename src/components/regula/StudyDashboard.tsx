@@ -7,6 +7,7 @@ import { SubPlanWizard } from "./SubPlanWizard";
 import { SubPlanHistoryModal } from "./SubPlanHistoryModal";
 import { GraduationCap, List, Clock } from "lucide-react";
 import { Plus } from "lucide-react";
+import { StudyPlan } from "./StudyPlan";
 
 interface SummaryCardProps {
   generalPlan: {
@@ -64,6 +65,7 @@ export function StudyDashboard() {
   const [wizardOpen, setWizardOpen] = useState(false);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<SubPlan | null>(null);
+  const [selectedTab, setSelectedTab] = useState<string>("overview");
 
   const summaryData: SummaryCardProps = {
     generalPlan: {
@@ -93,12 +95,15 @@ export function StudyDashboard() {
       },
       ...prev,
     ]);
+    setWizardOpen(false);
   }
 
   function handleViewHistory(plan: SubPlan) {
     setSelectedPlan(plan);
     setHistoryModalOpen(true);
   }
+
+  console.log("selectedTab", selectedTab);
 
   return (
     <div
@@ -180,11 +185,9 @@ export function StudyDashboard() {
 
       {/* Botão no topo alinhado à direita */}
       <div className="mb-4 flex justify-end">
-        <Button
-          className="flex h-12 items-center gap-2 rounded-xl bg-blue-600 px-6 text-base font-semibold text-white shadow-md hover:bg-blue-700"
-          onClick={summaryData.onNewSubPlan}
-        >
-          <Plus className="h-5 w-5" /> New Sub-Plan
+        <Button onClick={() => setWizardOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          New Sub-Plan
         </Button>
       </div>
 
@@ -230,13 +233,23 @@ export function StudyDashboard() {
       </div>
 
       {/* Abas */}
-      <Tabs defaultValue="overview" className="mb-6">
+      <Tabs
+        value={selectedTab}
+        onValueChange={(val: string) => setSelectedTab(val)}
+        className="mb-6"
+      >
         <TabsList className="flex w-full rounded-xl bg-[#f5f8fd] p-1">
           <TabsTrigger
             value="overview"
             className="flex-1 rounded-lg text-base data-[state=active]:bg-white data-[state=active]:shadow-sm"
           >
             Overview
+          </TabsTrigger>
+          <TabsTrigger
+            value="myplan"
+            className="flex-1 rounded-lg text-base data-[state=active]:bg-white data-[state=active]:shadow-sm"
+          >
+            My Plan
           </TabsTrigger>
           <TabsTrigger
             value="tracking"
@@ -259,6 +272,11 @@ export function StudyDashboard() {
                 onViewHistory={handleViewHistory}
               />
             </div>
+          </div>
+        </TabsContent>
+        <TabsContent value="myplan">
+          <div className="mt-6">
+            <StudyPlan />
           </div>
         </TabsContent>
         <TabsContent value="tracking">

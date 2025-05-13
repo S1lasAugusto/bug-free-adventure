@@ -333,38 +333,13 @@ export function SubPlanWizard({
                   </Button>
                 </div>
                 {/* Lista de estratégias customizadas */}
-                {customStrategies.length > 0 && (
-                  <div className="mt-3 flex flex-col gap-2">
-                    {customStrategies.map((s, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between rounded border border-zinc-200 bg-white px-3 py-2 shadow"
-                      >
-                        <div>
-                          <span className="font-medium text-blue-700">
-                            {s.name}
-                          </span>
-                          {s.description && (
-                            <span className="ml-2 text-xs text-gray-500">
-                              {s.description}
-                            </span>
-                          )}
-                        </div>
-                        <button
-                          className="ml-2 text-xs text-red-500 hover:underline"
-                          onClick={() => handleRemoveCustomStrategy(idx)}
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                {/* (Removido: a lista de estratégias customizadas aqui, pois agora elas aparecem apenas no fim da lista de seleção) */}
               </div>
               <div className="mb-2 font-medium">
                 Select your preferred learning strategies:
               </div>
               <div className="flex max-h-48 flex-col gap-2 overflow-y-auto">
+                {/* Estratégias padrão */}
                 {defaultStrategies.map((s) => (
                   <button
                     key={s.id}
@@ -388,6 +363,53 @@ export function SubPlanWizard({
                     </span>
                   </button>
                 ))}
+                {/* Estratégias customizadas */}
+                {customStrategies.map((s, idx) => {
+                  // Cria um id único para cada custom strategy
+                  const customId = `custom_${idx}`;
+                  const isSelected = selectedStrategies.includes(customId);
+                  return (
+                    <div key={customId} className="relative">
+                      <button
+                        type="button"
+                        className={`flex w-full flex-col items-start rounded-lg border px-4 py-2 text-left text-sm font-medium transition-all duration-200 ${
+                          isSelected
+                            ? "border-blue-600 bg-blue-600 text-white shadow"
+                            : "border-zinc-300 bg-gray-100 text-gray-700 hover:bg-blue-50"
+                        }`}
+                        onClick={() =>
+                          setSelectedStrategies((prev) =>
+                            isSelected
+                              ? prev.filter((d) => d !== customId)
+                              : [...prev, customId]
+                          )
+                        }
+                      >
+                        <span className="font-semibold">{s.name}</span>
+                        {s.description && (
+                          <span className="text-xs text-gray-400">
+                            {s.description}
+                          </span>
+                        )}
+                      </button>
+                      <button
+                        className="absolute right-2 top-2 z-10 text-xs text-red-500 hover:underline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveCustomStrategy(idx);
+                          // Remove da seleção se estiver selecionada
+                          setSelectedStrategies((prev) =>
+                            prev.filter((d) => d !== customId)
+                          );
+                        }}
+                        tabIndex={-1}
+                        type="button"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             </div>
             {/* Step 4: Plan Review */}
@@ -420,7 +442,13 @@ export function SubPlanWizard({
                     ...defaultStrategies
                       .filter((s) => selectedStrategies.includes(s.id))
                       .map((s) => s.name),
-                    ...customStrategies.map((s) => s.name),
+                    ...customStrategies
+                      .map((s, idx) =>
+                        selectedStrategies.includes(`custom_${idx}`)
+                          ? s.name
+                          : null
+                      )
+                      .filter(Boolean),
                   ].join(", ") || "None"}
                 </div>
               </div>

@@ -55,6 +55,7 @@ model User {
   history       ExerciseHistory[]
   preferences   UserPreference[]
   todo          ToDo[]
+  subplans      SubPlan[]
 }
 
 model UserPreference {
@@ -93,6 +94,26 @@ model ToDo {
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SubPlan {
+  id          String   @id @default(cuid())
+  name        String
+  topic       String
+  mastery     Int      @default(0)
+  status      String   @default("Active") // "Active" ou "Completed"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  selectedDays       String[]
+  selectedStrategies String[]
+  customStrategies   Json?
+  hoursPerDay        Int      @default(2)
+  
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
 }
 
 model VerificationToken {

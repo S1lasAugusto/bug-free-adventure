@@ -16,6 +16,7 @@ import {
   userPreferenceSchema,
 } from "../../server/schema/UserSchema";
 import { api } from "../../utils/api";
+import { Brain, BookOpen, Target, Clock } from "lucide-react";
 
 const Settings: NextPage = () => {
   const {
@@ -86,7 +87,7 @@ const Settings: NextPage = () => {
               checkboxIndexes.includes(SelectedEnum.TODO)
                 ? "border-[#0de890] dark:border-[#0de890]"
                 : "border-zinc-400 dark:border-zinc-600",
-              " course-card relative h-auto grid-cols-1 rounded-2xl border-2 border  px-6 pt-6"
+              " course-card relative h-auto grid-cols-1 rounded-2xl border border-2  px-6 pt-6"
             )}
           >
             <p className="mb-2 text-2xl font-bold tracking-tight">
@@ -131,7 +132,7 @@ const Settings: NextPage = () => {
               checkboxIndexes.includes(SelectedEnum.HISTORYGRAPH)
                 ? "border-[#0de890] dark:border-[#0de890]"
                 : "border-zinc-400 dark:border-zinc-600",
-              " course-card relative h-auto grid-cols-1 rounded-2xl border-2 border  px-6 pt-6"
+              " course-card relative h-auto grid-cols-1 rounded-2xl border border-2  px-6 pt-6"
             )}
           >
             <h5 className="mb-2 text-2xl font-bold tracking-tight">
@@ -177,7 +178,7 @@ const Settings: NextPage = () => {
               checkboxIndexes.includes(SelectedEnum.STATS)
                 ? "border-[#0de890] dark:border-[#0de890]"
                 : "border-zinc-400 dark:border-zinc-600",
-              " course-card relative h-auto grid-cols-1 rounded-2xl border-2 border  px-6 pt-6"
+              " course-card relative h-auto grid-cols-1 rounded-2xl border border-2  px-6 pt-6"
             )}
           >
             <h5 className="mb-2 text-2xl font-bold tracking-tight">Stats</h5>
@@ -220,7 +221,7 @@ const Settings: NextPage = () => {
               checkboxIndexes.includes(SelectedEnum.EXERCISEHISTORY)
                 ? "border-[#0de890] dark:border-[#0de890]"
                 : "border-zinc-400 dark:border-zinc-600",
-              " course-card relative h-auto grid-cols-1 rounded-2xl border-2 border  px-6 pt-6"
+              " course-card relative h-auto grid-cols-1 rounded-2xl border border-2  px-6 pt-6"
             )}
           >
             <h5 className="mb-2 text-2xl font-bold tracking-tight">
@@ -267,20 +268,50 @@ const Settings: NextPage = () => {
               checkboxIndexes.includes(SelectedEnum.REGULA)
                 ? "border-[#0de890] dark:border-[#0de890]"
                 : "border-zinc-400 dark:border-zinc-600",
-              " course-card relative h-auto grid-cols-1 rounded-2xl border-2 border  px-6 pt-6"
+              " course-card relative h-auto grid-cols-1 rounded-2xl border border-2 px-6 pb-16 pt-6"
             )}
           >
-            <h5 className="mb-2 text-2xl font-bold tracking-tight">Regula</h5>
-            <p className="col-start-1 text-sm text-gray-700 dark:text-gray-400">
-              Este componente é um placeholder para futuras funcionalidades de
-              autorregulação.
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Brain className="h-6 w-6 text-blue-600" />
+                <h5 className="text-2xl font-bold tracking-tight">Regula</h5>
+              </div>
+              <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+                Active
+              </span>
+            </div>
+
+            <p className="mt-2 text-sm text-gray-700 dark:text-gray-400">
+              Manage your learning autonomously and efficiently with
+              self-regulation tools.
             </p>
-            <div className="scale-90">
-              <div className="rounded bg-zinc-100 p-4 text-center text-zinc-500 dark:bg-zinc-800">
-                Regula Preview
+
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="flex items-center gap-2 rounded-lg bg-white p-2 shadow-sm">
+                <BookOpen className="h-4 w-4 text-blue-600" />
+                <span className="text-xs font-medium text-gray-700">
+                  Study Plan
+                </span>
+              </div>
+              <div className="flex items-center gap-2 rounded-lg bg-white p-2 shadow-sm">
+                <Target className="h-4 w-4 text-blue-600" />
+                <span className="text-xs font-medium text-gray-700">Goals</span>
+              </div>
+              <div className="flex items-center gap-2 rounded-lg bg-white p-2 shadow-sm">
+                <Clock className="h-4 w-4 text-blue-600" />
+                <span className="text-xs font-medium text-gray-700">
+                  Progress
+                </span>
+              </div>
+              <div className="flex items-center gap-2 rounded-lg bg-white p-2 shadow-sm">
+                <Brain className="h-4 w-4 text-blue-600" />
+                <span className="text-xs font-medium text-gray-700">
+                  Strategies
+                </span>
               </div>
             </div>
-            <div className="absolute bottom-1 my-6 ml-4 flex items-center gap-2 ">
+
+            <div className="absolute bottom-4 left-6 flex items-center gap-2">
               <Checkbox
                 onClick={() =>
                   checkboxIndexes?.includes(SelectedEnum.REGULA)
@@ -301,7 +332,12 @@ const Settings: NextPage = () => {
                 className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                 required={false}
               />
-              <label htmlFor="select">Select</label>
+              <label
+                htmlFor="select"
+                className="text-sm font-medium text-gray-700"
+              >
+                Select
+              </label>
             </div>
           </div>
         </div>
@@ -360,7 +396,7 @@ const Settings: NextPage = () => {
                         className={classNames(
                           errors.name
                             ? "border-red-500 bg-red-50 p-2.5 text-red-900 placeholder-red-700 focus:border-red-500 focus:ring-red-500 dark:border-red-400 dark:bg-red-100"
-                            : "border-zinc-300 bg-gray-50 text-gray-900  focus:border-blue-500 focus:ring-blue-500 dark:border-zinc-600  dark:bg-zinc-800 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500",
+                            : "border-zinc-300 bg-gray-50 text-gray-900  focus:border-blue-500 focus:ring-blue-500 dark:border-zinc-600  dark:bg-gray-700 dark:bg-zinc-800 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500",
                           "block flex-1 rounded-none rounded-r-lg border p-2.5 text-sm"
                         )}
                         placeholder="Ola"

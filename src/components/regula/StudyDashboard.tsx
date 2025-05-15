@@ -7,7 +7,6 @@ import { SubPlanWizard } from "./SubPlanWizard";
 import { SubPlanHistoryModal } from "./SubPlanHistoryModal";
 import { GraduationCap, List, Clock } from "lucide-react";
 import { Plus } from "lucide-react";
-import { StudyPlan } from "./StudyPlan";
 
 interface SummaryCardProps {
   generalPlan: {
@@ -35,33 +34,7 @@ interface SubPlan {
 }
 
 export function StudyDashboard() {
-  // MOCK: dados de exemplo
-  const [subPlans, setSubPlans] = useState<SubPlan[]>([
-    {
-      id: "1",
-      name: "Java Fundamentals",
-      status: "active",
-      lastModified: "10/15/2023",
-      topic: "Java Fundamentals",
-      changes: 4,
-    },
-    {
-      id: "2",
-      name: "OOP Concepts",
-      status: "active",
-      lastModified: "10/10/2023",
-      topic: "OOP Concepts",
-      changes: 2,
-    },
-    {
-      id: "3",
-      name: "Collections",
-      status: "completed",
-      lastModified: "09/30/2023",
-      topic: "Collections",
-      changes: 5,
-    },
-  ]);
+  const [subPlans, setSubPlans] = useState<SubPlan[]>([]);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<SubPlan | null>(null);
@@ -70,15 +43,15 @@ export function StudyDashboard() {
   const summaryData: SummaryCardProps = {
     generalPlan: {
       name: "My Study Plan",
-      course: "Java Programming",
-      grade: "Grade A (90-100%)",
+      course: "Not set",
+      grade: "Not set",
     },
     subPlans: {
       total: subPlans.length,
       active: subPlans.filter((s) => s.status === "active").length,
       completed: subPlans.filter((s) => s.status === "completed").length,
     },
-    weeklyHours: 20,
+    weeklyHours: 0,
     onNewSubPlan: () => setWizardOpen(true),
   };
 
@@ -103,8 +76,6 @@ export function StudyDashboard() {
     setHistoryModalOpen(true);
   }
 
-  console.log("selectedTab", selectedTab);
-
   return (
     <div
       className="min-h-screen overflow-y-auto bg-white px-12 py-10"
@@ -125,53 +96,7 @@ export function StudyDashboard() {
           onViewDetails={() => alert("View Plan Details clicked!")}
           title={`${selectedPlan.name} - Modification History`}
           subtitle="Detailed log of all changes made to this sub-plan"
-          events={[
-            {
-              type: "progress",
-              title: "Progress Updated",
-              date: "Oct 21, 2023 at 8:10 PM",
-              from: "45",
-              to: "65",
-              reflection: {
-                impact: "Completed chapter exercises",
-                reason: "Applied new learning strategies",
-                effectiveness: "high",
-              },
-              relativeTime: "over 1 year ago",
-            },
-            {
-              type: "strategy",
-              title: "Strategy Changed",
-              date: "Oct 19, 2023 at 11:20 AM",
-              from: "Pomodoro Technique, Active Recall",
-              to: "Pomodoro Technique, Active Recall, Practice Tests",
-              reflection: {
-                impact: "Added practice tests to improve retention",
-                reason: "Needed more hands-on practice",
-                effectiveness: "high",
-              },
-              relativeTime: "over 1 year ago",
-            },
-            {
-              type: "progress",
-              title: "Progress Updated",
-              date: "Oct 17, 2023 at 5:45 PM",
-              from: "30",
-              to: "45",
-              reflection: {
-                impact: "Completed two practice exercises",
-                reason: "Dedicated more time to studying",
-                effectiveness: "medium",
-              },
-              relativeTime: "over 1 year ago",
-            },
-            {
-              type: "created",
-              title: "Plan Created",
-              date: "Oct 15, 2023 at 12:30 PM",
-              relativeTime: "over 1 year ago",
-            },
-          ]}
+          events={[]}
         />
       )}
 
@@ -246,12 +171,6 @@ export function StudyDashboard() {
             Overview
           </TabsTrigger>
           <TabsTrigger
-            value="myplan"
-            className="flex-1 rounded-lg text-base data-[state=active]:bg-white data-[state=active]:shadow-sm"
-          >
-            My Plan
-          </TabsTrigger>
-          <TabsTrigger
             value="tracking"
             className="flex-1 rounded-lg text-base data-[state=active]:bg-white data-[state=active]:shadow-sm"
           >
@@ -272,11 +191,6 @@ export function StudyDashboard() {
                 onViewHistory={handleViewHistory}
               />
             </div>
-          </div>
-        </TabsContent>
-        <TabsContent value="myplan">
-          <div className="mt-6">
-            <StudyPlan />
           </div>
         </TabsContent>
         <TabsContent value="tracking">

@@ -3,6 +3,7 @@ import React, { useEffect, useRef } from "react";
 // @ts-ignore
 import cloud = require("d3-cloud");
 import * as d3 from "d3";
+import { Cloud } from "lucide-react";
 
 const words = [
   { text: "Java", value: 50 },
@@ -75,14 +76,12 @@ export function WordCloud() {
   }, []);
 
   return (
-    <div
-      className="flex w-full items-center justify-center rounded-lg bg-gray-50"
-      style={{ height }}
-    >
-      <svg
-        ref={svgRef}
-        style={{ display: "block", width: "100%", height: "100%" }}
-      ></svg>
+    <div className="flex h-[200px] flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 p-6 text-center">
+      <Cloud className="mb-2 h-8 w-8 text-gray-400" />
+      <h3 className="mb-1 text-sm font-medium text-gray-900">No data yet</h3>
+      <p className="text-sm text-gray-500">
+        Create sub-plans to generate your word cloud
+      </p>
     </div>
   );
 }

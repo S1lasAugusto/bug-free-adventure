@@ -1,4 +1,6 @@
 import React from "react";
+import { Button } from "@/components/ui/button";
+import { History } from "lucide-react";
 
 interface SubPlan {
   id: string;
@@ -12,59 +14,57 @@ interface SubPlan {
 
 interface SubPlanHistoryProps {
   subPlans: SubPlan[];
-  onViewHistory?: (plan: SubPlan) => void;
+  onViewHistory: (plan: SubPlan) => void;
 }
 
 export function SubPlanHistory({
   subPlans,
   onViewHistory,
 }: SubPlanHistoryProps) {
+  if (subPlans.length === 0) {
+    return (
+      <div className="flex h-[200px] flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 p-6 text-center">
+        <History className="mb-2 h-8 w-8 text-gray-400" />
+        <h3 className="mb-1 text-sm font-medium text-gray-900">
+          No sub-plans yet
+        </h3>
+        <p className="text-sm text-gray-500">
+          Create your first sub-plan to start tracking your progress
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {subPlans.map((plan) => (
         <div
           key={plan.id}
-          className="mb-2 rounded-lg border bg-white p-4 shadow-sm"
+          className="flex items-center justify-between rounded-lg border bg-white p-4"
         >
-          <div className="flex items-center justify-between">
-            <span className="text-lg font-semibold">{plan.name}</span>
+          <div>
+            <h3 className="font-medium">{plan.name}</h3>
+            <p className="text-sm text-gray-500">
+              Last modified: {plan.lastModified}
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
             <span
-              className={`ml-2 rounded-full px-3 py-1 text-xs font-semibold ${
+              className={`rounded-full px-2 py-1 text-xs font-medium ${
                 plan.status === "active"
-                  ? "bg-blue-100 text-blue-700"
-                  : "bg-gray-200 text-gray-600"
+                  ? "bg-green-100 text-green-800"
+                  : "bg-gray-100 text-gray-800"
               }`}
             >
               {plan.status}
             </span>
-          </div>
-          <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-gray-500">
-            <div>
-              <span className="font-medium">Last modified:</span>{" "}
-              {plan.lastModified}
-            </div>
-            <div>
-              <span className="font-medium">Topic:</span> {plan.topic}
-            </div>
-            <div>
-              <span className="font-medium">Changes:</span> {plan.changes}{" "}
-              records
-            </div>
-            {plan.mastery !== undefined && (
-              <div>
-                <span className="font-medium">Mastery goal:</span>{" "}
-                {plan.mastery}%
-              </div>
-            )}
-          </div>
-          <div className="mt-2">
-            <button
-              type="button"
-              className="text-sm font-medium text-blue-600 hover:underline"
-              onClick={() => onViewHistory && onViewHistory(plan)}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onViewHistory(plan)}
             >
-              Click to view detailed history
-            </button>
+              View History
+            </Button>
           </div>
         </div>
       ))}

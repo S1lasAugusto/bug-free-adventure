@@ -313,7 +313,7 @@ export function SubPlanWizard({
                   ))
                 ) : (
                   <option value="" disabled>
-                    Não há tópicos disponíveis no momento
+                    No topics available at the moment
                   </option>
                 )}
               </select>
@@ -321,12 +321,12 @@ export function SubPlanWizard({
               {availableModules.length === 0 && (
                 <div className="mb-4 rounded-lg bg-yellow-50 p-3 text-sm text-yellow-800">
                   <p>
-                    Todos os tópicos já possuem subplans criados. Para adicionar
-                    um novo, você pode:
+                    All topics already have subplans created. To add a new one,
+                    you can:
                   </p>
                   <ul className="ml-4 mt-2 list-disc">
-                    <li>Editar um subplan existente</li>
-                    <li>Marcar um subplan como concluído para criar um novo</li>
+                    <li>Edit an existing subplan</li>
+                    <li>Mark a subplan as completed to create a new one</li>
                   </ul>
                 </div>
               )}

@@ -110,13 +110,73 @@ export function SubPlanWizard({
     onClose();
   }
   function handleFinish() {
-    onComplete({
+    console.log(
+      "[CLIENT] SubPlanWizard.handleFinish - Completando wizard com dados:",
+      {
+        topic,
+        mastery,
+        selectedDays,
+        hoursPerDay,
+        selectedStrategies,
+        customStrategies: customStrategies.length > 0 ? customStrategies : null,
+      }
+    );
+
+    // Verificar se os dados são válidos antes de enviar
+    if (!topic) {
+      console.error(
+        "[CLIENT] SubPlanWizard.handleFinish - Erro: Tópico não selecionado"
+      );
+      return;
+    }
+
+    // Preparar os dados completos para enviar ao componente pai
+    const completeData = {
       topic,
       mastery,
       selectedDays,
+      hoursPerDay,
       selectedStrategies,
-      customStrategies,
-    });
+      customStrategies: customStrategies.length > 0 ? customStrategies : null,
+    };
+
+    // Verificar se a função onComplete está definida
+    if (typeof onComplete !== "function") {
+      console.error(
+        "[CLIENT] SubPlanWizard.handleFinish - ERRO: onComplete não é uma função",
+        onComplete
+      );
+      alert("Erro: não foi possível enviar os dados. Contate o suporte.");
+      return;
+    }
+
+    console.log(
+      "[CLIENT] SubPlanWizard.handleFinish - Chamando onComplete com dados completos"
+    );
+    console.log(
+      "[CLIENT] SubPlanWizard.handleFinish - onComplete é:",
+      onComplete.toString().substring(0, 100) + "..."
+    );
+
+    try {
+      // Chamar função onComplete diretamente com console.log embutido
+      console.log(
+        "[CLIENT] SubPlanWizard.handleFinish - Antes de chamar onComplete"
+      );
+      onComplete(completeData);
+      console.log(
+        "[CLIENT] SubPlanWizard.handleFinish - Depois de chamar onComplete"
+      );
+      console.log(
+        "[CLIENT] SubPlanWizard.handleFinish - onComplete executado com sucesso"
+      );
+    } catch (error) {
+      console.error(
+        "[CLIENT] SubPlanWizard.handleFinish - Erro ao chamar onComplete:",
+        error
+      );
+    }
+
     handleCancel();
   }
   function handleAddStrategy() {

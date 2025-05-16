@@ -18,6 +18,35 @@ const getBaseUrl = () => {
   return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
 };
 
+// Logger personalizado para depuração
+const customLogger = (opts: {
+  direction: "up" | "down";
+  path: string;
+  type: "query" | "mutation" | "subscription";
+  input?: unknown;
+  result?: unknown;
+  error?: Error;
+}) => {
+  const { direction, path, type, input, result, error } = opts;
+
+  // Log detalhado
+  if (direction === "up") {
+    console.log(`[TRPC-CLIENT] Enviando ${type} para ${path}`, { input });
+  } else {
+    if (error) {
+      console.error(`[TRPC-CLIENT] Erro no ${type} em ${path}:`, error);
+      console.error("[TRPC-CLIENT] Detalhes do erro:", {
+        message: error.message,
+        stack: error.stack,
+      });
+    } else {
+      console.log(`[TRPC-CLIENT] Resposta de ${path}:`, { result });
+    }
+  }
+
+  return { direction, path, type, input, result, error };
+};
+
 /**
  * A set of typesafe react-query hooks for your tRPC API
  */
@@ -39,9 +68,24 @@ export const api = createTRPCNext<AppRouter>({
           enabled: (opts) =>
             process.env.NODE_ENV === "development" ||
             (opts.direction === "down" && opts.result instanceof Error),
+          logger: customLogger,
         }),
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc`,
+          // Adicionar logs para depurar problemas de rede
+          fetch: async (url, options) => {
+            console.log(`[TRPC-CLIENT] Fetch iniciando para ${url}`);
+            try {
+              const response = await fetch(url, options);
+              console.log(
+                `[TRPC-CLIENT] Fetch concluído: status ${response.status}`
+              );
+              return response;
+            } catch (error) {
+              console.error(`[TRPC-CLIENT] Erro no fetch:`, error);
+              throw error;
+            }
+          },
         }),
       ],
     };

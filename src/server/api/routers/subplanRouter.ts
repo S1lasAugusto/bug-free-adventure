@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 // Schema para validação dos inputs do SubPlan
 const subPlanSchema = z.object({
@@ -27,61 +27,118 @@ const subPlanUpdateSchema = z.object({
 });
 
 export const subplanRouter = createTRPCRouter({
+  // Procedimento de teste para verificar se a comunicação está funcionando
+  test: publicProcedure.query(() => {
+    console.log("[SERVER] subplanRouter.test - Procedimento de teste chamado");
+    return {
+      success: true,
+      message: "Procedimento de teste foi executado com sucesso",
+      timestamp: new Date().toISOString(),
+    };
+  }),
+
   // Obter todos os subplans do usuário atual
   getAll: protectedProcedure.query(async ({ ctx }) => {
-    const subplans = await ctx.prisma.subPlan.findMany({
-      where: {
-        userId: ctx.session.user.id,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+    console.log("[SERVER] getAll - Sessão:", ctx.session);
+    console.log("[SERVER] getAll - ID do usuário:", ctx.session.user.id);
 
-    return subplans;
+    try {
+      const subplans = await ctx.prisma.subPlan.findMany({
+        where: {
+          userId: ctx.session.user.id,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+
+      console.log("[SERVER] getAll - Subplans encontrados:", subplans.length);
+      return subplans;
+    } catch (error) {
+      console.error("[SERVER] getAll - Erro ao buscar subplans:", error);
+      throw error;
+    }
   }),
 
   // Obter um subplan específico pelo ID
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      const subplan = await ctx.prisma.subPlan.findUnique({
-        where: {
-          id: input.id,
-        },
-      });
+      console.log("[SERVER] getById - ID do subplan requisitado:", input.id);
 
-      if (!subplan) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "SubPlan não encontrado",
+      try {
+        const subplan = await ctx.prisma.subPlan.findUnique({
+          where: {
+            id: input.id,
+          },
         });
-      }
 
-      // Verificar se o subplan pertence ao usuário atual
-      if (subplan.userId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Acesso não autorizado a este SubPlan",
-        });
-      }
+        if (!subplan) {
+          console.error("[SERVER] getById - SubPlan não encontrado");
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "SubPlan não encontrado",
+          });
+        }
 
-      return subplan;
+        // Verificar se o subplan pertence ao usuário atual
+        if (subplan.userId !== ctx.session.user.id) {
+          console.error("[SERVER] getById - Acesso não autorizado");
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Acesso não autorizado a este SubPlan",
+          });
+        }
+
+        console.log("[SERVER] getById - SubPlan encontrado");
+        return subplan;
+      } catch (error) {
+        console.error("[SERVER] getById - Erro:", error);
+        throw error;
+      }
     }),
 
   // Criar um novo subplan
   create: protectedProcedure
     .input(subPlanSchema)
     .mutation(async ({ ctx, input }) => {
-      // Criação do subplan com os dados do input
-      const subplan = await ctx.prisma.subPlan.create({
-        data: {
-          ...input,
-          userId: ctx.session.user.id,
-        },
-      });
+      console.log("[SERVER] create - Iniciando criação de subplan");
+      console.log("[SERVER] create - Dados recebidos:", input);
+      console.log("[SERVER] create - ID do usuário:", ctx.session.user.id);
 
-      return subplan;
+      try {
+        // Verificar conexão com o banco
+        await ctx.prisma.$queryRaw`SELECT 1`;
+        console.log("[SERVER] create - Conexão com o banco OK");
+
+        // Tratar customStrategies: substituir null por undefined
+        const processedInput = {
+          ...input,
+          // Se customStrategies for null, não incluir na requisição (será undefined)
+          ...(input.customStrategies === null
+            ? { customStrategies: undefined }
+            : {}),
+        };
+
+        console.log("[SERVER] create - Dados processados:", processedInput);
+
+        // Criação do subplan com os dados do input
+        const subplan = await ctx.prisma.subPlan.create({
+          data: {
+            ...processedInput,
+            userId: ctx.session.user.id,
+          },
+        });
+
+        console.log(
+          "[SERVER] create - SubPlan criado com sucesso:",
+          subplan.id
+        );
+        return subplan;
+      } catch (error) {
+        console.error("[SERVER] create - Erro ao criar subplan:", error);
+        throw error;
+      }
     }),
 
   // Atualizar um subplan existente

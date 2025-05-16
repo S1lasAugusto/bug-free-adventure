@@ -102,9 +102,24 @@ export const publicProcedure = t.procedure;
  * procedure
  */
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
+  console.log("[SERVER] middleware autenticação - Verificando sessão", {
+    temSessao: !!ctx.session,
+    temUsuario: !!ctx.session?.user,
+    userId: ctx.session?.user?.id,
+  });
+
   if (!ctx.session || !ctx.session.user) {
+    console.error(
+      "[SERVER] middleware autenticação - ERRO: Usuário não autenticado"
+    );
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
+
+  console.log(
+    "[SERVER] middleware autenticação - Usuário autenticado:",
+    ctx.session.user.id
+  );
+
   return next({
     ctx: {
       // infers the `session` as non-nullable

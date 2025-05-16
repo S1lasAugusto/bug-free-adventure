@@ -7,6 +7,37 @@ import { SubPlanWizard } from "./SubPlanWizard";
 import { SubPlanHistoryModal } from "./SubPlanHistoryModal";
 import { GraduationCap, List, Clock } from "lucide-react";
 import { Plus } from "lucide-react";
+import { api } from "@/utils/api";
+import { toast } from "react-hot-toast";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+
+// Definição da interface do banco de dados
+interface SubPlan {
+  id: string;
+  name: string;
+  status: string;
+  lastModified?: string;
+  topic: string;
+  changes?: number;
+  mastery: number;
+  selectedDays?: string[];
+  selectedStrategies?: string[];
+  customStrategies?: any;
+  hoursPerDay?: number;
+  createdAt?: string;
+}
+
+// Interface para o componente SubPlanHistory
+interface HistorySubPlan {
+  id: string;
+  name: string;
+  status: "active" | "completed";
+  lastModified: string;
+  topic: string;
+  changes: number;
+  mastery?: number;
+}
 
 interface SummaryCardProps {
   generalPlan: {
@@ -23,22 +54,73 @@ interface SummaryCardProps {
   onNewSubPlan: () => void;
 }
 
-interface SubPlan {
-  id: string;
-  name: string;
-  status: "active" | "completed";
-  lastModified: string;
-  topic: string;
-  changes: number;
-  mastery?: number;
-}
-
 export function StudyDashboard() {
   const [subPlans, setSubPlans] = useState<SubPlan[]>([]);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<SubPlan | null>(null);
   const [selectedTab, setSelectedTab] = useState<string>("overview");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const router = useRouter();
+  const { data: sessionData, status: sessionStatus } = useSession();
+
+  // Redirecionar para a página MyPlanDashboard que tem a implementação completa
+  const goToMyPlanPage = () => {
+    toast.success("Acessando dashboard completo...");
+    router.push("/regula/my-plan");
+  };
+
+  // Consulta tRPC
+  const createSubPlanMutation = api.subplanRouter.create.useMutation({
+    onSuccess: (data) => {
+      console.log(
+        "[CLIENT] StudyDashboard - SubPlan criado com sucesso:",
+        data
+      );
+      toast.success("SubPlan criado com sucesso!");
+      refetchStudyPlans();
+    },
+    onError: (error) => {
+      console.error("[CLIENT] StudyDashboard - Erro ao criar subplan:", error);
+      toast.error(`Erro ao criar subplan: ${error.message}`);
+      setIsLoading(false);
+    },
+  });
+
+  // Função para buscar os subplans do usuário atual
+  const { refetch: refetchStudyPlans } = api.subplanRouter.getAll.useQuery(
+    undefined,
+    {
+      enabled: sessionStatus === "authenticated",
+      onSuccess: (data) => {
+        // Converter os dados do banco para o formato local
+        const formattedPlans = data.map((plan) => ({
+          id: plan.id,
+          name: plan.name,
+          topic: plan.topic,
+          status: plan.status === "Active" ? "active" : "completed",
+          mastery: plan.mastery,
+          lastModified: plan.updatedAt
+            ? new Date(plan.updatedAt).toLocaleDateString()
+            : new Date().toLocaleDateString(),
+          changes: 0,
+          selectedDays: plan.selectedDays,
+          selectedStrategies: plan.selectedStrategies,
+          customStrategies: plan.customStrategies,
+          hoursPerDay: plan.hoursPerDay,
+          createdAt: plan.createdAt
+            ? new Date(plan.createdAt).toISOString()
+            : undefined,
+        }));
+        setSubPlans(formattedPlans);
+        console.log(
+          "[CLIENT] StudyDashboard - SubPlans carregados:",
+          formattedPlans.length
+        );
+      },
+    }
+  );
 
   const summaryData: SummaryCardProps = {
     generalPlan: {
@@ -55,24 +137,75 @@ export function StudyDashboard() {
     onNewSubPlan: () => setWizardOpen(true),
   };
 
-  function handleCreateSubPlan(data: { topic: string; mastery: number }) {
-    setSubPlans((prev) => [
-      {
-        id: (prev.length + 1).toString(),
+  function handleCreateSubPlan(data: any) {
+    console.log("[CLIENT] StudyDashboard - Recebendo dados do wizard:", data);
+
+    if (!sessionData?.user) {
+      toast.error("Você precisa estar logado para criar um subplan");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      const subPlanData = {
         name: data.topic,
-        status: "active",
-        lastModified: new Date().toLocaleDateString(),
         topic: data.topic,
-        changes: 0,
-        mastery: data.mastery,
-      },
-      ...prev,
-    ]);
+        mastery: data.mastery || 0,
+        selectedDays: Array.isArray(data.selectedDays) ? data.selectedDays : [],
+        selectedStrategies: Array.isArray(data.selectedStrategies)
+          ? data.selectedStrategies
+          : [],
+        customStrategies: data.customStrategies || undefined,
+        hoursPerDay: data.hoursPerDay || 2,
+        status: "Active",
+      };
+
+      // Salvar no banco
+      console.log("[CLIENT] StudyDashboard - Salvando no banco:", subPlanData);
+      createSubPlanMutation.mutate(subPlanData);
+
+      toast.success("Criando seu subplan...");
+    } catch (error) {
+      console.error("[CLIENT] StudyDashboard - Erro:", error);
+      toast.error("Erro ao criar subplan");
+      setIsLoading(false);
+    }
+
     setWizardOpen(false);
   }
 
-  function handleViewHistory(plan: SubPlan) {
-    setSelectedPlan(plan);
+  // Converter SubPlan para HistorySubPlan para componente local
+  const getHistoryPlans = (): HistorySubPlan[] => {
+    return subPlans.map((plan) => ({
+      id: plan.id,
+      name: plan.name,
+      status:
+        plan.status === "Active"
+          ? "active"
+          : ((plan.status === "active" ? "active" : "completed") as
+              | "active"
+              | "completed"),
+      lastModified: plan.lastModified || new Date().toLocaleDateString(),
+      topic: plan.topic,
+      changes: plan.changes || 0,
+      mastery: plan.mastery,
+    }));
+  };
+
+  function handleViewHistory(plan: HistorySubPlan) {
+    // Converter de volta para o tipo SubPlan local
+    const selectedSubPlan: SubPlan = {
+      id: plan.id,
+      name: plan.name,
+      status: plan.status,
+      lastModified: plan.lastModified,
+      topic: plan.topic,
+      changes: plan.changes,
+      mastery: plan.mastery || 0,
+    };
+
+    setSelectedPlan(selectedSubPlan);
     setHistoryModalOpen(true);
   }
 
@@ -108,8 +241,11 @@ export function StudyDashboard() {
         </p>
       </div>
 
-      {/* Botão no topo alinhado à direita */}
-      <div className="mb-4 flex justify-end">
+      {/* Botões no topo alinhados à direita */}
+      <div className="mb-4 flex justify-end gap-4">
+        <Button variant="outline" onClick={goToMyPlanPage}>
+          Ver Dashboard Completo
+        </Button>
         <Button onClick={() => setWizardOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           New Sub-Plan
@@ -187,7 +323,7 @@ export function StudyDashboard() {
             <div className="rounded-xl border bg-white p-6 shadow-sm">
               <div className="mb-2 font-semibold">Sub-Plan History</div>
               <SubPlanHistory
-                subPlans={subPlans}
+                subPlans={getHistoryPlans()}
                 onViewHistory={handleViewHistory}
               />
             </div>

@@ -9,6 +9,7 @@ import "../styles/globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { api } from "../utils/api";
 import { useRouter } from "next/router";
+import { Toaster } from "react-hot-toast";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -37,6 +38,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
             </Sidebar>
           )}
         </div>
+        <Toaster position="top-right" />
       </SessionProvider>
       <Analytics />
     </ThemeProvider>

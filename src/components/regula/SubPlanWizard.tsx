@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Dialog } from "@headlessui/react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -109,33 +109,51 @@ export function SubPlanWizard({
     { enabled: open } // Só busca quando o wizard está aberto
   );
 
+  // Referência para evitar loops infinitos
+  const processed = useRef(false);
+
   // Filtrar módulos já usados em subplans
   useEffect(() => {
-    if (modules.length > 0 && existingSubPlans.length > 0) {
-      // Extrair os nomes dos tópicos de subplans existentes
-      const existingTopics = existingSubPlans.map((plan) => plan.topic);
-
-      // Filtrar os módulos que ainda não possuem subplans
-      const filteredModules = modules.filter(
-        (module) => !existingTopics.includes(module.moduleName)
-      );
-
-      setAvailableModules(filteredModules);
-    } else {
-      setAvailableModules(modules);
+    // Evitar execuções repetidas se os dados não mudaram
+    if (!open) {
+      processed.current = false;
+      return;
     }
 
-    console.log(
-      "[CLIENT] SubPlanWizard - Módulos disponíveis:",
-      modules.length > 0 ? modules.map((m) => m.moduleName) : "nenhum"
-    );
-    console.log(
-      "[CLIENT] SubPlanWizard - SubPlans existentes:",
-      existingSubPlans.length > 0
-        ? existingSubPlans.map((p) => p.topic)
-        : "nenhum"
-    );
-  }, [modules, existingSubPlans]);
+    // Só executamos quando o wizard está aberto e temos dados, mas apenas uma vez
+    if (open && modules && existingSubPlans && !processed.current) {
+      processed.current = true;
+
+      try {
+        // Extrair os nomes dos tópicos de subplans existentes
+        const existingTopics = existingSubPlans.map((plan) => plan.topic);
+
+        // Filtrar os módulos que ainda não possuem subplans
+        const filteredModules = modules.filter(
+          (module) => !existingTopics.includes(module.moduleName)
+        );
+
+        setAvailableModules(filteredModules);
+
+        // Console logs em bloco separado para não causar re-renderização
+        console.log(
+          "[CLIENT] SubPlanWizard - Módulos disponíveis:",
+          modules.length > 0 ? modules.map((m) => m.moduleName) : "nenhum"
+        );
+        console.log(
+          "[CLIENT] SubPlanWizard - SubPlans existentes:",
+          existingSubPlans.length > 0
+            ? existingSubPlans.map((p) => p.topic)
+            : "nenhum"
+        );
+      } catch (error) {
+        console.error(
+          "[CLIENT] SubPlanWizard - Erro ao processar módulos:",
+          error
+        );
+      }
+    }
+  }, [open, modules, existingSubPlans]);
 
   function handleNext() {
     if (step < 4) setStep(step + 1);

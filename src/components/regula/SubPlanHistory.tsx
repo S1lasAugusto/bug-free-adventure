@@ -36,46 +36,38 @@ export function SubPlanHistory({
   }
 
   return (
-    <div className="max-h-[300px] overflow-y-auto pr-1">
-      <div className="space-y-4">
-        {subPlans.map((plan) => (
-          <div
-            key={plan.id}
-            className="flex items-center justify-between rounded-lg border bg-white p-4"
-          >
-            <div>
-              <h3 className="font-medium">{plan.name}</h3>
-              <p className="text-sm text-gray-500">
-                Last modified: {plan.lastModified}
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <span
-                className={`rounded-full px-2 py-1 text-xs font-medium ${
-                  plan.status === "active"
-                    ? "bg-green-100 text-green-800"
-                    : "bg-gray-100 text-gray-800"
-                }`}
-              >
-                {plan.status}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onViewHistory(plan)}
-              >
-                View History
-              </Button>
-            </div>
+    <div className="max-h-[300px] space-y-4 overflow-y-auto pr-2">
+      {subPlans.map((plan) => (
+        <div
+          key={plan.id}
+          className="flex items-center justify-between rounded-lg border bg-white p-4"
+        >
+          <div>
+            <h3 className="font-medium">{plan.name}</h3>
+            <p className="text-sm text-gray-500">
+              Last modified: {plan.lastModified}
+            </p>
           </div>
-        ))}
-      </div>
-
-      {subPlans.length > 4 && (
-        <div className="mt-2 text-center text-xs text-gray-400">
-          Scroll down to see more
+          <div className="flex items-center gap-4">
+            <span
+              className={`rounded-full px-2 py-1 text-xs font-medium ${
+                plan.status === "active"
+                  ? "bg-green-100 text-green-800"
+                  : "bg-gray-100 text-gray-800"
+              }`}
+            >
+              {plan.status}
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onViewHistory(plan)}
+            >
+              View History
+            </Button>
+          </div>
         </div>
-      )}
+      ))}
     </div>
   );
 }

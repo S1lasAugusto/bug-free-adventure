@@ -309,14 +309,12 @@ export function StudyDashboard() {
               <div className="mb-2 font-semibold">Word Cloud</div>
               <WordCloud />
             </div>
-            <div className="flex h-[400px] flex-col rounded-xl border bg-white p-6 shadow-sm">
+            <div className="rounded-xl border bg-white p-6 shadow-sm">
               <div className="mb-2 font-semibold">Sub-Plan History</div>
-              <div className="flex-grow">
-                <SubPlanHistory
-                  subPlans={getHistoryPlans()}
-                  onViewHistory={handleViewHistory}
-                />
-              </div>
+              <SubPlanHistory
+                subPlans={getHistoryPlans()}
+                onViewHistory={handleViewHistory}
+              />
             </div>
           </div>
         </TabsContent>

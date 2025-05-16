@@ -27,10 +27,9 @@ const MyApp: AppType<{ session: Session | null }> = ({
           name="google-site-verification"
           content="9hH0whHzR4kwqqYNqU9Gw201EcjJG1Ryu9GYdJlbEjI"
         />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
       <SessionProvider session={session}>
-        <div className="h-full w-full">
+        <div className="fixed w-full">
           {isRegula ? (
             <Component {...pageProps} />
           ) : (

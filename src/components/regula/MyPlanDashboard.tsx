@@ -24,7 +24,6 @@ export function MyPlanDashboard() {
   const [selectedTab, setSelectedTab] = useState("All Plans");
   const [wizardOpen, setWizardOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [testResult, setTestResult] = useState<string | null>(null);
 
   // Verificar o estado da sessão
   const { data: sessionData, status: sessionStatus } = useSession();
@@ -68,31 +67,6 @@ export function MyPlanDashboard() {
       toast.error(`Erro ao criar subplan: ${error.message}`);
     },
   });
-
-  // Query de teste
-  const testQuery = api.subplanRouter.test.useQuery(undefined, {
-    enabled: false, // Não executar automaticamente
-    onSuccess: (data) => {
-      console.log("[CLIENT] Teste bem-sucedido:", data);
-      setTestResult(JSON.stringify(data, null, 2));
-      toast.success("Teste de comunicação com sucesso!");
-    },
-    onError: (error) => {
-      console.error("[CLIENT] Erro no teste:", error);
-      setTestResult(`ERRO: ${error.message}`);
-      toast.error("Falha na comunicação com o servidor");
-    },
-  });
-
-  // Função para executar o teste
-  const handleTestConnection = () => {
-    console.log("[CLIENT] Executando teste de conexão...");
-    setTestResult("Aguardando resposta...");
-    testQuery.refetch().catch((err) => {
-      console.error("[CLIENT] Erro ao executar refetch do teste:", err);
-      setTestResult(`ERRO DE EXECUÇÃO: ${err.message}`);
-    });
-  };
 
   // Log de informações de estado
   useEffect(() => {
@@ -200,33 +174,6 @@ export function MyPlanDashboard() {
     }
   }
 
-  // Função para testar a criação direta de um subplan
-  const handleCreateTestSubplan = () => {
-    console.log("[CLIENT] *** BOTÃO DE TESTE - Criando subplan de teste ***");
-
-    if (!sessionData?.user) {
-      toast.error("Você precisa estar logado");
-      return;
-    }
-
-    // Dados mínimos para teste
-    const testData = {
-      name: "Teste " + new Date().toLocaleTimeString(),
-      topic: "Teste de API",
-      mastery: 10,
-      selectedDays: ["Monday"],
-      selectedStrategies: ["test"],
-      hoursPerDay: 1,
-      status: "Active",
-    };
-
-    console.log("[CLIENT] Dados de teste:", testData);
-
-    // Usar o método simplificado para chamar a API
-    createSubPlanMutation.mutate(testData);
-    toast.success("Solicitação de teste enviada!");
-  };
-
   return (
     <div className="mx-auto max-w-5xl">
       {/* Logging para depurar */}
@@ -254,20 +201,6 @@ export function MyPlanDashboard() {
         </div>
         <div className="flex gap-2">
           <Button
-            variant="outline"
-            onClick={handleTestConnection}
-            className="text-sm"
-          >
-            Testar API
-          </Button>
-          <Button
-            variant="outline"
-            onClick={handleCreateTestSubplan}
-            className="text-sm"
-          >
-            Criar SubPlan Teste
-          </Button>
-          <Button
             className="h-10 px-5 text-base font-semibold"
             onClick={() => setWizardOpen(true)}
             disabled={isLoading}
@@ -276,16 +209,6 @@ export function MyPlanDashboard() {
           </Button>
         </div>
       </div>
-
-      {/* Área de resultado do teste */}
-      {testResult && (
-        <div className="mb-4 rounded-lg border bg-gray-50 p-4">
-          <h3 className="mb-2 font-medium">Resultado do Teste:</h3>
-          <pre className="max-h-40 overflow-auto rounded-md bg-gray-100 p-2 text-xs">
-            {testResult}
-          </pre>
-        </div>
-      )}
 
       {/* Tabs */}
       <div className="mb-6 flex gap-2">
@@ -338,9 +261,7 @@ export function MyPlanDashboard() {
       {/* Sub-Plans Grid */}
       {isLoading ? (
         <div className="flex h-[300px] flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 p-6 text-center">
-          <h3 className="mb-1 text-sm font-medium text-gray-900">
-            Carregando...
-          </h3>
+          <h3 className="mb-1 text-sm font-medium text-gray-900">Loading...</h3>
         </div>
       ) : subPlans.length === 0 ? (
         <div className="flex h-[300px] flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 p-6 text-center">

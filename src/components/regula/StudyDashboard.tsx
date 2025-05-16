@@ -10,7 +10,6 @@ import { Plus } from "lucide-react";
 import { api } from "@/utils/api";
 import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
 
 // Definição da interface do banco de dados
 interface SubPlan {
@@ -62,14 +61,7 @@ export function StudyDashboard() {
   const [selectedTab, setSelectedTab] = useState<string>("overview");
   const [isLoading, setIsLoading] = useState(false);
 
-  const router = useRouter();
   const { data: sessionData, status: sessionStatus } = useSession();
-
-  // Redirecionar para a página MyPlanDashboard que tem a implementação completa
-  const goToMyPlanPage = () => {
-    toast.success("Acessando dashboard completo...");
-    router.push("/regula/my-plan");
-  };
 
   // Consulta tRPC
   const createSubPlanMutation = api.subplanRouter.create.useMutation({
@@ -141,7 +133,7 @@ export function StudyDashboard() {
     console.log("[CLIENT] StudyDashboard - Recebendo dados do wizard:", data);
 
     if (!sessionData?.user) {
-      toast.error("Você precisa estar logado para criar um subplan");
+      toast.error("You need to be logged in to create a subplan");
       return;
     }
 
@@ -165,10 +157,10 @@ export function StudyDashboard() {
       console.log("[CLIENT] StudyDashboard - Salvando no banco:", subPlanData);
       createSubPlanMutation.mutate(subPlanData);
 
-      toast.success("Criando seu subplan...");
+      toast.success("Creating your subplan...");
     } catch (error) {
       console.error("[CLIENT] StudyDashboard - Erro:", error);
-      toast.error("Erro ao criar subplan");
+      toast.error("Error creating subplan");
       setIsLoading(false);
     }
 
@@ -243,9 +235,6 @@ export function StudyDashboard() {
 
       {/* Botões no topo alinhados à direita */}
       <div className="mb-4 flex justify-end gap-4">
-        <Button variant="outline" onClick={goToMyPlanPage}>
-          Ver Dashboard Completo
-        </Button>
         <Button onClick={() => setWizardOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           New Sub-Plan
@@ -320,12 +309,14 @@ export function StudyDashboard() {
               <div className="mb-2 font-semibold">Word Cloud</div>
               <WordCloud />
             </div>
-            <div className="rounded-xl border bg-white p-6 shadow-sm">
+            <div className="flex h-[400px] flex-col rounded-xl border bg-white p-6 shadow-sm">
               <div className="mb-2 font-semibold">Sub-Plan History</div>
-              <SubPlanHistory
-                subPlans={getHistoryPlans()}
-                onViewHistory={handleViewHistory}
-              />
+              <div className="flex-grow">
+                <SubPlanHistory
+                  subPlans={getHistoryPlans()}
+                  onViewHistory={handleViewHistory}
+                />
+              </div>
             </div>
           </div>
         </TabsContent>

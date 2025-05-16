@@ -1,15 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog } from "@headlessui/react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { api } from "@/utils/api";
 
-const topics = [
-  { id: "java_basics", name: "Java Fundamentals" },
-  { id: "oop", name: "Object-Oriented Programming" },
-  { id: "collections", name: "Collections Framework" },
-  { id: "exceptions", name: "Exception Handling" },
-  { id: "io", name: "Input/Output (I/O)" },
-];
+// Remover os tópicos estáticos, agora vamos buscar os módulos do banco
+// const topics = [
+//   { id: "java_basics", name: "Java Fundamentals" },
+//   { id: "oop", name: "Object-Oriented Programming" },
+//   { id: "collections", name: "Collections Framework" },
+//   { id: "exceptions", name: "Exception Handling" },
+//   { id: "io", name: "Input/Output (I/O)" },
+// ];
 
 const daysOfWeek = [
   "Monday",
@@ -89,6 +91,51 @@ export function SubPlanWizard({
   >([]);
   const [strategyName, setStrategyName] = useState("");
   const [strategyDesc, setStrategyDesc] = useState("");
+  // Novo estado para armazenar os módulos disponíveis
+  const [availableModules, setAvailableModules] = useState<
+    { id: string; moduleName: string }[]
+  >([]);
+
+  // Buscar módulos do curso Java
+  const { data: modules = [] } =
+    api.courseRouter.getModuleOnCourseName.useQuery(
+      { courseNameInput: "Java" },
+      { enabled: open } // Só busca quando o wizard está aberto
+    );
+
+  // Buscar subplans existentes
+  const { data: existingSubPlans = [] } = api.subplanRouter.getAll.useQuery(
+    undefined,
+    { enabled: open } // Só busca quando o wizard está aberto
+  );
+
+  // Filtrar módulos já usados em subplans
+  useEffect(() => {
+    if (modules.length > 0 && existingSubPlans.length > 0) {
+      // Extrair os nomes dos tópicos de subplans existentes
+      const existingTopics = existingSubPlans.map((plan) => plan.topic);
+
+      // Filtrar os módulos que ainda não possuem subplans
+      const filteredModules = modules.filter(
+        (module) => !existingTopics.includes(module.moduleName)
+      );
+
+      setAvailableModules(filteredModules);
+    } else {
+      setAvailableModules(modules);
+    }
+
+    console.log(
+      "[CLIENT] SubPlanWizard - Módulos disponíveis:",
+      modules.length > 0 ? modules.map((m) => m.moduleName) : "nenhum"
+    );
+    console.log(
+      "[CLIENT] SubPlanWizard - SubPlans existentes:",
+      existingSubPlans.length > 0
+        ? existingSubPlans.map((p) => p.topic)
+        : "nenhum"
+    );
+  }, [modules, existingSubPlans]);
 
   function handleNext() {
     if (step < 4) setStep(step + 1);
@@ -258,12 +305,32 @@ export function SubPlanWizard({
                 onChange={(e) => setTopic(e.target.value)}
               >
                 <option value="">Choose a topic</option>
-                {topics.map((t) => (
-                  <option key={t.id} value={t.name}>
-                    {t.name}
+                {availableModules.length > 0 ? (
+                  availableModules.map((module) => (
+                    <option key={module.id} value={module.moduleName}>
+                      {module.moduleName}
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>
+                    Não há tópicos disponíveis no momento
                   </option>
-                ))}
+                )}
               </select>
+
+              {availableModules.length === 0 && (
+                <div className="mb-4 rounded-lg bg-yellow-50 p-3 text-sm text-yellow-800">
+                  <p>
+                    Todos os tópicos já possuem subplans criados. Para adicionar
+                    um novo, você pode:
+                  </p>
+                  <ul className="ml-4 mt-2 list-disc">
+                    <li>Editar um subplan existente</li>
+                    <li>Marcar um subplan como concluído para criar um novo</li>
+                  </ul>
+                </div>
+              )}
+
               <label className="mb-1 block text-sm font-medium">
                 Set your mastery goal:
               </label>

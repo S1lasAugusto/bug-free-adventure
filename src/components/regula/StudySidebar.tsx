@@ -1,6 +1,7 @@
 import React from "react";
 import { useRouter } from "next/router";
 import { LayoutGrid, List } from "lucide-react";
+import Link from "next/link";
 
 const navItems = [
   {
@@ -17,15 +18,16 @@ const navItems = [
 
 export function StudySidebar() {
   const router = useRouter();
+
   return (
     <aside className="h-full w-60 border-r bg-white pt-8">
       <nav className="flex flex-col gap-2 px-4">
         {navItems.map((item) => {
           const isActive = router.pathname === item.href;
           return (
-            <button
+            <Link
               key={item.name}
-              onClick={() => router.push(item.href)}
+              href={item.href}
               className={`flex items-center gap-3 rounded-lg px-3 py-3 text-base font-medium transition-colors
                 ${
                   isActive
@@ -35,7 +37,7 @@ export function StudySidebar() {
             >
               <item.icon className="h-5 w-5" />
               {item.name}
-            </button>
+            </Link>
           );
         })}
       </nav>

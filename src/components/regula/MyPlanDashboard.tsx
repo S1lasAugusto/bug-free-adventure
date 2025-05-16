@@ -24,11 +24,10 @@ export function MyPlanDashboard() {
   const [selectedTab, setSelectedTab] = useState("All Plans");
   const [wizardOpen, setWizardOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [sessionChecked, setSessionChecked] = useState(false);
 
   // Verificar o estado da sessão
   const { data: sessionData, status: sessionStatus } = useSession();
-  console.log("[CLIENT] Estado da sessão:", sessionStatus);
-  console.log("[CLIENT] Dados da sessão:", sessionData);
 
   // Consultas tRPC
   const {
@@ -41,66 +40,47 @@ export function MyPlanDashboard() {
   } = api.subplanRouter.getAll.useQuery(undefined, {
     enabled: sessionStatus === "authenticated",
     retry: 1,
+    staleTime: 30000, // 30 segundos
+    cacheTime: 60000, // 1 minuto
     onSuccess: (data) => {
-      console.log("[CLIENT] SubPlans carregados com sucesso:", data);
+      console.log("[CLIENT] SubPlans carregados com sucesso:", data.length);
     },
     onError: (error) => {
-      console.error("[CLIENT] Erro ao carregar subplans:", error);
-      console.error("[CLIENT] Mensagem de erro:", error.message);
-      console.error("[CLIENT] Dados do erro:", error);
+      console.error("[CLIENT] Erro ao carregar subplans:", error.message);
     },
   });
 
   const createSubPlanMutation = api.subplanRouter.create.useMutation({
     onMutate: (variables) => {
-      console.log("[CLIENT] Iniciando mutação com variáveis:", variables);
+      console.log("[CLIENT] Iniciando mutação");
     },
     onSuccess: (data) => {
-      console.log("[CLIENT] SubPlan criado com sucesso:", data);
+      console.log("[CLIENT] SubPlan criado com sucesso");
       refetchSubPlans();
       toast.success("SubPlan criado com sucesso!");
     },
     onError: (error) => {
-      console.error("[CLIENT] Erro ao criar subplan:", error);
-      console.error("[CLIENT] Mensagem de erro:", error.message);
-      console.error("[CLIENT] Dados do erro:", error);
+      console.error("[CLIENT] Erro ao criar subplan:", error.message);
       toast.error(`Erro ao criar subplan: ${error.message}`);
     },
   });
 
-  // Log de informações de estado
+  // Log de debug para sessão via API - executado apenas uma vez na montagem
   useEffect(() => {
-    console.log("[CLIENT] Status de carregamento:", {
-      isLoadingPlans,
-      isFetchingPlans,
-      sessionStatus,
-      hasSession: !!sessionData,
-    });
-  }, [isLoadingPlans, isFetchingPlans, sessionStatus, sessionData]);
+    if (sessionChecked) return;
 
-  // Log de debug para sessão via API
-  useEffect(() => {
-    const fetchSession = async () => {
-      try {
-        // Verificar status da sessão
-        const response = await fetch("/api/auth/session");
-        const session = await response.json();
-        console.log("[CLIENT] API Session check:", session);
-        if (!session || !session.user) {
-          console.warn("[CLIENT] Usuário não autenticado na API de sessão");
-        } else {
-          console.log("[CLIENT] ID do usuário na sessão:", session.user.id);
-        }
-      } catch (err) {
-        console.error("[CLIENT] Erro ao verificar sessão:", err);
-      }
-    };
+    console.log("[CLIENT] Verificando sessão uma única vez");
+    setSessionChecked(true);
 
-    fetchSession();
-  }, []);
+    if (sessionStatus === "unauthenticated") {
+      console.warn("[CLIENT] Usuário não autenticado");
+    } else if (sessionStatus === "authenticated" && sessionData?.user) {
+      console.log("[CLIENT] Usuário autenticado");
+    }
+  }, [sessionStatus, sessionData, sessionChecked]);
 
   if (isLoadError) {
-    console.error("[CLIENT] Erro na consulta getAll:", loadError);
+    console.error("[CLIENT] Erro na consulta getAll:", loadError?.message);
   }
 
   // Filtrar os subplans com base na aba selecionada
@@ -115,22 +95,14 @@ export function MyPlanDashboard() {
 
   // Função para criar um novo subplan usando a API tRPC
   function handleCreateSubPlan(data: any) {
-    // Log inicial para confirmar que a função está sendo chamada
-    console.log("=============================================");
-    console.log("[CLIENT] *** FUNÇÃO handleCreateSubPlan INICIADA ***");
-    console.log("[CLIENT] handleCreateSubPlan - DADOS RECEBIDOS:", data);
-    console.log("=============================================");
-
     // Verificação básica de login
     if (!sessionData?.user) {
-      console.error("[CLIENT] handleCreateSubPlan - Sem usuário na sessão");
       toast.error("Você precisa estar logado para criar um subplan");
       return;
     }
 
     // Verificação básica de dados
     if (!data || !data.topic) {
-      console.error("[CLIENT] handleCreateSubPlan - Dados inválidos:", data);
       toast.error("Dados inválidos para criar subplan");
       return;
     }
@@ -138,7 +110,7 @@ export function MyPlanDashboard() {
     try {
       setIsLoading(true);
 
-      // Preparar dados super simplificados para teste
+      // Preparar dados simplificados
       const subplanMinimal = {
         name: data.topic,
         topic: data.topic,
@@ -147,28 +119,17 @@ export function MyPlanDashboard() {
         selectedStrategies: Array.isArray(data.selectedStrategies)
           ? data.selectedStrategies
           : [],
-        // Usar undefined ao invés de null para customStrategies
         customStrategies: data.customStrategies || undefined,
         hoursPerDay: data.hoursPerDay || 1,
         status: "Active",
       };
 
-      console.log(
-        "[CLIENT] handleCreateSubPlan - Dados preparados:",
-        subplanMinimal
-      );
-
-      // Chamar mutação com menos manipulação possível
+      // Chamar mutação
       createSubPlanMutation.mutate(subplanMinimal);
-      console.log("[CLIENT] handleCreateSubPlan - Mutação chamada");
-
-      // Mostrar mensagem de sucesso
       toast.success("Solicitação de criação enviada!");
     } catch (error) {
-      console.error("[CLIENT] handleCreateSubPlan - Erro na execução:", error);
       toast.error("Erro ao processar solicitação");
     } finally {
-      // Sempre fechar o wizard e limpar estado
       setIsLoading(false);
       setWizardOpen(false);
     }

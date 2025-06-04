@@ -109,49 +109,31 @@ export function SubPlanWizard({
     { enabled: open } // Só busca quando o wizard está aberto
   );
 
-  // Referência para evitar loops infinitos
-  const processed = useRef(false);
-
   // Filtrar módulos já usados em subplans
   useEffect(() => {
-    // Evitar execuções repetidas se os dados não mudaram
-    if (!open) {
-      processed.current = false;
-      return;
-    }
+    if (!open) return;
 
-    // Só executamos quando o wizard está aberto e temos dados, mas apenas uma vez
-    if (open && modules && existingSubPlans && !processed.current) {
-      processed.current = true;
+    if (modules && existingSubPlans) {
+      // Extrair os nomes dos tópicos de subplans existentes
+      const existingTopics = existingSubPlans.map((plan) => plan.topic);
 
-      try {
-        // Extrair os nomes dos tópicos de subplans existentes
-        const existingTopics = existingSubPlans.map((plan) => plan.topic);
+      // Filtrar os módulos que ainda não possuem subplans
+      const filteredModules = modules.filter(
+        (module) => !existingTopics.includes(module.moduleName)
+      );
 
-        // Filtrar os módulos que ainda não possuem subplans
-        const filteredModules = modules.filter(
-          (module) => !existingTopics.includes(module.moduleName)
-        );
+      setAvailableModules(filteredModules);
 
-        setAvailableModules(filteredModules);
-
-        // Console logs em bloco separado para não causar re-renderização
-        console.log(
-          "[CLIENT] SubPlanWizard - Módulos disponíveis:",
-          modules.length > 0 ? modules.map((m) => m.moduleName) : "nenhum"
-        );
-        console.log(
-          "[CLIENT] SubPlanWizard - SubPlans existentes:",
-          existingSubPlans.length > 0
-            ? existingSubPlans.map((p) => p.topic)
-            : "nenhum"
-        );
-      } catch (error) {
-        console.error(
-          "[CLIENT] SubPlanWizard - Erro ao processar módulos:",
-          error
-        );
-      }
+      console.log(
+        "[CLIENT] SubPlanWizard - Módulos disponíveis:",
+        modules.length > 0 ? modules.map((m) => m.moduleName) : "nenhum"
+      );
+      console.log(
+        "[CLIENT] SubPlanWizard - SubPlans existentes:",
+        existingSubPlans.length > 0
+          ? existingSubPlans.map((p) => p.topic)
+          : "nenhum"
+      );
     }
   }, [open, modules, existingSubPlans]);
 

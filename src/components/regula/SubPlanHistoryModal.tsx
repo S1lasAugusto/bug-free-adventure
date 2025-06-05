@@ -104,16 +104,25 @@ export function SubPlanHistoryModal({
                   {event.scales && (
                     <div className="mb-2 grid grid-cols-2 gap-2 text-sm text-zinc-700">
                       {Object.entries(event.scales)
-                        .filter(([key]) =>
-                          event.type === "edit"
-                            ? [
-                                "control",
-                                "awareness",
-                                "strengths",
-                                "planning",
-                              ].includes(key)
-                            : true
-                        )
+                        .filter(([key]) => {
+                          if (event.type === "edit") {
+                            return [
+                              "control",
+                              "awareness",
+                              "strengths",
+                              "planning",
+                            ].includes(key);
+                          }
+                          if (event.type === "completed") {
+                            return [
+                              "alternatives",
+                              "summary",
+                              "diagrams",
+                              "adaptation",
+                            ].includes(key);
+                          }
+                          return true;
+                        })
                         .map(([key, value]) => (
                           <div key={key} className="flex items-center gap-2">
                             <span className="font-semibold capitalize">

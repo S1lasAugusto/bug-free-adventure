@@ -132,22 +132,22 @@ export function EditReflectionDialog({
   const createReflection = api.reflectionRouter.create.useMutation({
     onSuccess: () => {
       utils.reflectionRouter.getAll.invalidate();
-      toast.success("Alterações salvas com sucesso!");
+      toast.success("Changes saved successfully!");
       onClose();
     },
     onError: (error) => {
-      toast.error(`Erro ao salvar alterações: ${error.message}`);
+      toast.error(`Error saving changes: ${error.message}`);
     },
   });
 
   const updateReflection = api.reflectionRouter.update.useMutation({
     onSuccess: () => {
       utils.reflectionRouter.getAll.invalidate();
-      toast.success("Alterações salvas com sucesso!");
+      toast.success("Changes saved successfully!");
       onClose();
     },
     onError: (error) => {
-      toast.error(`Erro ao salvar alterações: ${error.message}`);
+      toast.error(`Error saving changes: ${error.message}`);
     },
   });
 
@@ -156,7 +156,7 @@ export function EditReflectionDialog({
       utils.subplanRouter.getById.invalidate({ id: subPlan.id });
     },
     onError: (error) => {
-      toast.error(`Erro ao atualizar plano: ${error.message}`);
+      toast.error(`Error updating plan: ${error.message}`);
     },
   });
 
@@ -185,7 +185,7 @@ export function EditReflectionDialog({
 
     if (!subPlan?.id) {
       console.error("ID do subplan não encontrado", subPlan);
-      toast.error("Erro: ID do plano não encontrado");
+      toast.error("Error: Plan ID not found");
       return;
     }
 
@@ -222,11 +222,11 @@ export function EditReflectionDialog({
         });
       }
 
-      toast.success("Alterações salvas com sucesso!");
+      toast.success("Changes saved successfully!");
       onClose();
     } catch (error) {
       console.error("Erro ao salvar:", error);
-      toast.error("Erro ao salvar alterações");
+      toast.error("Error saving changes");
     }
   };
 
@@ -276,7 +276,7 @@ export function EditReflectionDialog({
           <div className="space-y-6">
             <div className="space-y-4">
               <div>
-                <Label htmlFor="mastery">Nível de Domínio</Label>
+                <Label htmlFor="mastery">Mastery Level</Label>
                 <div className="mt-2 flex items-center gap-4">
                   <input
                     type="range"
@@ -299,7 +299,7 @@ export function EditReflectionDialog({
               </div>
 
               <div>
-                <Label htmlFor="hoursPerDay">Horas por Dia</Label>
+                <Label htmlFor="hoursPerDay">Hours per Day</Label>
                 <div className="mt-2 flex items-center gap-4">
                   <input
                     type="range"
@@ -322,7 +322,7 @@ export function EditReflectionDialog({
               </div>
 
               <div>
-                <Label>Dias da Semana</Label>
+                <Label>Days of the Week</Label>
                 <div className="mt-2 grid grid-cols-4 gap-2">
                   {DAYS_OF_WEEK.map((day) => (
                     <button

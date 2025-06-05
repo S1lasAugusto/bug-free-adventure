@@ -296,9 +296,22 @@ export default function PlanDetailPage() {
       />
 
       <EditReflectionDialog
-        open={isEditDialogOpen}
+        isOpen={isEditDialogOpen}
         onClose={() => setIsEditDialogOpen(false)}
-        subPlanId={id as string}
+        reflection={{
+          id: id as string,
+          type: "edit_reflection",
+          control: 0,
+          awareness: 0,
+          strengths: 0,
+          planning: 0,
+          alternatives: 0,
+          summary: 0,
+          diagrams: 0,
+          adaptation: 0,
+          comment: "",
+          selectedStrategies: subPlan.selectedStrategies || [],
+        }}
       />
     </div>
   );

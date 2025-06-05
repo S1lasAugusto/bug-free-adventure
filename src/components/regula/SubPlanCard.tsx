@@ -19,49 +19,52 @@ export function SubPlanCard({ subPlan }: SubPlanCardProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCompleteDialogOpen, setIsCompleteDialogOpen] = useState(false);
 
-  const handleEditClick = () => {
-    console.log("Edit button clicked");
-    setIsEditDialogOpen(true);
-  };
-
-  const handleCompleteClick = () => {
-    console.log("Complete button clicked");
-    setIsCompleteDialogOpen(true);
-  };
-
   return (
     <>
-      <Card className="p-4">
-        <h3 className="text-lg font-semibold">{subPlan.topic}</h3>
-        <div className="mt-2 space-y-2">
-          <p>Nível de domínio: {subPlan.mastery}%</p>
-          <p>Dias da semana: {subPlan.daysOfWeek.join(", ")}</p>
-          <p>Horas por dia: {subPlan.hoursPerDay}</p>
-          <p>Estratégias: {subPlan.strategies.join(", ")}</p>
-        </div>
-        <div className="mt-4 flex space-x-2">
-          <button
-            className="ring-offset-background focus-visible:ring-ring border-input bg-background hover:bg-accent hover:text-accent-foreground inline-flex h-10 items-center justify-center rounded-md border px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-            onClick={handleEditClick}
-            type="button"
-          >
-            Editar
-          </button>
-          <button
-            className="ring-offset-background focus-visible:ring-ring bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-            onClick={handleCompleteClick}
-            type="button"
-          >
-            Completar
-          </button>
+      <Card className="group border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-lg">
+        <div className="p-6">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900">
+              {subPlan.topic}
+            </h3>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsEditDialogOpen(true)}
+              >
+                Edit Plan
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsCompleteDialogOpen(true)}
+              >
+                Complete
+              </Button>
+            </div>
+          </div>
         </div>
       </Card>
 
       {isEditDialogOpen && (
         <EditReflectionDialog
-          open={isEditDialogOpen}
+          isOpen={isEditDialogOpen}
           onClose={() => setIsEditDialogOpen(false)}
-          subPlanId={subPlan.id}
+          reflection={{
+            id: subPlan.id,
+            type: "edit_reflection",
+            control: 0,
+            awareness: 0,
+            strengths: 0,
+            planning: 0,
+            alternatives: 0,
+            summary: 0,
+            diagrams: 0,
+            adaptation: 0,
+            comment: "",
+            selectedStrategies: subPlan.strategies || [],
+          }}
         />
       )}
 

@@ -203,6 +203,13 @@ export function StudyDashboard() {
     }
   }, [reflections, selectedPlan]);
 
+  const weeklyHours = subPlans
+    .filter((s) => s.status === "active")
+    .reduce(
+      (sum, s) => sum + (s.hoursPerDay || 0) * (s.selectedDays?.length || 0),
+      0
+    );
+
   const summaryData: SummaryCardProps = {
     generalPlan: {
       name: "My Study Plan",
@@ -214,7 +221,7 @@ export function StudyDashboard() {
       active: subPlans.filter((s) => s.status === "active").length,
       completed: subPlans.filter((s) => s.status === "completed").length,
     },
-    weeklyHours: 0,
+    weeklyHours: weeklyHours,
     onNewSubPlan: () => setWizardOpen(true),
   };
 

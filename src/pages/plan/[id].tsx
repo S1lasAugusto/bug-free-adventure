@@ -251,12 +251,14 @@ export default function PlanDetailPage() {
                   <Button
                     className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-sm transition-all duration-300 hover:from-emerald-600 hover:to-emerald-700 hover:shadow-md"
                     onClick={() => setIsCompleteDialogOpen(true)}
+                    disabled={subPlan.status === "Completed"}
                   >
                     <CheckCircle2 className="h-4 w-4" /> Complete Plan
                   </Button>
                   <Button
                     className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-sm transition-all duration-300 hover:from-orange-600 hover:to-orange-700 hover:shadow-md"
                     onClick={() => setIsEditDialogOpen(true)}
+                    disabled={subPlan.status === "Completed"}
                   >
                     <Edit className="h-4 w-4" /> Edit Plan
                   </Button>

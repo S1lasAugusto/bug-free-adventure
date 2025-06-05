@@ -299,7 +299,6 @@ export default function PlanDetailPage() {
         isOpen={isEditDialogOpen}
         onClose={() => setIsEditDialogOpen(false)}
         reflection={{
-          id: id as string,
           type: "edit_reflection",
           control: 0,
           awareness: 0,

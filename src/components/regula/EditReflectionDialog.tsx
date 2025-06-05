@@ -49,7 +49,7 @@ interface EditReflectionDialogProps {
   isOpen: boolean;
   onClose: () => void;
   reflection: {
-    id: string;
+    id?: string;
     type: string;
     control: number;
     awareness: number;

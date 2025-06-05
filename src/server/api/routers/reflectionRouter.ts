@@ -48,4 +48,28 @@ export const reflectionRouter = createTRPCRouter({
         },
       });
     }),
+
+  update: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        type: z.string().optional(),
+        control: z.number().optional(),
+        awareness: z.number().optional(),
+        strengths: z.number().optional(),
+        planning: z.number().optional(),
+        alternatives: z.number().optional(),
+        summary: z.number().optional(),
+        diagrams: z.number().optional(),
+        adaptation: z.number().optional(),
+        comment: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { id, ...data } = input;
+      return ctx.prisma.reflection.update({
+        where: { id },
+        data,
+      });
+    }),
 });

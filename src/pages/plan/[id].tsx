@@ -312,6 +312,12 @@ export default function PlanDetailPage() {
           comment: "",
           selectedStrategies: subPlan.selectedStrategies || [],
         }}
+        subPlan={{
+          id: subPlan.id,
+          mastery: subPlan.mastery,
+          hoursPerDay: subPlan.hoursPerDay,
+          selectedDays: subPlan.selectedDays,
+        }}
       />
     </div>
   );

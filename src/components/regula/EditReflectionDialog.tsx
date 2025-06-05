@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/utils/api";
 import { CheckCircle2, X } from "lucide-react";
+import { toast } from "react-hot-toast";
 
 const LEARNING_STRATEGIES = [
   "active_recall",
@@ -111,20 +112,16 @@ export function EditReflectionDialog({
 }: EditReflectionDialogProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
-    type: reflection?.type || "edit_reflection",
-    control: reflection?.control || 0,
-    awareness: reflection?.awareness || 0,
-    strengths: reflection?.strengths || 0,
-    planning: reflection?.planning || 0,
-    alternatives: reflection?.alternatives || 0,
-    summary: reflection?.summary || 0,
-    diagrams: reflection?.diagrams || 0,
-    adaptation: reflection?.adaptation || 0,
-    comment: reflection?.comment || "",
-    selectedStrategies: reflection?.selectedStrategies || [],
-    mastery: subPlan?.mastery || 0,
-    hoursPerDay: subPlan?.hoursPerDay || 1,
-    selectedDays: subPlan?.selectedDays || [],
+    type: reflection.type,
+    control: reflection.control,
+    awareness: reflection.awareness,
+    strengths: reflection.strengths,
+    planning: reflection.planning,
+    comment: reflection.comment,
+    selectedStrategies: reflection.selectedStrategies,
+    mastery: subPlan?.mastery ?? 0,
+    hoursPerDay: subPlan?.hoursPerDay ?? 1,
+    selectedDays: subPlan?.selectedDays ?? [],
   });
 
   const [customStrategies, setCustomStrategies] = useState<{
@@ -132,10 +129,25 @@ export function EditReflectionDialog({
   }>({});
 
   const utils = api.useUtils();
+  const createReflection = api.reflectionRouter.create.useMutation({
+    onSuccess: () => {
+      utils.reflectionRouter.getAll.invalidate();
+      toast.success("Alterações salvas com sucesso!");
+      onClose();
+    },
+    onError: (error) => {
+      toast.error(`Erro ao salvar alterações: ${error.message}`);
+    },
+  });
+
   const updateReflection = api.reflectionRouter.update.useMutation({
     onSuccess: () => {
       utils.reflectionRouter.getAll.invalidate();
+      toast.success("Alterações salvas com sucesso!");
       onClose();
+    },
+    onError: (error) => {
+      toast.error(`Erro ao salvar alterações: ${error.message}`);
     },
   });
 
@@ -143,34 +155,77 @@ export function EditReflectionDialog({
     onSuccess: () => {
       utils.subplanRouter.getById.invalidate({ id: subPlan.id });
     },
+    onError: (error) => {
+      toast.error(`Erro ao atualizar plano: ${error.message}`);
+    },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Sempre que abrir o dialog ou mudar o subPlan/reflection, sincroniza o formData
+  useEffect(() => {
+    if (isOpen && subPlan) {
+      setFormData({
+        type: reflection.type,
+        control: reflection.control,
+        awareness: reflection.awareness,
+        strengths: reflection.strengths,
+        planning: reflection.planning,
+        comment: reflection.comment,
+        selectedStrategies: reflection.selectedStrategies,
+        mastery: subPlan.mastery,
+        hoursPerDay: subPlan.hoursPerDay,
+        selectedDays: subPlan.selectedDays,
+      });
+    }
+  }, [isOpen, subPlan, reflection]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!reflection?.id || !subPlan?.id) return;
+    console.log("Salvando alterações...", { formData, subPlan, reflection });
 
-    // Primeiro atualiza o plano
-    updateSubPlan.mutate({
-      id: subPlan.id,
-      mastery: formData.mastery,
-      hoursPerDay: formData.hoursPerDay,
-      selectedDays: formData.selectedDays,
-    });
+    if (!subPlan?.id) {
+      console.error("ID do subplan não encontrado", subPlan);
+      toast.error("Erro: ID do plano não encontrado");
+      return;
+    }
 
-    // Depois atualiza a reflexão
-    updateReflection.mutate({
-      id: reflection.id,
-      type: formData.type,
-      control: formData.control,
-      awareness: formData.awareness,
-      strengths: formData.strengths,
-      planning: formData.planning,
-      alternatives: formData.alternatives,
-      summary: formData.summary,
-      diagrams: formData.diagrams,
-      adaptation: formData.adaptation,
-      comment: formData.comment,
-    });
+    try {
+      // Atualiza o plano
+      await updateSubPlan.mutateAsync({
+        id: subPlan.id,
+        mastery: formData.mastery,
+        hoursPerDay: formData.hoursPerDay,
+        selectedDays: formData.selectedDays,
+      });
+
+      // Atualiza ou cria a reflexão
+      if (reflection?.id) {
+        await updateReflection.mutateAsync({
+          id: reflection.id,
+          type: formData.type,
+          control: formData.control,
+          awareness: formData.awareness,
+          strengths: formData.strengths,
+          planning: formData.planning,
+          comment: formData.comment,
+        });
+      } else {
+        await createReflection.mutateAsync({
+          type: formData.type,
+          control: formData.control,
+          awareness: formData.awareness,
+          strengths: formData.strengths,
+          planning: formData.planning,
+          comment: formData.comment,
+          subPlanId: subPlan.id,
+        });
+      }
+
+      toast.success("Alterações salvas com sucesso!");
+      onClose();
+    } catch (error) {
+      console.error("Erro ao salvar:", error);
+      toast.error("Erro ao salvar alterações");
+    }
   };
 
   const handleStrategyToggle = (strategy: string) => {
@@ -219,52 +274,67 @@ export function EditReflectionDialog({
           <div className="space-y-6">
             <div className="space-y-4">
               <div>
-                <Label>Mastery Level (%)</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={formData.mastery}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      mastery: Number(e.target.value),
-                    }))
-                  }
-                />
+                <Label htmlFor="mastery">Nível de Domínio</Label>
+                <div className="mt-2 flex items-center gap-4">
+                  <input
+                    type="range"
+                    id="mastery"
+                    min="0"
+                    max="100"
+                    value={formData.mastery}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        mastery: parseInt(e.target.value),
+                      }))
+                    }
+                    className="h-2 w-full rounded-lg bg-gray-200"
+                  />
+                  <span className="min-w-[3rem] text-right font-medium">
+                    {formData.mastery}%
+                  </span>
+                </div>
               </div>
 
               <div>
-                <Label>Hours per Day</Label>
-                <Input
-                  type="number"
-                  min="1"
-                  value={formData.hoursPerDay}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      hoursPerDay: Number(e.target.value),
-                    }))
-                  }
-                />
+                <Label htmlFor="hoursPerDay">Horas por Dia</Label>
+                <div className="mt-2 flex items-center gap-4">
+                  <input
+                    type="range"
+                    id="hoursPerDay"
+                    min="1"
+                    max="8"
+                    value={formData.hoursPerDay}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        hoursPerDay: parseInt(e.target.value),
+                      }))
+                    }
+                    className="h-2 w-full rounded-lg bg-gray-200"
+                  />
+                  <span className="min-w-[3rem] text-right font-medium">
+                    {formData.hoursPerDay}h
+                  </span>
+                </div>
               </div>
 
               <div>
-                <Label>Days of Week</Label>
-                <div className="mt-2 flex flex-wrap gap-2">
+                <Label>Dias da Semana</Label>
+                <div className="mt-2 grid grid-cols-4 gap-2">
                   {DAYS_OF_WEEK.map((day) => (
-                    <Button
+                    <button
                       key={day}
-                      variant={
-                        formData.selectedDays.includes(day)
-                          ? "default"
-                          : "outline"
-                      }
+                      type="button"
                       onClick={() => handleDayToggle(day)}
-                      className="h-8"
+                      className={`rounded-lg border px-3 py-2 text-sm font-medium transition-all ${
+                        formData.selectedDays.includes(day)
+                          ? "border-blue-600 bg-blue-600 text-white"
+                          : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                      }`}
                     >
                       {day.slice(0, 3)}
-                    </Button>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -434,6 +504,7 @@ export function EditReflectionDialog({
               </Button>
               <Button
                 type="submit"
+                onClick={handleSubmit}
                 className="bg-emerald-600 hover:bg-emerald-700"
               >
                 Save Changes

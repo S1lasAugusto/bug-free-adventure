@@ -59,6 +59,18 @@ export default function PlanDetailPage() {
   return (
     <div className="min-h-screen overflow-y-auto bg-gray-50">
       <div className="mx-auto max-w-7xl p-8 pb-16">
+        {/* Botão de voltar */}
+        <div className="mb-6">
+          <Link
+            href="/regula/my-plan"
+            className="inline-flex items-center gap-2 text-blue-600 hover:underline"
+          >
+            <span className="inline-flex items-center gap-2">
+              <ArrowLeft className="h-5 w-5" />
+              Back to My Plans
+            </span>
+          </Link>
+        </div>
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900">{subPlan.topic}</h1>
           <p className="mt-1 text-sm text-gray-500">

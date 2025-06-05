@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/utils/api";
 import { CheckCircle2, X } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { ReflectionScale } from "./ReflectionScale";
 
 const LEARNING_STRATEGIES = [
   "active_recall",
@@ -69,40 +70,6 @@ interface EditReflectionDialogProps {
     selectedDays: string[];
   };
 }
-
-const RatingScale = ({
-  value,
-  onChange,
-  label,
-}: {
-  value: number;
-  onChange: (value: number) => void;
-  label: string;
-}) => {
-  return (
-    <div className="space-y-2">
-      <Label>{label}</Label>
-      <div className="flex items-center gap-4">
-        {[0, 1, 2, 3, 4, 5].map((rating) => (
-          <label
-            key={rating}
-            className="flex cursor-pointer items-center gap-2"
-          >
-            <input
-              type="radio"
-              name={label}
-              value={rating}
-              checked={value === rating}
-              onChange={() => onChange(rating)}
-              className="h-4 w-4 border-gray-300 text-emerald-600 focus:ring-emerald-600"
-            />
-            <span className="text-sm font-medium text-gray-700">{rating}</span>
-          </label>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 export function EditReflectionDialog({
   isOpen,
@@ -449,7 +416,7 @@ export function EditReflectionDialog({
         return (
           <div className="space-y-6">
             <div className="space-y-6">
-              <RatingScale
+              <ReflectionScale
                 label="I have control over how well I learn."
                 value={formData.control}
                 onChange={(value) =>
@@ -457,7 +424,7 @@ export function EditReflectionDialog({
                 }
               />
 
-              <RatingScale
+              <ReflectionScale
                 label="I am aware of what strategies I use when I study."
                 value={formData.awareness}
                 onChange={(value) =>
@@ -465,7 +432,7 @@ export function EditReflectionDialog({
                 }
               />
 
-              <RatingScale
+              <ReflectionScale
                 label="I use my intellectual strengths to compensate for my weaknesses."
                 value={formData.strengths}
                 onChange={(value) =>
@@ -473,7 +440,7 @@ export function EditReflectionDialog({
                 }
               />
 
-              <RatingScale
+              <ReflectionScale
                 label="I think about what I really need to learn before I begin a task."
                 value={formData.planning}
                 onChange={(value) =>

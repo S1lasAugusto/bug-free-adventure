@@ -175,6 +175,7 @@ export function EditReflectionDialog({
         hoursPerDay: subPlan.hoursPerDay,
         selectedDays: subPlan.selectedDays,
       });
+      setCurrentStep(1);
     }
   }, [isOpen, subPlan, reflection]);
 
@@ -195,6 +196,7 @@ export function EditReflectionDialog({
         mastery: formData.mastery,
         hoursPerDay: formData.hoursPerDay,
         selectedDays: formData.selectedDays,
+        selectedStrategies: formData.selectedStrategies,
       });
 
       // Atualiza ou cria a reflexão

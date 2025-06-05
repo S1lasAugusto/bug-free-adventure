@@ -4,6 +4,7 @@ import { subplanRouter } from "./routers/subplanRouter";
 import { userRouter } from "./routers/userRouter";
 import { createTRPCRouter } from "./trpc";
 import { reflectionRouter } from "./routers/reflectionRouter";
+import { generalPlanRouter } from "./routers/generalPlanRouter";
 
 /**
  * This is the primary router for your server.
@@ -16,6 +17,7 @@ export const appRouter = createTRPCRouter({
   userRouter: userRouter,
   subplanRouter: subplanRouter,
   reflectionRouter: reflectionRouter,
+  generalPlanRouter: generalPlanRouter,
 });
 
 // export type definition of API

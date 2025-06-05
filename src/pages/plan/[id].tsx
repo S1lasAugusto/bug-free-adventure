@@ -18,7 +18,6 @@ import {
   BarChart3,
 } from "lucide-react";
 import { api } from "@/utils/api";
-import { utils } from "@/utils/utils";
 
 export default function PlanDetailPage() {
   const router = useRouter();
@@ -58,7 +57,7 @@ export default function PlanDetailPage() {
 
   return (
     <div className="min-h-screen overflow-y-auto bg-gray-50">
-      <div className="mx-auto max-w-7xl p-8 pb-16">
+      <div className="mx-auto h-[calc(100vh-32px)] max-w-7xl overflow-y-auto p-8 pb-16">
         {/* Botão de voltar */}
         <div className="mb-6">
           <Link

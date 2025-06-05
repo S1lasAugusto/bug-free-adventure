@@ -114,18 +114,19 @@ CREATE TABLE "SubPlan" (
 -- CreateTable
 CREATE TABLE "Reflection" (
     "id" TEXT NOT NULL,
-    "subPlanId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     "type" TEXT NOT NULL,
-    "control" INTEGER NOT NULL,
-    "awareness" INTEGER NOT NULL,
-    "strengths" INTEGER NOT NULL,
-    "planning" INTEGER NOT NULL,
+    "control" INTEGER,
+    "awareness" INTEGER,
+    "strengths" INTEGER,
+    "planning" INTEGER,
     "alternatives" INTEGER,
     "summary" INTEGER,
     "diagrams" INTEGER,
     "adaptation" INTEGER,
     "comment" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "subPlanId" TEXT NOT NULL,
 
     CONSTRAINT "Reflection_pkey" PRIMARY KEY ("id")
 );

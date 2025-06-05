@@ -56,6 +56,7 @@ model User {
   preferences   UserPreference[]
   todo          ToDo[]
   subplans      SubPlan[]
+  generalPlans  GeneralPlan[]
 }
 
 model UserPreference {
@@ -96,6 +97,18 @@ model ToDo {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model GeneralPlan {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  gradeGoal String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subPlans  SubPlan[]
+}
+
 model SubPlan {
   id          String   @id @default(cuid())
   name        String
@@ -104,17 +117,15 @@ model SubPlan {
   status      String   @default("Active") // "Active" ou "Completed"
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
   selectedDays       String[]
   selectedStrategies String[]
   customStrategies   Json?
   hoursPerDay        Int      @default(2)
-  
   userId     String
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
   reflections Reflection[]
-  
+  generalPlanId String?
+  generalPlan   GeneralPlan? @relation(fields: [generalPlanId], references: [id])
   @@index([userId])
 }
 

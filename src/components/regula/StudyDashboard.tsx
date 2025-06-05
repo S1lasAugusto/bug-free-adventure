@@ -10,6 +10,7 @@ import { Plus } from "lucide-react";
 import { api } from "@/utils/api";
 import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
+import { GradeDialog } from "./GradeDialog";
 
 // Definição da interface do banco de dados
 interface SubPlan {
@@ -53,6 +54,15 @@ interface SummaryCardProps {
   onNewSubPlan: () => void;
 }
 
+// Adicionar o array de grades para mapear o label
+const gradeLabels: Record<string, string> = {
+  A: "Grade A (90-100%)",
+  B: "Grade B (80-89%)",
+  C: "Grade C (70-79%)",
+  D: "Grade D (60-69%)",
+  E: "Grade E (50-59%)",
+};
+
 export function StudyDashboard() {
   const [subPlans, setSubPlans] = useState<SubPlan[]>([]);
   const [wizardOpen, setWizardOpen] = useState(false);
@@ -61,6 +71,23 @@ export function StudyDashboard() {
   const [selectedTab, setSelectedTab] = useState<string>("overview");
   const [isLoading, setIsLoading] = useState(false);
   const [reflectionEvents, setReflectionEvents] = useState<any[]>([]);
+  const [showDialog, setShowDialog] = useState(false);
+  const { data: generalPlan, isLoading: isLoadingPlan } =
+    api.generalPlanRouter.get.useQuery(undefined, {
+      onSuccess: (data) => {
+        if (!data) setShowDialog(true);
+      },
+    });
+  const utils = api.useUtils();
+  const createPlan = api.generalPlanRouter.create.useMutation({
+    onSuccess: () => {
+      utils.generalPlanRouter.get.invalidate();
+      setShowDialog(false);
+    },
+    onError: (err) => {
+      toast.error("Erro ao salvar plano geral: " + err.message);
+    },
+  });
 
   const { data: sessionData, status: sessionStatus } = useSession();
 
@@ -265,10 +292,59 @@ export function StudyDashboard() {
   }
 
   return (
-    <div
-      className="min-h-screen overflow-y-auto bg-white px-12 py-10"
-      style={{ maxHeight: "100vh" }}
-    >
+    <div className="flex-1 p-6">
+      {!isLoadingPlan && !generalPlan && showDialog && (
+        <div className="mb-6">
+          <GradeDialog
+            open={showDialog}
+            onSelect={(grade) => {
+              createPlan.mutate({ name: "My General Plan", gradeGoal: grade });
+            }}
+          />
+        </div>
+      )}
+      {generalPlan && (
+        <div className="mb-6 grid w-full grid-cols-3 gap-6">
+          <div className="min-w-[220px] rounded-2xl border bg-white p-6 shadow-sm">
+            <div className="mb-1 flex items-center justify-between text-sm text-gray-500">
+              <span>General Plan</span>
+              <GraduationCap className="h-5 w-5 text-gray-400" />
+            </div>
+            <div className="text-3xl font-bold">My Study Plan</div>
+            <div className="mt-1 text-base text-gray-400">
+              {gradeLabels[generalPlan.gradeGoal] ?? generalPlan.gradeGoal}
+            </div>
+          </div>
+          <div className="min-w-[220px] rounded-2xl border bg-white p-6 shadow-sm">
+            <div className="mb-1 flex items-center justify-between text-sm text-gray-500">
+              <span>Sub-Plans</span>
+              <List className="h-5 w-5 text-gray-400" />
+            </div>
+            <div className="text-3xl font-bold">
+              {summaryData.subPlans.total}
+            </div>
+            <div className="mt-1 text-base">
+              <span className="font-semibold text-blue-600">
+                ● Active: {summaryData.subPlans.active}
+              </span>
+              <span className="ml-4 text-gray-400">
+                ● Completed: {summaryData.subPlans.completed}
+              </span>
+            </div>
+          </div>
+          <div className="min-w-[220px] rounded-2xl border bg-white p-6 shadow-sm">
+            <div className="mb-1 flex items-center justify-between text-sm text-gray-500">
+              <span>Weekly Hours</span>
+              <Clock className="h-5 w-5 text-gray-400" />
+            </div>
+            <div className="text-3xl font-bold">{summaryData.weeklyHours}</div>
+            <div className="mt-1 text-base text-gray-400">
+              Hours committed per week
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Wizard de novo sub-plano */}
       <SubPlanWizard
         open={wizardOpen}
@@ -302,47 +378,6 @@ export function StudyDashboard() {
           <Plus className="mr-2 h-4 w-4" />
           New Sub-Plan
         </Button>
-      </div>
-
-      {/* Grid de cards de resumo */}
-      <div className="mb-6 grid w-full grid-cols-3 gap-6">
-        <div className="min-w-[220px] rounded-2xl border bg-white p-6 shadow-sm">
-          <div className="mb-1 flex items-center justify-between text-sm text-gray-500">
-            <span>General Plan</span>
-            <GraduationCap className="h-5 w-5 text-gray-400" />
-          </div>
-          <div className="text-3xl font-bold">
-            {summaryData.generalPlan.name}
-          </div>
-          <div className="mt-1 text-base text-gray-400">
-            {summaryData.generalPlan.course} • {summaryData.generalPlan.grade}
-          </div>
-        </div>
-        <div className="min-w-[220px] rounded-2xl border bg-white p-6 shadow-sm">
-          <div className="mb-1 flex items-center justify-between text-sm text-gray-500">
-            <span>Sub-Plans</span>
-            <List className="h-5 w-5 text-gray-400" />
-          </div>
-          <div className="text-3xl font-bold">{summaryData.subPlans.total}</div>
-          <div className="mt-1 text-base">
-            <span className="font-semibold text-blue-600">
-              ● Active: {summaryData.subPlans.active}
-            </span>
-            <span className="ml-4 text-gray-400">
-              ● Completed: {summaryData.subPlans.completed}
-            </span>
-          </div>
-        </div>
-        <div className="min-w-[220px] rounded-2xl border bg-white p-6 shadow-sm">
-          <div className="mb-1 flex items-center justify-between text-sm text-gray-500">
-            <span>Weekly Hours</span>
-            <Clock className="h-5 w-5 text-gray-400" />
-          </div>
-          <div className="text-3xl font-bold">{summaryData.weeklyHours}</div>
-          <div className="mt-1 text-base text-gray-400">
-            Hours committed per week
-          </div>
-        </div>
       </div>
 
       {/* Abas */}

@@ -299,135 +299,142 @@ export function StudyDashboard() {
   }
 
   return (
-    <div className="flex-1 p-6">
-      {!isLoadingPlan && !generalPlan && showDialog && (
-        <div className="mb-6">
-          <GradeDialog
-            open={showDialog}
-            onSelect={(grade) => {
-              createPlan.mutate({ name: "My General Plan", gradeGoal: grade });
-            }}
-          />
-        </div>
-      )}
-      {generalPlan && (
-        <div className="mb-6 grid w-full grid-cols-3 gap-6">
-          <div className="min-w-[220px] rounded-2xl border bg-white p-6 shadow-sm">
-            <div className="mb-1 flex items-center justify-between text-sm text-gray-500">
-              <span>General Plan</span>
-              <GraduationCap className="h-5 w-5 text-gray-400" />
+    <div className="min-h-screen overflow-y-auto bg-gray-50">
+      <div className="mx-auto h-[calc(100vh-32px)] max-w-7xl overflow-y-auto p-8 pb-16">
+        {!isLoadingPlan && !generalPlan && showDialog && (
+          <div className="mb-6">
+            <GradeDialog
+              open={showDialog}
+              onSelect={(grade) => {
+                createPlan.mutate({
+                  name: "My General Plan",
+                  gradeGoal: grade,
+                });
+              }}
+            />
+          </div>
+        )}
+        {generalPlan && (
+          <div className="mb-6 grid w-full grid-cols-3 gap-6">
+            <div className="min-w-[220px] rounded-2xl border bg-white p-6 shadow-sm">
+              <div className="mb-1 flex items-center justify-between text-sm text-gray-500">
+                <span>General Plan</span>
+                <GraduationCap className="h-5 w-5 text-gray-400" />
+              </div>
+              <div className="text-3xl font-bold">My Study Plan</div>
+              <div className="mt-1 text-base text-gray-400">
+                {gradeLabels[generalPlan.gradeGoal] ?? generalPlan.gradeGoal}
+              </div>
             </div>
-            <div className="text-3xl font-bold">My Study Plan</div>
-            <div className="mt-1 text-base text-gray-400">
-              {gradeLabels[generalPlan.gradeGoal] ?? generalPlan.gradeGoal}
+            <div className="min-w-[220px] rounded-2xl border bg-white p-6 shadow-sm">
+              <div className="mb-1 flex items-center justify-between text-sm text-gray-500">
+                <span>Sub-Plans</span>
+                <List className="h-5 w-5 text-gray-400" />
+              </div>
+              <div className="text-3xl font-bold">
+                {summaryData.subPlans.total}
+              </div>
+              <div className="mt-1 text-base">
+                <span className="font-semibold text-blue-600">
+                  ● Active: {summaryData.subPlans.active}
+                </span>
+                <span className="ml-4 text-gray-400">
+                  ● Completed: {summaryData.subPlans.completed}
+                </span>
+              </div>
+            </div>
+            <div className="min-w-[220px] rounded-2xl border bg-white p-6 shadow-sm">
+              <div className="mb-1 flex items-center justify-between text-sm text-gray-500">
+                <span>Weekly Hours</span>
+                <Clock className="h-5 w-5 text-gray-400" />
+              </div>
+              <div className="text-3xl font-bold">
+                {summaryData.weeklyHours}
+              </div>
+              <div className="mt-1 text-base text-gray-400">
+                Hours committed per week
+              </div>
             </div>
           </div>
-          <div className="min-w-[220px] rounded-2xl border bg-white p-6 shadow-sm">
-            <div className="mb-1 flex items-center justify-between text-sm text-gray-500">
-              <span>Sub-Plans</span>
-              <List className="h-5 w-5 text-gray-400" />
-            </div>
-            <div className="text-3xl font-bold">
-              {summaryData.subPlans.total}
-            </div>
-            <div className="mt-1 text-base">
-              <span className="font-semibold text-blue-600">
-                ● Active: {summaryData.subPlans.active}
-              </span>
-              <span className="ml-4 text-gray-400">
-                ● Completed: {summaryData.subPlans.completed}
-              </span>
-            </div>
-          </div>
-          <div className="min-w-[220px] rounded-2xl border bg-white p-6 shadow-sm">
-            <div className="mb-1 flex items-center justify-between text-sm text-gray-500">
-              <span>Weekly Hours</span>
-              <Clock className="h-5 w-5 text-gray-400" />
-            </div>
-            <div className="text-3xl font-bold">{summaryData.weeklyHours}</div>
-            <div className="mt-1 text-base text-gray-400">
-              Hours committed per week
-            </div>
-          </div>
-        </div>
-      )}
+        )}
 
-      {/* Wizard de novo sub-plano */}
-      <SubPlanWizard
-        open={wizardOpen}
-        onClose={() => setWizardOpen(false)}
-        onComplete={handleCreateSubPlan}
-      />
-
-      {/* Modal de histórico detalhado */}
-      {selectedPlan && (
-        <SubPlanHistoryModal
-          open={historyModalOpen}
-          onClose={() => setHistoryModalOpen(false)}
-          onViewDetails={() => alert("View Plan Details clicked!")}
-          title={`${selectedPlan.name} - Modification History`}
-          subtitle="Detailed log of all reflections for this sub-plan"
-          events={reflectionEvents}
+        {/* Wizard de novo sub-plano */}
+        <SubPlanWizard
+          open={wizardOpen}
+          onClose={() => setWizardOpen(false)}
+          onComplete={handleCreateSubPlan}
         />
-      )}
 
-      {/* Título e subtítulo */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold">Study Dashboard</h1>
-        <p className="mt-2 text-lg text-gray-500">
-          Manage your study plans and track your progress.
-        </p>
-      </div>
+        {/* Modal de histórico detalhado */}
+        {selectedPlan && (
+          <SubPlanHistoryModal
+            open={historyModalOpen}
+            onClose={() => setHistoryModalOpen(false)}
+            onViewDetails={() => alert("View Plan Details clicked!")}
+            title={`${selectedPlan.name} - Modification History`}
+            subtitle="Detailed log of all reflections for this sub-plan"
+            events={reflectionEvents}
+          />
+        )}
 
-      {/* Botões no topo alinhados à direita */}
-      <div className="mb-4 flex justify-end gap-4">
-        <Button onClick={() => setWizardOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          New Sub-Plan
-        </Button>
-      </div>
+        {/* Título e subtítulo */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold">Study Dashboard</h1>
+          <p className="mt-2 text-lg text-gray-500">
+            Manage your study plans and track your progress.
+          </p>
+        </div>
 
-      {/* Abas */}
-      <Tabs
-        value={selectedTab}
-        onValueChange={(val: string) => setSelectedTab(val)}
-        className="mb-6"
-      >
-        <TabsList className="flex w-full rounded-xl bg-[#f5f8fd] p-1">
-          <TabsTrigger
-            value="overview"
-            className="flex-1 rounded-lg text-base data-[state=active]:bg-white data-[state=active]:shadow-sm"
-          >
-            Overview
-          </TabsTrigger>
-          <TabsTrigger
-            value="tracking"
-            className="flex-1 rounded-lg text-base data-[state=active]:bg-white data-[state=active]:shadow-sm"
-          >
-            Tracking
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="overview">
-          {/* Conteúdo da aba Overview */}
-          <div className="mt-6 grid grid-cols-2 gap-6">
-            <div className="rounded-xl border bg-white p-6 shadow-sm">
-              <div className="mb-2 font-semibold">Word Cloud</div>
-              <WordCloud words={wordCloudData} />
+        {/* Botões no topo alinhados à direita */}
+        <div className="mb-4 flex justify-end gap-4">
+          <Button onClick={() => setWizardOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            New Sub-Plan
+          </Button>
+        </div>
+
+        {/* Abas */}
+        <Tabs
+          value={selectedTab}
+          onValueChange={(val: string) => setSelectedTab(val)}
+          className="mb-6"
+        >
+          <TabsList className="flex w-full rounded-xl bg-[#f5f8fd] p-1">
+            <TabsTrigger
+              value="overview"
+              className="flex-1 rounded-lg text-base data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            >
+              Overview
+            </TabsTrigger>
+            <TabsTrigger
+              value="tracking"
+              className="flex-1 rounded-lg text-base data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            >
+              Tracking
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="overview">
+            {/* Conteúdo da aba Overview */}
+            <div className="mt-6 grid grid-cols-2 gap-6">
+              <div className="rounded-xl border bg-white p-6 shadow-sm">
+                <div className="mb-2 font-semibold">Word Cloud</div>
+                <WordCloud words={wordCloudData} />
+              </div>
+              <div className="rounded-xl border bg-white p-6 shadow-sm">
+                <div className="mb-2 font-semibold">Sub-Plan History</div>
+                <SubPlanHistory
+                  subPlans={getHistoryPlans()}
+                  onViewHistory={handleViewHistory}
+                />
+              </div>
             </div>
-            <div className="rounded-xl border bg-white p-6 shadow-sm">
-              <div className="mb-2 font-semibold">Sub-Plan History</div>
-              <SubPlanHistory
-                subPlans={getHistoryPlans()}
-                onViewHistory={handleViewHistory}
-              />
-            </div>
-          </div>
-        </TabsContent>
-        <TabsContent value="tracking">
-          {/* Conteúdo da aba Tracking */}
-          <div className="mt-6 text-gray-400">Tracking content here...</div>
-        </TabsContent>
-      </Tabs>
+          </TabsContent>
+          <TabsContent value="tracking">
+            {/* Conteúdo da aba Tracking */}
+            <div className="mt-6 text-gray-400">Tracking content here...</div>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }

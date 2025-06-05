@@ -69,6 +69,40 @@ interface EditReflectionDialogProps {
   };
 }
 
+const RatingScale = ({
+  value,
+  onChange,
+  label,
+}: {
+  value: number;
+  onChange: (value: number) => void;
+  label: string;
+}) => {
+  return (
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      <div className="flex items-center gap-4">
+        {[0, 1, 2, 3, 4, 5].map((rating) => (
+          <label
+            key={rating}
+            className="flex cursor-pointer items-center gap-2"
+          >
+            <input
+              type="radio"
+              name={label}
+              value={rating}
+              checked={value === rating}
+              onChange={() => onChange(rating)}
+              className="h-4 w-4 border-gray-300 text-emerald-600 focus:ring-emerald-600"
+            />
+            <span className="text-sm font-medium text-gray-700">{rating}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export function EditReflectionDialog({
   isOpen,
   onClose,
@@ -342,160 +376,38 @@ export function EditReflectionDialog({
       case 3:
         return (
           <div className="space-y-6">
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="control">
-                  I have control over how well I learn.
-                </Label>
-                <Input
-                  id="control"
-                  type="number"
-                  min="0"
-                  max="5"
-                  value={formData.control}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      control: parseInt(e.target.value),
-                    }))
-                  }
-                />
-              </div>
+            <div className="space-y-6">
+              <RatingScale
+                label="I have control over how well I learn."
+                value={formData.control}
+                onChange={(value) =>
+                  setFormData((prev) => ({ ...prev, control: value }))
+                }
+              />
 
-              <div>
-                <Label htmlFor="awareness">
-                  I am aware of what strategies I use when I study.
-                </Label>
-                <Input
-                  id="awareness"
-                  type="number"
-                  min="0"
-                  max="5"
-                  value={formData.awareness}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      awareness: parseInt(e.target.value),
-                    }))
-                  }
-                />
-              </div>
+              <RatingScale
+                label="I am aware of what strategies I use when I study."
+                value={formData.awareness}
+                onChange={(value) =>
+                  setFormData((prev) => ({ ...prev, awareness: value }))
+                }
+              />
 
-              <div>
-                <Label htmlFor="strengths">
-                  I use my intellectual strengths to compensate for my
-                  weaknesses.
-                </Label>
-                <Input
-                  id="strengths"
-                  type="number"
-                  min="0"
-                  max="5"
-                  value={formData.strengths}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      strengths: parseInt(e.target.value),
-                    }))
-                  }
-                />
-              </div>
+              <RatingScale
+                label="I use my intellectual strengths to compensate for my weaknesses."
+                value={formData.strengths}
+                onChange={(value) =>
+                  setFormData((prev) => ({ ...prev, strengths: value }))
+                }
+              />
 
-              <div>
-                <Label htmlFor="planning">
-                  I think about what I really need to learn before I begin a
-                  task.
-                </Label>
-                <Input
-                  id="planning"
-                  type="number"
-                  min="0"
-                  max="5"
-                  value={formData.planning}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      planning: parseInt(e.target.value),
-                    }))
-                  }
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="alternatives">
-                  I think about alternatives when I get stuck.
-                </Label>
-                <Input
-                  id="alternatives"
-                  type="number"
-                  min="0"
-                  max="5"
-                  value={formData.alternatives}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      alternatives: parseInt(e.target.value),
-                    }))
-                  }
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="summary">
-                  I summarize what I've learned after I study.
-                </Label>
-                <Input
-                  id="summary"
-                  type="number"
-                  min="0"
-                  max="5"
-                  value={formData.summary}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      summary: parseInt(e.target.value),
-                    }))
-                  }
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="diagrams">
-                  I use diagrams and tables to organize information.
-                </Label>
-                <Input
-                  id="diagrams"
-                  type="number"
-                  min="0"
-                  max="5"
-                  value={formData.diagrams}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      diagrams: parseInt(e.target.value),
-                    }))
-                  }
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="adaptation">
-                  I adapt my learning strategies to different subjects.
-                </Label>
-                <Input
-                  id="adaptation"
-                  type="number"
-                  min="0"
-                  max="5"
-                  value={formData.adaptation}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      adaptation: parseInt(e.target.value),
-                    }))
-                  }
-                />
-              </div>
+              <RatingScale
+                label="I think about what I really need to learn before I begin a task."
+                value={formData.planning}
+                onChange={(value) =>
+                  setFormData((prev) => ({ ...prev, planning: value }))
+                }
+              />
 
               <div>
                 <Label htmlFor="comment">Comment (optional)</Label>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WordCloud } from "./WordCloud";
@@ -60,6 +60,7 @@ export function StudyDashboard() {
   const [selectedPlan, setSelectedPlan] = useState<SubPlan | null>(null);
   const [selectedTab, setSelectedTab] = useState<string>("overview");
   const [isLoading, setIsLoading] = useState(false);
+  const [reflectionEvents, setReflectionEvents] = useState<any[]>([]);
 
   const { data: sessionData, status: sessionStatus } = useSession();
 
@@ -113,6 +114,67 @@ export function StudyDashboard() {
       },
     }
   );
+
+  // Hook para buscar reflexões do subplano selecionado
+  const { data: reflections, refetch: refetchReflections } =
+    api.reflectionRouter.getBySubPlan.useQuery(
+      selectedPlan ? { subPlanId: selectedPlan.id } : { subPlanId: "" },
+      { enabled: !!selectedPlan }
+    );
+
+  // Buscar todas as reflexões do usuário para a word cloud
+  const { data: allReflections } = api.reflectionRouter.getAll.useQuery();
+
+  // Extrair palavras dos comentários das reflexões
+  const wordCounts: Record<string, number> = {};
+  if (allReflections) {
+    allReflections.forEach((r: any) => {
+      if (r.comment) {
+        r.comment
+          .toLowerCase()
+          .replace(/[^a-zA-Z0-9\s]/g, "")
+          .split(/\s+/)
+          .filter((w: string) => w.length > 2) // ignora palavras muito curtas
+          .forEach((word: string) => {
+            wordCounts[word] = (wordCounts[word] || 0) + 1;
+          });
+      }
+    });
+  }
+  const wordCloudData = Object.entries(wordCounts).map(([text, value]) => ({
+    text,
+    value,
+  }));
+
+  useEffect(() => {
+    if (reflections && selectedPlan) {
+      // Mapear reflexões para eventos do modal
+      const events = reflections.map((r: any) => ({
+        type: r.type === "complete_reflection" ? "completed" : "edit",
+        title:
+          r.type === "complete_reflection"
+            ? "Completed Plan Reflection"
+            : "Edit Reflection",
+        date: new Date(r.createdAt).toLocaleString(),
+        badge: r.type === "complete_reflection" ? "Completed" : "Edit",
+        scales: {
+          control: r.control,
+          awareness: r.awareness,
+          strengths: r.strengths,
+          planning: r.planning,
+          alternatives: r.alternatives,
+          summary: r.summary,
+          diagrams: r.diagrams,
+          adaptation: r.adaptation,
+        },
+        comment: r.comment,
+        relativeTime: new Date(r.createdAt).toLocaleDateString(),
+      }));
+      setReflectionEvents(events);
+    } else {
+      setReflectionEvents([]);
+    }
+  }, [reflections, selectedPlan]);
 
   const summaryData: SummaryCardProps = {
     generalPlan: {
@@ -199,6 +261,7 @@ export function StudyDashboard() {
 
     setSelectedPlan(selectedSubPlan);
     setHistoryModalOpen(true);
+    refetchReflections();
   }
 
   return (
@@ -220,8 +283,8 @@ export function StudyDashboard() {
           onClose={() => setHistoryModalOpen(false)}
           onViewDetails={() => alert("View Plan Details clicked!")}
           title={`${selectedPlan.name} - Modification History`}
-          subtitle="Detailed log of all changes made to this sub-plan"
-          events={[]}
+          subtitle="Detailed log of all reflections for this sub-plan"
+          events={reflectionEvents}
         />
       )}
 
@@ -307,7 +370,7 @@ export function StudyDashboard() {
           <div className="mt-6 grid grid-cols-2 gap-6">
             <div className="rounded-xl border bg-white p-6 shadow-sm">
               <div className="mb-2 font-semibold">Word Cloud</div>
-              <WordCloud />
+              <WordCloud words={wordCloudData} />
             </div>
             <div className="rounded-xl border bg-white p-6 shadow-sm">
               <div className="mb-2 font-semibold">Sub-Plan History</div>

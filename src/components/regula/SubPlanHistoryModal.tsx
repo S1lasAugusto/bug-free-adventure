@@ -3,7 +3,7 @@ import { Dialog } from "@headlessui/react";
 import { Button } from "@/components/ui/button";
 
 export interface SubPlanHistoryEvent {
-  type: "progress" | "strategy" | "created";
+  type: "progress" | "strategy" | "created" | "completed" | "edit";
   title: string;
   date: string;
   from?: string;
@@ -14,6 +14,9 @@ export interface SubPlanHistoryEvent {
     effectiveness?: "high" | "medium" | "low";
   };
   relativeTime?: string;
+  badge?: string;
+  scales?: Record<string, string>;
+  comment?: string;
 }
 
 interface SubPlanHistoryModalProps {
@@ -69,75 +72,66 @@ export function SubPlanHistoryModal({
                   <div className="mb-2 flex items-center gap-2">
                     <span
                       className={`inline-block rounded-full p-1 ${
-                        event.type === "progress"
-                          ? "bg-yellow-100"
-                          : event.type === "strategy"
-                          ? "bg-pink-100"
-                          : "bg-green-100"
+                        event.type === "completed"
+                          ? "bg-green-100"
+                          : "bg-blue-100"
                       }`}
                     >
-                      {event.type === "progress" && (
-                        <span className="text-yellow-500">→</span>
-                      )}
-                      {event.type === "strategy" && (
-                        <span className="text-pink-500">💡</span>
-                      )}
-                      {event.type === "created" && (
+                      {event.type === "completed" ? (
                         <span className="text-green-600">★</span>
+                      ) : (
+                        <span className="text-blue-600">✎</span>
                       )}
                     </span>
                     <span className="text-lg font-bold text-zinc-800">
                       {event.title}
                     </span>
+                    {/* Badge do tipo */}
+                    <span
+                      className={`ml-2 rounded px-2 py-0.5 text-xs font-semibold ${
+                        event.type === "completed"
+                          ? "bg-green-200 text-green-800"
+                          : "bg-blue-200 text-blue-800"
+                      }`}
+                    >
+                      {event.badge}
+                    </span>
                     <span className="ml-auto text-xs font-medium text-blue-700">
                       {event.date}
                     </span>
                   </div>
-                  {event.from && (
+                  {/* Escalas */}
+                  {event.scales && (
+                    <div className="mb-2 grid grid-cols-2 gap-2 text-sm text-zinc-700">
+                      {Object.entries(event.scales)
+                        .filter(([key]) =>
+                          event.type === "edit"
+                            ? [
+                                "control",
+                                "awareness",
+                                "strengths",
+                                "planning",
+                              ].includes(key)
+                            : true
+                        )
+                        .map(([key, value]) => (
+                          <div key={key} className="flex items-center gap-2">
+                            <span className="font-semibold capitalize">
+                              {key}:
+                            </span>
+                            <span>{value}</span>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                  {/* Comentário */}
+                  {event.comment && (
                     <div className="mb-1 text-sm text-zinc-700">
-                      <span className="font-semibold">From:</span> {event.from}
+                      <span className="font-semibold">Comment:</span>{" "}
+                      {event.comment}
                     </div>
                   )}
-                  {event.to && (
-                    <div className="mb-1 text-sm text-zinc-700">
-                      <span className="font-semibold">To:</span> {event.to}
-                    </div>
-                  )}
-                  {event.reflection && (
-                    <div className="mt-3 rounded bg-white/80 p-3 text-sm">
-                      <div className="mb-1 font-semibold text-zinc-700">
-                        Reflection
-                      </div>
-                      {event.reflection.impact && (
-                        <div className="text-zinc-700">
-                          <span className="font-semibold">Impact:</span>{" "}
-                          {event.reflection.impact}
-                        </div>
-                      )}
-                      {event.reflection.reason && (
-                        <div className="text-zinc-700">
-                          <span className="font-semibold">Reason:</span>{" "}
-                          {event.reflection.reason}
-                        </div>
-                      )}
-                      {event.reflection.effectiveness && (
-                        <div className="text-zinc-700">
-                          <span className="font-semibold">Effectiveness:</span>{" "}
-                          <span
-                            className={`inline-block rounded px-2 py-0.5 text-xs font-bold text-white ${
-                              event.reflection.effectiveness === "high"
-                                ? "bg-blue-600"
-                                : event.reflection.effectiveness === "medium"
-                                ? "bg-yellow-500"
-                                : "bg-zinc-400"
-                            }`}
-                          >
-                            {event.reflection.effectiveness}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  {/* Data relativa */}
                   {event.relativeTime && (
                     <div className="mt-2 text-xs text-zinc-400">
                       {event.relativeTime}

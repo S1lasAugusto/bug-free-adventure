@@ -5,18 +5,6 @@ import cloud = require("d3-cloud");
 import * as d3 from "d3";
 import { Cloud } from "lucide-react";
 
-const words = [
-  { text: "Java", value: 50 },
-  { text: "OOP", value: 30 },
-  { text: "Inheritance", value: 20 },
-  { text: "Collections", value: 25 },
-  { text: "Polymorphism", value: 15 },
-  { text: "Abstraction", value: 10 },
-  { text: "Encapsulation", value: 10 },
-  { text: "Interfaces", value: 12 },
-  { text: "Exceptions", value: 8 },
-];
-
 const width = 500;
 const height = 300;
 
@@ -29,14 +17,16 @@ type WordDatum = {
   rotate: number;
 };
 
-export function WordCloud() {
+export function WordCloud({
+  words = [],
+}: {
+  words?: { text: string; value: number }[];
+}) {
   const svgRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
-    // Limpa o SVG
     d3.select(svgRef.current).selectAll("*").remove();
-
-    // Cria o layout da nuvem
+    if (!words || words.length === 0) return;
     cloud()
       .size([width, height])
       .words(words.map((d) => ({ ...d, size: 10 + d.value })))
@@ -53,7 +43,6 @@ export function WordCloud() {
           .attr("preserveAspectRatio", "xMidYMid meet")
           .append("g")
           .attr("transform", `translate(${width / 2},${height / 2})`);
-
         svg
           .selectAll("text")
           .data(cloudWords)
@@ -73,15 +62,23 @@ export function WordCloud() {
           .text((d: WordDatum) => d.text);
       })
       .start();
-  }, []);
+  }, [words]);
+
+  if (!words || words.length === 0) {
+    return (
+      <div className="flex h-[200px] flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 p-6 text-center">
+        <Cloud className="mb-2 h-8 w-8 text-gray-400" />
+        <h3 className="mb-1 text-sm font-medium text-gray-900">No data yet</h3>
+        <p className="text-sm text-gray-500">
+          Create reflections to generate your word cloud
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex h-[200px] flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 p-6 text-center">
-      <Cloud className="mb-2 h-8 w-8 text-gray-400" />
-      <h3 className="mb-1 text-sm font-medium text-gray-900">No data yet</h3>
-      <p className="text-sm text-gray-500">
-        Create sub-plans to generate your word cloud
-      </p>
+    <div className="flex h-[200px] w-full items-center justify-center">
+      <svg ref={svgRef} style={{ display: "block", margin: "0 auto" }} />
     </div>
   );
 }

@@ -72,4 +72,17 @@ export const reflectionRouter = createTRPCRouter({
         data,
       });
     }),
+
+  getAll: protectedProcedure.query(async ({ ctx }) => {
+    return ctx.prisma.reflection.findMany({
+      where: {
+        subPlan: {
+          userId: ctx.session.user.id,
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }),
 });

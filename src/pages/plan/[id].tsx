@@ -31,11 +31,71 @@ export default function PlanDetailPage() {
   );
 
   const formatStrategyName = (strategy: string) => {
-    return strategy
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
+    return strategy.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
   };
+
+  // Importar as estratégias padrão para usar as descrições
+  const defaultStrategies = [
+    {
+      id: "pomodoro",
+      name: "Pomodoro Technique",
+      description: "Work for 25 minutes, then take a 5-minute break",
+    },
+    {
+      id: "spaced_repetition",
+      name: "Spaced Repetition",
+      description: "Review material at increasing intervals",
+    },
+    {
+      id: "active_recall",
+      name: "Active Recall",
+      description: "Test yourself on the material",
+    },
+    {
+      id: "mind_mapping",
+      name: "Mind Mapping",
+      description: "Visualize concepts and connections",
+    },
+    {
+      id: "feynman",
+      name: "Feynman Technique",
+      description: "Explain concepts in simple terms",
+    },
+    {
+      id: "cornell",
+      name: "Cornell Note-Taking",
+      description: "Structured note-taking method",
+    },
+    {
+      id: "group_study",
+      name: "Group Study",
+      description: "Study with peers for discussion",
+    },
+    {
+      id: "practice_tests",
+      name: "Practice Tests",
+      description: "Take mock exams to practice",
+    },
+    // Estratégias extras
+    {
+      id: "practice_by_teaching",
+      name: "Practice by Teaching",
+      description:
+        "Reinforce your understanding by teaching the material to someone else.",
+    },
+    {
+      id: "self_explanation",
+      name: "Self Explanation",
+      description:
+        "Explain concepts to yourself in your own words to deepen understanding.",
+    },
+    {
+      id: "concrete_examples",
+      name: "Concrete Examples",
+      description:
+        "Use specific examples to make abstract concepts more tangible.",
+    },
+  ];
 
   if (isLoading) {
     return (
@@ -279,21 +339,35 @@ export default function PlanDetailPage() {
               </CardHeader>
               <CardContent className="p-6">
                 <div className="space-y-3">
-                  {subPlan.selectedStrategies.map((strategy, i) => (
-                    <div
-                      key={i}
-                      className="flex items-start gap-3 rounded-xl border border-gray-100 bg-gray-50/50 p-4 transition-all duration-300 hover:bg-gray-50 hover:shadow-sm"
-                    >
-                      <div className="rounded-xl bg-amber-100 p-2 shadow-sm">
-                        <CheckCircle2 className="h-4 w-4 text-amber-600" />
+                  {subPlan.selectedStrategies.map((strategy, i) => {
+                    const found = defaultStrategies.find(
+                      (s) => s.id === strategy || s.name === strategy
+                    );
+                    return (
+                      <div
+                        key={i}
+                        className="flex flex-col gap-1 rounded-xl border border-gray-100 bg-gray-50/50 p-4 transition-all duration-300 hover:bg-gray-50 hover:shadow-sm"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="rounded-xl bg-amber-100 p-2 shadow-sm">
+                            <CheckCircle2 className="h-4 w-4 text-amber-600" />
+                          </div>
+                          <span className="font-medium text-gray-900">
+                            {found ? found.name : formatStrategyName(strategy)}
+                          </span>
+                        </div>
+                        {found ? (
+                          <div className="ml-10 text-sm text-gray-600">
+                            {found.description}
+                          </div>
+                        ) : (
+                          <div className="ml-10 text-sm italic text-gray-400">
+                            No description available yet.
+                          </div>
+                        )}
                       </div>
-                      <div>
-                        <span className="font-medium text-gray-900">
-                          {formatStrategyName(strategy)}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>

@@ -94,6 +94,43 @@ CREATE TABLE "ToDo" (
 );
 
 -- CreateTable
+CREATE TABLE "SubPlan" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "topic" TEXT NOT NULL,
+    "mastery" INTEGER NOT NULL DEFAULT 0,
+    "status" TEXT NOT NULL DEFAULT 'Active',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "selectedDays" TEXT[],
+    "selectedStrategies" TEXT[],
+    "customStrategies" JSONB,
+    "hoursPerDay" INTEGER NOT NULL DEFAULT 2,
+    "userId" TEXT NOT NULL,
+
+    CONSTRAINT "SubPlan_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Reflection" (
+    "id" TEXT NOT NULL,
+    "subPlanId" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "control" INTEGER NOT NULL,
+    "awareness" INTEGER NOT NULL,
+    "strengths" INTEGER NOT NULL,
+    "planning" INTEGER NOT NULL,
+    "alternatives" INTEGER,
+    "summary" INTEGER,
+    "diagrams" INTEGER,
+    "adaptation" INTEGER,
+    "comment" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Reflection_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "VerificationToken" (
     "identifier" TEXT NOT NULL,
     "token" TEXT NOT NULL,
@@ -146,6 +183,9 @@ CREATE UNIQUE INDEX "User_protusId_key" ON "User"("protusId");
 CREATE UNIQUE INDEX "ExerciseHistory_userId_activityResourceId_key" ON "ExerciseHistory"("userId", "activityResourceId");
 
 -- CreateIndex
+CREATE INDEX "SubPlan_userId_idx" ON "SubPlan"("userId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "VerificationToken_token_key" ON "VerificationToken"("token");
 
 -- CreateIndex
@@ -168,6 +208,12 @@ ALTER TABLE "ExerciseHistory" ADD CONSTRAINT "ExerciseHistory_activityResourceId
 
 -- AddForeignKey
 ALTER TABLE "ToDo" ADD CONSTRAINT "ToDo_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "SubPlan" ADD CONSTRAINT "SubPlan_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Reflection" ADD CONSTRAINT "Reflection_subPlanId_fkey" FOREIGN KEY ("subPlanId") REFERENCES "SubPlan"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ActivityResource" ADD CONSTRAINT "ActivityResource_moduleId_fkey" FOREIGN KEY ("moduleId") REFERENCES "Module"("id") ON DELETE CASCADE ON UPDATE CASCADE;

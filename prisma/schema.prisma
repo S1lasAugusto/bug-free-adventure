@@ -113,7 +113,27 @@ model SubPlan {
   userId     String
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
+  reflections Reflection[]
+  
   @@index([userId])
+}
+
+model Reflection {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  type        String
+  control     Int?
+  awareness   Int?
+  strengths   Int?
+  planning    Int?
+  alternatives Int?
+  summary     Int?
+  diagrams    Int?
+  adaptation  Int?
+  comment     String?
+  subPlan     SubPlan  @relation(fields: [subPlanId], references: [id])
+  subPlanId   String
 }
 
 model VerificationToken {

@@ -72,6 +72,16 @@ export const api = createTRPCNext<AppRouter>({
         }),
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc`,
+          headers() {
+            // Adicionar token de autenticação nos headers se existir
+            const token =
+              typeof window !== "undefined"
+                ? localStorage.getItem("auth-token")
+                : null;
+            return {
+              Authorization: token ? `Bearer ${token}` : "",
+            };
+          },
           // Adicionar logs para depurar problemas de rede
           fetch: async (url, options) => {
             console.log(`[TRPC-CLIENT] Fetch iniciando para ${url}`);

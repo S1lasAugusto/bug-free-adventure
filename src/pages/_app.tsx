@@ -1,6 +1,4 @@
 // src/pages/_app.tsx
-import type { Session } from "next-auth";
-import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "next-themes";
 import type { AppType } from "next/app";
 import Head from "next/head";
@@ -10,15 +8,15 @@ import { Analytics } from "@vercel/analytics/react";
 import { api } from "../utils/api";
 import { useRouter } from "next/router";
 import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "../contexts/AuthContext";
 
-const MyApp: AppType<{ session: Session | null }> = ({
-  Component,
-  pageProps: { session, ...pageProps },
-}) => {
+const MyApp: AppType = ({ Component, pageProps }) => {
   const router = useRouter();
   const isRegula =
     router.pathname.startsWith("/regula") ||
     router.pathname.startsWith("/plan/");
+
+  const isAuthPage = router.pathname.startsWith("/auth/");
 
   return (
     <ThemeProvider attribute="class" enableSystem={false}>
@@ -28,9 +26,11 @@ const MyApp: AppType<{ session: Session | null }> = ({
           content="9hH0whHzR4kwqqYNqU9Gw201EcjJG1Ryu9GYdJlbEjI"
         />
       </Head>
-      <SessionProvider session={session}>
+      <AuthProvider>
         <div className="fixed w-full">
-          {isRegula ? (
+          {isAuthPage ? (
+            <Component {...pageProps} />
+          ) : isRegula ? (
             <Component {...pageProps} />
           ) : (
             <Sidebar>
@@ -39,7 +39,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
           )}
         </div>
         <Toaster position="top-right" />
-      </SessionProvider>
+      </AuthProvider>
       <Analytics />
     </ThemeProvider>
   );

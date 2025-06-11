@@ -3,7 +3,7 @@ import {
   DocumentTextIcon,
   FlagIcon,
 } from "@heroicons/react/24/solid";
-import { useSession } from "next-auth/react";
+import { useAuth } from "../contexts/AuthContext";
 import { useState } from "react";
 import { useUpdateExerciseHistory } from "../hooks/useUpdateExerciseHistory";
 
@@ -14,7 +14,7 @@ const TimelineWrapper = (props: {
   recommendedActivities: Activity[];
   learnerAnalytics: any;
 }) => {
-  const { data: session, status } = useSession();
+  const { user, isLoading } = useAuth();
 
   const { recommendedActivities } = props;
 
@@ -31,8 +31,8 @@ const TimelineWrapper = (props: {
     return <div>No recommendations have been generated yet</div>;
   }
 
-  if (status === "unauthenticated" || !session?.user) {
-    return <div>Unauthorized</div>;
+  if (isLoading || !user) {
+    return <div>Loading...</div>;
   }
 
   return (
@@ -44,7 +44,7 @@ const TimelineWrapper = (props: {
             href={
               activity.url +
               "&usr=" +
-              session.user?.protusId +
+              user?.protusId +
               "&grp=NorwayFall2022B&sid=TEST&cid=352"
             }
             onClick={() => {

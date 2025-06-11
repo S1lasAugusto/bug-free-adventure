@@ -40,12 +40,12 @@ export const subplanRouter = createTRPCRouter({
   // Obter todos os subplans do usuário atual
   getAll: protectedProcedure.query(async ({ ctx }) => {
     console.log("[SERVER] getAll - Sessão:", ctx.session);
-    console.log("[SERVER] getAll - ID do usuário:", ctx.session.user.id);
+    console.log("[SERVER] getAll - ID do usuário:", ctx.user.id);
 
     try {
       const subplans = await ctx.prisma.subPlan.findMany({
         where: {
-          userId: ctx.session.user.id,
+          userId: ctx.user.id,
         },
         orderBy: {
           createdAt: "desc",
@@ -82,7 +82,7 @@ export const subplanRouter = createTRPCRouter({
         }
 
         // Verificar se o subplan pertence ao usuário atual
-        if (subplan.userId !== ctx.session.user.id) {
+        if (subplan.userId !== ctx.user.id) {
           console.error("[SERVER] getById - Acesso não autorizado");
           throw new TRPCError({
             code: "FORBIDDEN",
@@ -104,7 +104,7 @@ export const subplanRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       console.log("[SERVER] create - Iniciando criação de subplan");
       console.log("[SERVER] create - Dados recebidos:", input);
-      console.log("[SERVER] create - ID do usuário:", ctx.session.user.id);
+      console.log("[SERVER] create - ID do usuário:", ctx.user.id);
 
       try {
         // Verificar conexão com o banco
@@ -126,7 +126,7 @@ export const subplanRouter = createTRPCRouter({
         const subplan = await ctx.prisma.subPlan.create({
           data: {
             ...processedInput,
-            userId: ctx.session.user.id,
+            userId: ctx.user.id,
           },
         });
 
@@ -159,7 +159,7 @@ export const subplanRouter = createTRPCRouter({
         });
       }
 
-      if (existingSubplan.userId !== ctx.session.user.id) {
+      if (existingSubplan.userId !== ctx.user.id) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Acesso não autorizado a este SubPlan",
@@ -184,35 +184,19 @@ export const subplanRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      // Verificar se o subplan existe e pertence ao usuário
-      const existingSubplan = await ctx.prisma.subPlan.findUnique({
+      // Primeiro deleta todas as reflections associadas
+      await ctx.prisma.reflection.deleteMany({
+        where: {
+          subPlanId: input.id,
+        },
+      });
+
+      // Depois deleta o subplan
+      return ctx.prisma.subPlan.delete({
         where: {
           id: input.id,
         },
       });
-
-      if (!existingSubplan) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "SubPlan não encontrado",
-        });
-      }
-
-      if (existingSubplan.userId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Acesso não autorizado a este SubPlan",
-        });
-      }
-
-      // Excluir o subplan
-      await ctx.prisma.subPlan.delete({
-        where: {
-          id: input.id,
-        },
-      });
-
-      return { success: true };
     }),
 
   // Atualizar o status de um subplan (marcar como "Completed")
@@ -238,7 +222,7 @@ export const subplanRouter = createTRPCRouter({
         });
       }
 
-      if (existingSubplan.userId !== ctx.session.user.id) {
+      if (existingSubplan.userId !== ctx.user.id) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Acesso não autorizado a este SubPlan",
@@ -281,7 +265,7 @@ export const subplanRouter = createTRPCRouter({
         });
       }
 
-      if (existingSubplan.userId !== ctx.session.user.id) {
+      if (existingSubplan.userId !== ctx.user.id) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Acesso não autorizado a este SubPlan",

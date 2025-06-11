@@ -77,7 +77,7 @@ export const reflectionRouter = createTRPCRouter({
     return ctx.prisma.reflection.findMany({
       where: {
         subPlan: {
-          userId: ctx.session.user.id,
+          userId: ctx.user.id,
         },
       },
       orderBy: {

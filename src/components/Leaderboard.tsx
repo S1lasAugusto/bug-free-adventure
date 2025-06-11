@@ -1,4 +1,4 @@
-import { useSession } from "next-auth/react";
+import { useAuth } from "../contexts/AuthContext";
 import { api } from "../utils/api";
 
 const Leaderboard = () => {
@@ -6,7 +6,7 @@ const Leaderboard = () => {
     return classes.filter(Boolean).join(" ");
   }
 
-  const { data: session, status } = useSession();
+  const { user, isLoading: authLoading } = useAuth();
 
   const {
     data: leaderboard,
@@ -26,13 +26,13 @@ const Leaderboard = () => {
     );
   }
 
-  if (status === "loading") {
+  if (authLoading) {
     return <div>Loading...</div>;
   }
 
   const leaderboardTop10 = leaderboard.slice(0, 10);
   const leaderboardPosition =
-    leaderboard.findIndex((x) => x.userId === session?.user.id) + 1;
+    leaderboard.findIndex((x) => x.userId === user?.id) + 1;
   const userScore = leaderboard[leaderboardPosition - 1]?.score;
 
   return (
@@ -46,8 +46,8 @@ const Leaderboard = () => {
             <th className="w-1/5 rounded-tl-lg border-r border-[#988efe] px-6 ">
               Ranking
             </th>
-            <th className="w-3/5 py-2 px-6">Name</th>
-            <th className="w-1/5 border-l border-[#988efe] py-2 px-6 ">
+            <th className="w-3/5 px-6 py-2">Name</th>
+            <th className="w-1/5 border-l border-[#988efe] px-6 py-2 ">
               Score
             </th>
           </tr>
@@ -58,13 +58,13 @@ const Leaderboard = () => {
               <tr
                 key={index}
                 className={classNames(
-                  person.userId == session?.user.id
+                  person.userId == user?.id
                     ? `bg-[#BFF7E0] dark:bg-[#BFF7E0] dark:text-gray-700`
                     : `bg-[#fff] dark:bg-[#212124]`,
                   `text-color border-t  font-semibold dark:border-zinc-700 `
                 )}
               >
-                <td className="grid place-items-center py-2 px-6 text-center">
+                <td className="grid place-items-center px-6 py-2 text-center">
                   <div
                     className={classNames(
                       index == 0
@@ -80,20 +80,20 @@ const Leaderboard = () => {
                     {index + 1}
                   </div>
                 </td>
-                <td className="py-2 px-6">{person.name}</td>
-                <td className=" py-2 px-6 text-center">{person.score}</td>
+                <td className="px-6 py-2">{person.name}</td>
+                <td className=" px-6 py-2 text-center">{person.score}</td>
               </tr>
             );
           })}
-          {leaderboardTop10.some((e) => e.userId === session?.user.id) ? (
+          {leaderboardTop10.some((e) => e.userId === user.id) ? (
             <></>
           ) : (
             <tr className="text-color border-t-2 border-[#EFADBF]  bg-[#F7D6DF] font-semibold dark:text-gray-700  ">
-              <td className="grid place-items-center border-r border-[#F7D6DF] py-2 px-6 text-center">
+              <td className="grid place-items-center border-r border-[#F7D6DF] px-6 py-2 text-center">
                 {leaderboardPosition}
               </td>
-              <td className=" py-2 px-6">{session?.user.name}</td>
-              <td className=" border-l border-[#F7D6DF] py-2 px-6 text-center">
+              <td className=" px-6 py-2">{user.name}</td>
+              <td className=" border-l border-[#F7D6DF] px-6 py-2 text-center">
                 {userScore}
               </td>
             </tr>

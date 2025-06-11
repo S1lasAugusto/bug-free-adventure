@@ -1,4 +1,4 @@
-import { useSession } from "next-auth/react";
+import { useAuth } from "../../contexts/AuthContext";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import ActivityCard from "../../components/ActivityCard";
@@ -18,7 +18,7 @@ const ModuleStatistics = () => {
     isLoading,
   } = api.learnerActivityRouter.getLearnerActivity.useQuery();
 
-  const { data: session, status } = useSession();
+  const { user, isLoading: authLoading } = useAuth();
   const [selectedActivity, setSelectedActivity] = useState<string | undefined>(
     undefined
   );
@@ -36,7 +36,7 @@ const ModuleStatistics = () => {
   const { module } = router.query;
   const { type } = router.query;
 
-  if (isLoading || !isSuccess || status === "loading") {
+  if (isLoading || !isSuccess || authLoading) {
     return (
       <div className="mx-12 mt-36 flex grid animate-pulse grid-cols-4 gap-8">
         <div className="loading h-72 rounded"></div>
@@ -51,7 +51,7 @@ const ModuleStatistics = () => {
     );
   }
 
-  if (status === "unauthenticated" || !session?.user) {
+  if (status === "unauthenticated" || !user) {
     return <div>Unauthorized</div>;
   }
 
@@ -109,12 +109,12 @@ const ModuleStatistics = () => {
     return (
       <div>
         <Breadcrumbs currentPage={module ? module[1] : "404"} />
-        <div className="course-card my-6 mx-12 rounded-lg p-6">
+        <div className="course-card mx-12 my-6 rounded-lg p-6">
           {description}
         </div>
         <div className="m-4 h-screen ">
           <div className="flex flex-row gap-16">
-            <div className="w-1/2 space-y-8 pt-2 pl-14">
+            <div className="w-1/2 space-y-8 pl-14 pt-2">
               <div className="text-color mb-4 text-lg font-semibold uppercase opacity-75">
                 Recommended next steps
               </div>
@@ -189,7 +189,7 @@ const ModuleStatistics = () => {
                       href={
                         activity.url +
                         "&usr=" +
-                        session.user?.protusId +
+                        user?.protusId +
                         "&grp=NorwayFall2022B&sid=TEST&cid=352"
                       }
                       onClick={() => {

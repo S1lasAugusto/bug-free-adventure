@@ -9,7 +9,7 @@ import {
   Title,
   Tooltip,
 } from "chart.js";
-import { useSession } from "next-auth/react";
+import { useAuth } from "../../contexts/AuthContext";
 import React from "react";
 import { Line } from "react-chartjs-2";
 

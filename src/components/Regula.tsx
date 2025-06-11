@@ -3,9 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { useRouter } from "next/router";
 import { Brain, BookOpen, Target, Clock } from "lucide-react";
 
-interface RegulaProps {
-  // Props serão adicionadas conforme necessário
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface RegulaProps {}
 
 export function Regula() {
   const router = useRouter();

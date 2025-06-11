@@ -5,7 +5,7 @@ import { SubPlanWizard } from "./SubPlanWizard";
 import Link from "next/link";
 import { api } from "@/utils/api";
 import { toast } from "react-hot-toast";
-import { useSession } from "next-auth/react";
+import { useAuth } from "../../contexts/AuthContext";
 
 interface SubPlan {
   id: string;
@@ -26,7 +26,12 @@ export function MyPlanDashboard() {
   const [isLoading, setIsLoading] = useState(false);
 
   // Verificar o estado da sessão
-  const { data: sessionData, status: sessionStatus } = useSession();
+  const { user: sessionData, isLoading: authLoading } = useAuth();
+  const sessionStatus = authLoading
+    ? "loading"
+    : sessionData
+    ? "authenticated"
+    : "unauthenticated";
   console.log("[CLIENT] Estado da sessão:", sessionStatus);
   console.log("[CLIENT] Dados da sessão:", sessionData);
 
@@ -86,10 +91,10 @@ export function MyPlanDashboard() {
         const response = await fetch("/api/auth/session");
         const session = await response.json();
         console.log("[CLIENT] API Session check:", session);
-        if (!session || !session.user) {
+        if (!session || !sessionData) {
           console.warn("[CLIENT] Usuário não autenticado na API de sessão");
         } else {
-          console.log("[CLIENT] ID do usuário na sessão:", session.user.id);
+          console.log("[CLIENT] ID do usuário na sessão:", sessionData.id);
         }
       } catch (err) {
         console.error("[CLIENT] Erro ao verificar sessão:", err);
@@ -122,7 +127,7 @@ export function MyPlanDashboard() {
     console.log("=============================================");
 
     // Verificação básica de login
-    if (!sessionData?.user) {
+    if (!sessionData) {
       console.error("[CLIENT] handleCreateSubPlan - Sem usuário na sessão");
       toast.error("Você precisa estar logado para criar um subplan");
       return;

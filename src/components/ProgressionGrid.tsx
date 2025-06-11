@@ -1,4 +1,4 @@
-import { useSession } from "next-auth/react";
+import { useAuth } from "../contexts/AuthContext";
 import { useState } from "react";
 import { useUpdateExerciseHistory } from "../hooks/useUpdateExerciseHistory";
 import { Activity } from "../server/schema/LearnerActivitySchema";
@@ -8,7 +8,7 @@ interface ProgressionGridInterface {
   currentPage?: string;
 }
 const ProgressionGrid = (props: ProgressionGridInterface) => {
-  const { data: session, status } = useSession();
+  const { user, isLoading: authLoading } = useAuth();
   const [isShowing, setIsShowing] = useState<Activity | null>();
 
   const handleHover = (child: Activity) => {
@@ -31,7 +31,7 @@ const ProgressionGrid = (props: ProgressionGridInterface) => {
 
   if (isLoading || !isSuccess) return <div>Loading..</div>;
 
-  if (status === "unauthenticated" || !session?.user) {
+  if (status === "unauthenticated" || !user) {
     return <div>Unauthorized</div>;
   }
 
@@ -63,7 +63,7 @@ const ProgressionGrid = (props: ProgressionGridInterface) => {
                 href={
                   item.url +
                   "&usr=" +
-                  session.user?.protusId +
+                  user?.protusId +
                   "&grp=NorwayFall2022B&sid=TEST&cid=352"
                 }
                 onClick={() => {
@@ -113,7 +113,7 @@ const ProgressionGrid = (props: ProgressionGridInterface) => {
                 href={
                   item.url +
                   "&usr=" +
-                  session.user?.protusId +
+                  user?.protusId +
                   "&grp=NorwayFall2022B&sid=TEST&cid=352"
                 }
                 onClick={() => {
@@ -163,7 +163,7 @@ const ProgressionGrid = (props: ProgressionGridInterface) => {
                 href={
                   item.url +
                   "&usr=" +
-                  session.user?.protusId +
+                  user?.protusId +
                   "&grp=NorwayFall2022B&sid=TEST&cid=352"
                 }
                 onClick={() => {

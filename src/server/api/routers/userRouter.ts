@@ -63,7 +63,7 @@ export const userRouter = createTRPCRouter({
       try {
         const user = await ctx.prisma.user.update({
           where: {
-            id: ctx.session.user.id,
+            id: ctx.user.id,
           },
           include: {
             preferences: true,
@@ -100,12 +100,21 @@ export const userRouter = createTRPCRouter({
 
   getUserPreferences: protectedProcedure.query(async ({ ctx }) => {
     const preferences = await ctx.prisma.userPreference.findMany({
-      where: { userId: ctx.session.user.id },
+      where: { userId: ctx.user.id },
       include: { user: true },
       orderBy: { createdAt: "desc" },
       take: 1,
     });
-    return preferences[0]!;
+
+    if (preferences.length === 0) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message:
+          "User preferences not found. Please complete onboarding first.",
+      });
+    }
+
+    return preferences[0];
   }),
 
   updateUserPreferences: protectedProcedure
@@ -113,23 +122,18 @@ export const userRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       await ctx.prisma.userPreference.create({
         data: {
-          userId: ctx.session.user.id,
+          userId: ctx.user.id,
           selectedComponents: input.newSelectedComponents,
           createdAt: new Date(),
           leaderboard: input.leaderboard,
         },
       });
-      updateUserName(
-        ctx.prisma,
-        ctx.session.user.id,
-        input.name,
-        input.leaderboard
-      );
+      updateUserName(ctx.prisma, ctx.user.id, input.name, input.leaderboard);
     }),
   getLastUnfinishedActivity: protectedProcedure.query(async ({ ctx }) => {
     const unfinishedActivity = await ctx.prisma.exerciseHistory.findMany({
       where: {
-        userId: ctx.session.user.id,
+        userId: ctx.user.id,
         completedAt: null,
       },
       include: {
@@ -152,7 +156,7 @@ export const userRouter = createTRPCRouter({
   getExerciseHistoryOnUser: protectedProcedure.query(async ({ ctx }) => {
     const history = await ctx.prisma.exerciseHistory.findMany({
       where: {
-        userId: ctx.session.user.id,
+        userId: ctx.user.id,
         NOT: {
           completedAt: null,
         },
@@ -170,12 +174,12 @@ export const userRouter = createTRPCRouter({
       return await ctx.prisma.exerciseHistory.upsert({
         where: {
           userExerciseHistoryOnActivityResource: {
-            userId: ctx.session.user.id,
+            userId: ctx.user.id,
             activityResourceId: input.activityId,
           },
         },
         create: {
-          userId: ctx.session.user.id,
+          userId: ctx.user.id,
           activityResourceId: input.activityId,
           visitedAt: new Date(),
         },
@@ -185,9 +189,8 @@ export const userRouter = createTRPCRouter({
   updateExerciseHistory: protectedProcedure
     .input(z.object({ activityId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const activityAnalytics = (
-        await learnerActivity(ctx.prisma, ctx.session.user)
-      ).activityAnalytics;
+      const activityAnalytics = (await learnerActivity(ctx.prisma, ctx.user))
+        .activityAnalytics;
 
       const attempts = [
         ...activityAnalytics.challenges,
@@ -198,7 +201,7 @@ export const userRouter = createTRPCRouter({
       return await ctx.prisma.exerciseHistory.update({
         where: {
           userExerciseHistoryOnActivityResource: {
-            userId: ctx.session.user.id,
+            userId: ctx.user.id,
             activityResourceId: input.activityId,
           },
         },

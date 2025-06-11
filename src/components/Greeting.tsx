@@ -1,12 +1,8 @@
-import { useSession } from "next-auth/react";
+import { useAuth } from "../contexts/AuthContext";
 
 const Greeting = () => {
-  const { data: session } = useSession();
-  return (
-    <div className="text-color rounded text-3xl">
-      Hey, {session?.user?.name}!
-    </div>
-  );
+  const { user } = useAuth();
+  return <div className="text-color rounded text-3xl">Hey, {user?.name}!</div>;
 };
 
 export default Greeting;

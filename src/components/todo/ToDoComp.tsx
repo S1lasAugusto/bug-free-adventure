@@ -7,7 +7,7 @@ import {
 import { ToDo } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { Badge } from "flowbite-react";
-import { useSession } from "next-auth/react";
+import { useAuth } from "../../contexts/AuthContext";
 import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { HiInformationCircle } from "react-icons/hi";
@@ -17,12 +17,12 @@ import { api } from "../../utils/api";
 const ToDoComp = () => {
   const ctx = api.useContext();
 
-  const { data: session, status } = useSession({ required: true });
+  const { user, isLoading: authLoading } = useAuth();
   const { register, handleSubmit, reset } = useForm<ToDoForm>();
   const [openAddToDo, setOpenAddToDo] = useState(false);
   const [showCompleted, setShowCompleted] = useState(true);
 
-  if (status == "loading") {
+  if (authLoading) {
     return (
       <div className="mx-auto w-full rounded-md p-4">
         <div className="flex animate-pulse space-x-4">
@@ -38,25 +38,25 @@ const ToDoComp = () => {
     data: todo,
     isSuccess,
     isLoading,
-  } = api.userRouter.getToDosOnUser.useQuery({ userId: session.user.id });
+  } = api.userRouter.getToDosOnUser.useQuery({ userId: user.id });
 
   const addToDoMutation = api.userRouter.addToDoToUser.useMutation({
     async onMutate(newToDo) {
       // Optimistic update, delete the transaction from the list immediately
       await ctx.userRouter.getToDosOnUser.cancel();
       const prevData = ctx.userRouter.getToDosOnUser.getData({
-        userId: session.user.id,
+        userId: user.id,
       });
-      ctx.userRouter.getToDosOnUser.setData(
-        { userId: session.user.id },
-        (old: any) => [...old, newToDo.toDo]
-      );
+      ctx.userRouter.getToDosOnUser.setData({ userId: user.id }, (old: any) => [
+        ...old,
+        newToDo.toDo,
+      ]);
 
       return { prevData };
     },
     // Invalidate the query after the mutation is complete to sync wit server
     onSettled() {
-      ctx.userRouter.getToDosOnUser.invalidate({ userId: session.user.id });
+      ctx.userRouter.getToDosOnUser.invalidate({ userId: user.id });
     },
   });
 
@@ -65,26 +65,23 @@ const ToDoComp = () => {
       // Optimistic update, delete the transaction from the list immediately
       await ctx.userRouter.getToDosOnUser.cancel();
       const prevData = ctx.userRouter.getToDosOnUser.getData({
-        userId: session.user.id,
+        userId: user.id,
       });
-      ctx.userRouter.getToDosOnUser.setData(
-        { userId: session.user.id },
-        (old: any) => {
-          const newTodos = old.map((todo: ToDo) => {
-            if (todo.todoId === newTodo.todoId) {
-              return { ...todo, completed: true };
-            }
-            return todo;
-          });
-          return newTodos;
-        }
-      );
+      ctx.userRouter.getToDosOnUser.setData({ userId: user.id }, (old: any) => {
+        const newTodos = old.map((todo: ToDo) => {
+          if (todo.todoId === newTodo.todoId) {
+            return { ...todo, completed: true };
+          }
+          return todo;
+        });
+        return newTodos;
+      });
 
       return { prevData };
     },
     // Invalidate the query after the mutation is complete to sync wit server
     onSettled() {
-      ctx.userRouter.getToDosOnUser.invalidate({ userId: session.user.id });
+      ctx.userRouter.getToDosOnUser.invalidate({ userId: user.id });
     },
   });
 
@@ -93,21 +90,18 @@ const ToDoComp = () => {
       // Optimistic update, delete the transaction from the list immediately
       await ctx.userRouter.getToDosOnUser.cancel();
       const prevData = ctx.userRouter.getToDosOnUser.getData({
-        userId: session.user.id,
+        userId: user.id,
       });
-      ctx.userRouter.getToDosOnUser.setData(
-        { userId: session.user.id },
-        (old: any) => {
-          const newTodos = old.filter((todo: ToDo) => {
-            return todo.todoId !== todoId.todoId;
-          });
-          return newTodos;
-        }
-      );
+      ctx.userRouter.getToDosOnUser.setData({ userId: user.id }, (old: any) => {
+        const newTodos = old.filter((todo: ToDo) => {
+          return todo.todoId !== todoId.todoId;
+        });
+        return newTodos;
+      });
       return { prevData };
     },
     onSettled() {
-      ctx.userRouter.getToDosOnUser.invalidate({ userId: session.user.id });
+      ctx.userRouter.getToDosOnUser.invalidate({ userId: user.id });
     },
   });
 
@@ -126,7 +120,7 @@ const ToDoComp = () => {
   const onSubmit: SubmitHandler<ToDoForm> = (data: ToDoForm) => {
     addToDoMutation.mutate(
       {
-        toDo: { ...data, userId: session.user.id },
+        toDo: { ...data, userId: user.id },
       },
       {
         onError: () => {

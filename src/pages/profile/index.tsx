@@ -1,13 +1,13 @@
-import { useSession } from "next-auth/react";
+import { useAuth } from "../../contexts/AuthContext";
 import { TrophyIcon } from "@heroicons/react/24/outline";
 import { api } from "../../utils/api";
 
 import { summary } from "date-streaks";
 
 const Profile = () => {
-  const { data: session, status } = useSession({ required: true });
+  const { user, isLoading: authLoading } = useAuth();
 
-  if (status == "loading") {
+  if (authLoading) {
     return (
       <div className="mx-auto mt-32 w-4/5 rounded-md p-4">
         <div className="flex animate-pulse space-x-4">
@@ -57,22 +57,18 @@ const Profile = () => {
         <div className="mb-16 mt-12">
           <div className="grid grid-cols-3 items-baseline border-b dark:border-zinc-700">
             <p className=" col-start-1 text-sm font-semibold uppercase">Name</p>
-            <p className=" col-span-2 col-start-2 text-lg">
-              {session?.user?.name}
-            </p>
+            <p className=" col-span-2 col-start-2 text-lg">{user?.name}</p>
           </div>
           <div className="my-8 grid grid-cols-3 items-baseline border-b dark:border-zinc-700">
             <p className=" col-start-1 text-sm font-semibold uppercase">
               E-mail
             </p>
-            <p className=" col-span-2 col-start-2 text-lg">
-              {session?.user?.USNEmail}
-            </p>
+            <p className=" col-span-2 col-start-2 text-lg">{user?.USNEmail}</p>
           </div>
           <div className="my-8 grid grid-cols-3 items-baseline border-b dark:border-zinc-700">
             <p className=" col-start-1 text-sm font-semibold uppercase">ID</p>
             <p className=" col-span-2 col-start-2 text-lg">
-              {session?.user?.protusId?.slice(6, 12)}
+              {user?.protusId?.slice(6, 12)}
             </p>
           </div>
         </div>

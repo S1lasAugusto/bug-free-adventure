@@ -1285,44 +1285,68 @@ async function main() {
     data: [
       {
         name: "Tester1",
+        email: "tester1@test.com",
+        password:
+          "$2b$12$3IL3BCLdgTApUwX6By0ggeHJqBBuRjyCSZ3crgCwGaxneZwEeamOS", // senha: test123
         USNEmail: "test@usn.no",
         protusId: "norway22190",
         leaderboard: true,
+        onBoarded: true,
         id: "clduelk2900003b6leubwp06d",
       },
       {
         name: "Tester2",
+        email: "tester2@test.com",
+        password:
+          "$2b$12$3IL3BCLdgTApUwX6By0ggeHJqBBuRjyCSZ3crgCwGaxneZwEeamOS", // senha: test123
         USNEmail: "test@usn.no",
         protusId: "norway22191",
         leaderboard: true,
+        onBoarded: true,
         id: "clduelk2900013b6lq99hnzqx",
       },
       {
         name: "Tester3",
+        email: "tester3@test.com",
+        password:
+          "$2b$12$3IL3BCLdgTApUwX6By0ggeHJqBBuRjyCSZ3crgCwGaxneZwEeamOS", // senha: test123
         USNEmail: "test@usn.no",
         protusId: "norway22192",
         leaderboard: true,
+        onBoarded: true,
         id: "clduelk2900023b6lbje3n09n",
       },
       {
         name: "Tester6",
+        email: "tester6@test.com",
+        password:
+          "$2b$12$3IL3BCLdgTApUwX6By0ggeHJqBBuRjyCSZ3crgCwGaxneZwEeamOS", // senha: test123
         USNEmail: "test@usn.no",
         protusId: "norway22193",
         leaderboard: true,
+        onBoarded: true,
         id: "clduelk2900033b6lr9tne35c",
       },
       {
         name: "Tester4",
+        email: "tester4@test.com",
+        password:
+          "$2b$12$3IL3BCLdgTApUwX6By0ggeHJqBBuRjyCSZ3crgCwGaxneZwEeamOS", // senha: test123
         USNEmail: "test@usn.no",
         protusId: "norway22194",
         leaderboard: true,
+        onBoarded: true,
         id: "clduelk2900043b6l17v5vswp",
       },
       {
         name: "Tester5",
+        email: "tester5@test.com",
+        password:
+          "$2b$12$3IL3BCLdgTApUwX6By0ggeHJqBBuRjyCSZ3crgCwGaxneZwEeamOS", // senha: test123
         USNEmail: "test@usn.no",
         protusId: "norway22195",
         leaderboard: true,
+        onBoarded: true,
         id: "clduelk2900053b6lq0vgmfdo",
       },
     ],

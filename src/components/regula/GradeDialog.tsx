@@ -11,7 +11,14 @@ export function GradeDialog({
   return (
     <Dialog open={open}>
       <DialogContent className="max-w-md p-0">
-        <GradeSelection onSelect={onSelect ?? (() => {})} />
+        <GradeSelection
+          onSelect={
+            onSelect ??
+            (() => {
+              /* noop */
+            })
+          }
+        />
       </DialogContent>
     </Dialog>
   );

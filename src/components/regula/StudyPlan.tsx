@@ -39,7 +39,8 @@ export function StudyPlan() {
         <Card>
           <CardContent className="flex h-32 items-center justify-center">
             <p className="text-zinc-500">
-              No study plans created yet. Click "New Plan" to get started.
+              No study plans created yet. Click &quot;New Plan&quot; to get
+              started.
             </p>
           </CardContent>
         </Card>

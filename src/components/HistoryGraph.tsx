@@ -9,15 +9,15 @@ import {
   Title,
   Tooltip,
 } from "chart.js";
-import { useSession } from "next-auth/react";
+import { useAuth } from "../contexts/AuthContext";
 import React from "react";
 import { Line } from "react-chartjs-2";
 import { api } from "../utils/api";
 
 const HistoryGraph = () => {
-  const { data: session, status } = useSession({ required: true });
+  const { user, isLoading: authLoading } = useAuth();
 
-  if (status == "loading") {
+  if (authLoading) {
     return (
       <div className="mx-auto w-full rounded-md p-4">
         <div className="flex animate-pulse space-x-4">

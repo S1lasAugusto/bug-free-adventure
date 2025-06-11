@@ -3,7 +3,7 @@ import {
   ArrowTrendingDownIcon,
 } from "@heroicons/react/24/solid";
 import { type } from "@prisma/client";
-import { useSession } from "next-auth/react";
+import { useAuth } from "../contexts/AuthContext";
 import { api } from "../utils/api";
 import { summary } from "date-streaks";
 

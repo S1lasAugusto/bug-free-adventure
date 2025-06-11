@@ -17,14 +17,13 @@
  *
  */
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
-import { type Session } from "next-auth";
 
-import { getServerAuthSession } from "../auth";
 import { prisma } from "../db";
 import { initTRPC, TRPCError } from "@trpc/server";
 
 type CreateContextOptions = {
-  session: Session | null;
+  req?: any;
+  res?: any;
 };
 
 /**
@@ -38,8 +37,9 @@ type CreateContextOptions = {
  */
 const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
-    session: opts.session,
     prisma,
+    req: opts.req,
+    res: opts.res,
   };
 };
 
@@ -51,11 +51,9 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
 export const createTRPCContext = async (opts: CreateNextContextOptions) => {
   const { req, res } = opts;
 
-  // Get the session from the server using the unstable_getServerSession wrapper function
-  const session = await getServerAuthSession({ req, res });
-
   return createInnerTRPCContext({
-    session,
+    req,
+    res,
   });
 };
 
@@ -101,29 +99,56 @@ export const publicProcedure = t.procedure;
  * Reusable middleware that enforces users are logged in before running the
  * procedure
  */
-const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-  console.log("[SERVER] middleware autenticação - Verificando sessão", {
-    temSessao: !!ctx.session,
-    temUsuario: !!ctx.session?.user,
-    userId: ctx.session?.user?.id,
-  });
+const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
+  // Pegar token do header Authorization ou cookie
+  const authHeader = ctx.req?.headers.authorization;
+  const token = authHeader?.startsWith("Bearer ")
+    ? authHeader.slice(7)
+    : ctx.req?.headers.cookie
+        ?.split(";")
+        .find((c: string) => c.trim().startsWith("auth-token="))
+        ?.split("=")[1];
 
-  if (!ctx.session || !ctx.session.user) {
-    console.error(
-      "[SERVER] middleware autenticação - ERRO: Usuário não autenticado"
-    );
-    throw new TRPCError({ code: "UNAUTHORIZED" });
+  if (!token) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Token de autenticação não fornecido",
+    });
   }
 
-  console.log(
-    "[SERVER] middleware autenticação - Usuário autenticado:",
-    ctx.session.user.id
-  );
+  // Verificar token
+  const { verifyToken } = await import("../../lib/auth");
+  const decoded = verifyToken(token);
+
+  if (!decoded) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Token de autenticação inválido",
+    });
+  }
+
+  // Buscar usuário
+  const user = await ctx.prisma.user.findUnique({
+    where: { id: decoded.userId },
+  });
+
+  if (!user) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Usuário não encontrado",
+    });
+  }
 
   return next({
     ctx: {
-      // infers the `session` as non-nullable
-      session: { ...ctx.session, user: ctx.session.user },
+      ...ctx,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        onBoarded: user.onBoarded,
+        protusId: user.protusId,
+      },
     },
   });
 });
@@ -132,7 +157,7 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
  * Protected (authed) procedure
  *
  * If you want a query or mutation to ONLY be accessible to logged in users, use
- * this. It verifies the session is valid and guarantees ctx.session.user is not
+ * this. It verifies the session is valid and guarantees ctx.user is not
  * null
  *
  * @see https://trpc.io/docs/procedures

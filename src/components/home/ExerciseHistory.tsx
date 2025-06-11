@@ -4,13 +4,13 @@ import {
   FlagIcon,
 } from "@heroicons/react/24/outline";
 import { ActivityResource, ExerciseHistory } from "@prisma/client";
-import { useSession } from "next-auth/react";
+import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../utils/api";
 
 const ExerciseHistoryComp = () => {
-  const { data: session, status } = useSession({ required: true });
+  const { user, isLoading: authLoading } = useAuth();
 
-  if (status == "loading") {
+  if (authLoading) {
     return (
       <div className="mx-auto w-full rounded-md p-4">
         <div className="flex animate-pulse space-x-4">

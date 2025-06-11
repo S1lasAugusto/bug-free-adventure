@@ -9,7 +9,7 @@ import { GraduationCap, List, Clock } from "lucide-react";
 import { Plus } from "lucide-react";
 import { api } from "@/utils/api";
 import { toast } from "react-hot-toast";
-import { useSession } from "next-auth/react";
+import { useAuth } from "../../contexts/AuthContext";
 import { GradeDialog } from "./GradeDialog";
 
 // Definição da interface do banco de dados
@@ -89,7 +89,12 @@ export function StudyDashboard() {
     },
   });
 
-  const { data: sessionData, status: sessionStatus } = useSession();
+  const { user: sessionData, isLoading: authLoading } = useAuth();
+  const sessionStatus = authLoading
+    ? "loading"
+    : sessionData
+    ? "authenticated"
+    : "unauthenticated";
 
   // Consulta tRPC
   const createSubPlanMutation = api.subplanRouter.create.useMutation({
@@ -228,7 +233,7 @@ export function StudyDashboard() {
   function handleCreateSubPlan(data: any) {
     console.log("[CLIENT] StudyDashboard - Recebendo dados do wizard:", data);
 
-    if (!sessionData?.user) {
+    if (!sessionData) {
       toast.error("You need to be logged in to create a subplan");
       return;
     }

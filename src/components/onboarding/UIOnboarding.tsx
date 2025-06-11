@@ -107,7 +107,7 @@ const UIOnboarding = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="max-h-screen min-h-screen overflow-y-auto bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       <div className="mx-auto max-w-6xl px-4 py-8">
         {/* Header com progresso */}
         <div className="mb-8 text-center">
@@ -452,6 +452,8 @@ const UIOnboarding = () => {
             </div>
           )}
         </form>
+        {/* Extra padding no final para garantir espaço para scroll */}
+        <div className="h-16"></div>
       </div>
     </div>
   );

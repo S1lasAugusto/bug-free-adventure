@@ -1,111 +1,122 @@
-const LeaderboardPreview = () => {
-  function classNames(...classes: string[]) {
-    return classes.filter(Boolean).join(" ");
-  }
+import React from "react";
+import { Trophy, Medal, Award, Star } from "lucide-react";
 
+const LeaderboardPreview = () => {
   const leaderboard = [
     {
-      userId: "5f9f1b9b0b9b9b0017b0b1b1",
+      userId: "1",
       name: "Joe",
       score: 100,
     },
     {
-      userId: "5f9f1b9b0b9b9b0017b0b1b2",
+      userId: "2",
       name: "Ola",
       score: 90,
     },
     {
-      userId: "5f9f1b9b0b9b9b0017b0b1b3",
+      userId: "3",
       name: "Me",
       score: 80,
     },
     {
-      userId: "5f9f1b9b0b9b9b0017b0b1b4",
-      name: "Jane Smith",
+      userId: "4",
+      name: "Jane",
       score: 70,
     },
     {
-      userId: "5f9f1b9b0b9b9b0017b0b1b5",
-      name: "John Doe",
+      userId: "5",
+      name: "John",
       score: 60,
-    },
-    {
-      userId: "5f9f1b9b0b9b9b0017b0b1b6",
-      name: "Jane Doe",
-      score: 50,
     },
   ];
 
-  const leaderboardTop10 = leaderboard.slice(0, 10);
-  const leaderboardPosition =
-    leaderboard.findIndex((x) => x.userId === "Me") + 1;
-  const userScore = leaderboard[leaderboardPosition - 1]?.score;
+  const getRankIcon = (position: number) => {
+    switch (position) {
+      case 1:
+        return <Trophy className="h-4 w-4 text-yellow-500" />;
+      case 2:
+        return <Medal className="h-4 w-4 text-gray-400" />;
+      case 3:
+        return <Award className="h-4 w-4 text-amber-600" />;
+      default:
+        return (
+          <span className="flex h-4 w-4 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-600">
+            {position}
+          </span>
+        );
+    }
+  };
+
+  const getRankBg = (position: number, isMe: boolean) => {
+    if (isMe) return "bg-blue-50 border-l-4 border-blue-500";
+    if (position === 1) return "bg-gradient-to-r from-yellow-50 to-yellow-100";
+    if (position === 2) return "bg-gradient-to-r from-gray-50 to-gray-100";
+    if (position === 3) return "bg-gradient-to-r from-amber-50 to-amber-100";
+    return "bg-white hover:bg-gray-50";
+  };
 
   return (
-    <div className="relative  overflow-x-auto rounded-lg">
-      <div className="text-color absolute right-0 top-0 grid h-6 w-16 place-items-center rounded-t-lg bg-gray-200 text-sm font-semibold uppercase dark:bg-[#212124] ">
-        <p>java</p>
+    <div className="w-full max-w-sm rounded-xl border border-gray-200 bg-white shadow-sm">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-gray-100 p-4">
+        <div className="flex items-center gap-2">
+          <Star className="h-5 w-5 text-amber-500" />
+          <span className="font-semibold text-gray-800">Leaderboard</span>
+        </div>
+        <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">
+          Java
+        </span>
       </div>
-      <table className="text-color mt-6 w-full table-fixed text-left text-sm">
-        <thead>
-          <tr className="border-b border-[#988efe] bg-[#988efe] uppercase text-white ">
-            <th className="w-1/5 rounded-tl-lg border-r border-[#988efe] px-6 ">
-              Ranking
-            </th>
-            <th className="w-3/5 py-2 px-8">Name</th>
-            <th className="w-1/5 border-l border-[#988efe] py-2 px-2 ">
-              Score
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {leaderboardTop10.map((person, index) => {
-            return (
-              <tr
-                key={index}
-                className={classNames(
-                  person.name == "Me"
-                    ? `bg-[#BFF7E0] dark:bg-[#BFF7E0] dark:text-gray-700`
-                    : `bg-[#fff] dark:bg-[#212124]`,
-                  `text-color border-t  font-semibold dark:border-zinc-700 `
-                )}
-              >
-                <td className="grid place-items-center py-2 px-6 text-center">
-                  <div
-                    className={classNames(
-                      index == 0
-                        ? `bg-gradient-to-tr from-[#feda15] via-[#feea74] to-[#feda15] dark:text-gray-700`
-                        : index == 1
-                        ? `bg-gradient-to-tr from-[#a7b1c9] via-[#dee2e7] to-[#a7b1c9] dark:text-gray-700`
-                        : index == 2
-                        ? `bg-gradient-to-tr from-[#d89142] via-[#eaa85f] to-[#d89142] dark:text-gray-700`
-                        : ``,
-                      "h-5 w-5 rounded-2xl text-center"
-                    )}
-                  >
-                    {index + 1}
-                  </div>
-                </td>
-                <td className="py-2 px-8">{person.name}</td>
-                <td className=" py-2 px-4 text-center">{person.score}</td>
-              </tr>
-            );
-          })}
-          {leaderboardTop10.some((e) => e.name === "Me") ? (
-            <></>
-          ) : (
-            <tr className="text-color border-t-2 border-[#EFADBF]  bg-[#F7D6DF] font-semibold dark:text-gray-700  ">
-              <td className="grid place-items-center border-r border-[#F7D6DF] py-2 px-6 text-center">
-                {leaderboardPosition}
-              </td>
-              <td className=" py-2 px-6">Me</td>
-              <td className=" border-l border-[#F7D6DF] py-2 px-6 text-center">
-                {userScore}
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+
+      {/* Leaderboard List */}
+      <div className="p-2">
+        {leaderboard.slice(0, 5).map((person, index) => {
+          const position = index + 1;
+          const isMe = person.name === "Me";
+
+          return (
+            <div
+              key={person.userId}
+              className={`mb-1 flex items-center justify-between rounded-lg p-3 transition-colors ${getRankBg(
+                position,
+                isMe
+              )}`}
+            >
+              <div className="flex items-center gap-3">
+                {getRankIcon(position)}
+                <span
+                  className={`text-sm font-medium ${
+                    isMe ? "text-blue-700" : "text-gray-700"
+                  }`}
+                >
+                  {person.name}
+                  {isMe && (
+                    <span className="ml-1 text-xs text-blue-500">(You)</span>
+                  )}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span
+                  className={`text-sm font-bold ${
+                    isMe ? "text-blue-700" : "text-gray-600"
+                  }`}
+                >
+                  {person.score}
+                </span>
+                <span className="text-xs text-gray-400">pts</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Footer */}
+      <div className="border-t border-gray-100 p-3">
+        <div className="text-center text-xs text-gray-500">
+          Your current rank:{" "}
+          <span className="font-semibold text-gray-700">#3</span>
+        </div>
+      </div>
     </div>
   );
 };

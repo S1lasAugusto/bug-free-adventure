@@ -1,36 +1,37 @@
 import { SelectedEnum } from "@prisma/client";
-import { Alert, Button, Checkbox, Label } from "flowbite-react";
-import { useRouter } from "next/router";
 import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  HiAtSymbol,
-  HiUser,
-  HiArrowRight,
-  HiArrowLeft,
-  HiInformationCircle,
-  HiIdentification,
-  HiOutlineCheck,
-} from "react-icons/hi";
 import {
   OnboardingForm,
   onboardingSchema,
 } from "../../server/schema/UserSchema";
 import { api } from "../../utils/api";
-import ToggleTheme from "../ToggleTheme";
+import { useRouter } from "next/router";
+import {
+  ArrowRight,
+  ArrowLeft,
+  User,
+  Mail,
+  Hash,
+  Sparkles,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
+
+// Import dos componentes preview
 import LeaderboardPreview from "../previews/LeaderboardPreview";
 import ExercisePlannerPreview from "../previews/ExercisePlannerPreview";
 import HistoryGraphPreview from "../previews/HistoryGraphPreview";
 import ExerciseHistoryPreview from "../previews/ExerciseHistoryPreview";
 import StatsPreview from "../previews/StatsPreview";
+import RegulaPreview from "../previews/RegulaPreview";
 
 const UIOnboarding = () => {
   const {
     register,
     handleSubmit,
     trigger,
-
     watch,
     formState: { errors },
   } = useForm<OnboardingForm>({
@@ -39,24 +40,21 @@ const UIOnboarding = () => {
       selectedComponents: [],
     },
   });
+
   const router = useRouter();
-  const [page, setPage] = useState<string>("welcome");
-  const showName = watch("leaderboard");
-
+  const [currentStep, setCurrentStep] = useState(1);
+  const showNameField = watch("leaderboard");
   const ctx = api.useContext();
-
   const mutation = api.userRouter.submitOnboarding.useMutation();
 
-  const validateAndGoToNextPage = async () => {
+  const validateAndNextStep = async () => {
     const valid = await trigger(["USNEmail", "protusId"]);
-
     if (valid) {
-      setPage("components");
+      setCurrentStep(2);
     }
   };
 
   const onSubmit: SubmitHandler<OnboardingForm> = (data: OnboardingForm) => {
-    console.log(data);
     mutation.mutate(data, {
       onSuccess: () => {
         ctx.invalidate();
@@ -65,402 +63,393 @@ const UIOnboarding = () => {
     });
   };
 
-  function classNames(...classes: string[]) {
-    return classes.filter(Boolean).join(" ");
-  }
-
-  const height = Math.ceil(innerHeight / 2 + 89);
-  console.log(height);
+  const components = [
+    {
+      id: SelectedEnum.STATS,
+      title: "Stats Dashboard",
+      description:
+        "Track your progress with detailed statistics and performance metrics.",
+      preview: <StatsPreview />,
+      color: "from-blue-500 to-cyan-500",
+    },
+    {
+      id: SelectedEnum.HISTORYGRAPH,
+      title: "Activity Graph",
+      description:
+        "Visualize your daily activity with interactive charts and graphs.",
+      preview: <HistoryGraphPreview />,
+      color: "from-green-500 to-emerald-500",
+    },
+    {
+      id: SelectedEnum.TODO,
+      title: "Task Planner",
+      description:
+        "Organize your assignments and deadlines with our smart planner.",
+      preview: <ExercisePlannerPreview />,
+      color: "from-purple-500 to-indigo-500",
+    },
+    {
+      id: SelectedEnum.EXERCISEHISTORY,
+      title: "Exercise History",
+      description:
+        "Keep track of all your completed exercises and achievements.",
+      preview: <ExerciseHistoryPreview />,
+      color: "from-orange-500 to-red-500",
+    },
+    {
+      id: SelectedEnum.REGULA,
+      title: "Regula",
+      description:
+        "Self-regulation tools to help you learn more effectively and autonomously.",
+      preview: <RegulaPreview />,
+      color: "from-pink-500 to-rose-500",
+    },
+  ];
 
   return (
-    <div className="back-layer text-color mb-8 h-screen w-full px-32 pb-16">
-      <div className="h-8"></div>
-      <div className="background-color relative mx-auto h-full w-full overflow-y-auto rounded-2xl">
-        <div className="absolute right-4 top-4">
-          <ToggleTheme />
-        </div>
-        <form onSubmit={handleSubmit(onSubmit)} className="h-full">
-          {page == "welcome" ? (
-            <div className="pl-12 pt-16 ">
-              <h1 className="text-4xl font-medium">Welcome to Progresso! 👋🏻</h1>
-              <h2 className="pt-2 text-lg  font-medium">
-                We will now take you through a few steps to set up your
-                dashboard to your needs.
-              </h2>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      <div className="mx-auto max-w-6xl px-4 py-8">
+        {/* Header com progresso */}
+        <div className="mb-8 text-center">
+          <div className="mb-6 flex items-center justify-center">
+            <div className="rounded-full bg-gradient-to-r from-blue-600 to-purple-600 p-3">
+              <Sparkles className="h-8 w-8 text-white" />
+            </div>
+          </div>
 
-              <div>
+          <h1 className="mb-2 text-4xl font-bold text-gray-900">
+            Welcome to Progresso! 👋
+          </h1>
+          <p className="text-lg text-gray-600">
+            Let's set up your personalized learning dashboard
+          </p>
+
+          {/* Progress bar */}
+          <div className="mx-auto mt-6 w-full max-w-md">
+            <div className="mb-2 flex items-center justify-between text-sm text-gray-500">
+              <span>Step {currentStep} of 3</span>
+              <span>{Math.round((currentStep / 3) * 100)}% complete</span>
+            </div>
+            <div className="h-2 rounded-full bg-gray-200">
+              <div
+                className="h-2 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-500"
+                style={{ width: `${(currentStep / 3) * 100}%` }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+          {/* Step 1: Personal Information */}
+          {currentStep === 1 && (
+            <div className="mx-auto max-w-2xl">
+              <div className="rounded-2xl border border-gray-200 bg-white/80 p-8 shadow-xl backdrop-blur-sm">
+                <div className="mb-6 text-center">
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    Personal Information
+                  </h2>
+                  <p className="text-gray-600">Tell us a bit about yourself</p>
+                </div>
+
+                {/* Error display */}
                 {(errors.USNEmail || errors.protusId) && (
-                  <div>
-                    {Object.values(errors).map((error) => (
-                      <Alert
-                        key={error?.type} // Use a unique property of the error object as key
-                        color="failure"
-                        className="mt-2 mr-2"
-                        icon={HiInformationCircle}
-                      >
-                        <span>{error?.message}</span>
-                      </Alert>
-                    ))}
+                  <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
+                    <div className="flex items-center gap-2 text-red-800">
+                      <AlertCircle className="h-5 w-5" />
+                      <span className="font-medium">
+                        Please fix the following errors:
+                      </span>
+                    </div>
+                    <ul className="mt-2 list-inside list-disc text-sm text-red-700">
+                      {errors.USNEmail && <li>{errors.USNEmail.message}</li>}
+                      {errors.protusId && <li>{errors.protusId.message}</li>}
+                    </ul>
                   </div>
                 )}
-              </div>
 
-              <div>
-                <label
-                  htmlFor="mail"
-                  className="mb-2 block pt-8 text-sm font-medium text-gray-900 dark:text-white"
-                >
-                  USN mail
-                </label>
-                <p className="my-1 text-sm text-gray-400">
-                  Your USN email will be used to identify you during the testing
-                  phase. Rest assured that you will be anonymized in the final
-                  report, and deleted after the test phase is finished.
-                </p>
-                <div className="flex w-1/5">
-                  <span
-                    className={classNames(
-                      errors.USNEmail
-                        ? "border-red-500 bg-red-50 text-red-900 placeholder-red-700 focus:border-red-500 focus:ring-red-500 dark:border-red-400 dark:bg-red-100"
-                        : " border-zinc-300 bg-zinc-200  text-gray-900 dark:border-zinc-600 dark:bg-zinc-700 dark:text-gray-400",
-                      "inline-flex items-center rounded-l-md border border-r-0 px-3 text-sm"
-                    )}
-                  >
-                    <HiAtSymbol
-                      className={
-                        errors.USNEmail
-                          ? " text-red-700"
-                          : "text-gray-600 dark:text-gray-200"
-                      }
-                    />
-                  </span>
-                  <input
-                    {...register("USNEmail")}
-                    type="email"
-                    id="USNEmail"
-                    color={errors.USNEmail && "failure"}
-                    className={classNames(
-                      errors.USNEmail
-                        ? "border-red-500 bg-red-50 p-2.5 text-red-900 placeholder-red-700 focus:border-red-500 focus:ring-red-500 dark:border-red-400 dark:bg-red-100"
-                        : "border-zinc-300 bg-gray-50 text-gray-900  focus:border-blue-500 focus:ring-blue-500 dark:border-zinc-600  dark:bg-zinc-800 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500",
-                      "block flex-1 rounded-none rounded-r-lg border p-2.5 text-sm"
-                    )}
-                    placeholder="olanr@usn.no"
-                    required={true}
-                  ></input>
-                </div>
-              </div>
-              <div>
-                <label
-                  htmlFor="mail"
-                  className="mb-2 block pt-8 text-sm font-medium text-gray-900 dark:text-white"
-                >
-                  Your ID
-                </label>
-                <p className="my-1 text-sm text-gray-400">
-                  Your ID will be sent to you on the email you have associated
-                  with your GitHub account. It is a five digit number starting
-                  with 22 (ex: 22170). If you have not received an email two
-                  hours after signin, please contact{" "}
-                  <a
-                    className="text-indigo-600"
-                    href="mailto:boban.vesin@ntnu.no"
-                  >
-                    Boban Vesin
-                  </a>
-                  .
-                </p>
-                <div className="flex w-1/5">
-                  <span
-                    className={classNames(
-                      errors.protusId
-                        ? "border-red-500 bg-red-50 text-red-900 placeholder-red-700 focus:border-red-500 focus:ring-red-500 dark:border-red-400 dark:bg-red-100"
-                        : " border-zinc-300 bg-zinc-200  text-gray-900 dark:border-zinc-600 dark:bg-zinc-700 dark:text-gray-400",
-                      "inline-flex items-center rounded-l-md border border-r-0 px-3 text-sm"
-                    )}
-                  >
-                    <HiIdentification
-                      className={
-                        errors.protusId
-                          ? " text-red-700"
-                          : "text-gray-600 dark:text-gray-200"
-                      }
-                    />
-                  </span>
-                  <input
-                    {...register("protusId", { valueAsNumber: true })}
-                    type="number"
-                    id="number"
-                    color={errors.protusId && "failure"}
-                    className={classNames(
-                      errors.protusId
-                        ? "border-red-500 bg-red-50 p-2.5 text-red-900 placeholder-red-700 focus:border-red-500 focus:ring-red-500 dark:border-red-400 dark:bg-red-100"
-                        : "border-zinc-300 bg-gray-50 text-gray-900  focus:border-blue-500 focus:ring-blue-500 dark:border-zinc-600  dark:bg-zinc-800 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500",
-                      "block flex-1 rounded-none rounded-r-lg border p-2.5 text-sm"
-                    )}
-                    placeholder="22xxx"
-                    required={true}
-                  ></input>
-                </div>
-              </div>
-              <Button
-                className="absolute right-16 bottom-16"
-                onClick={() => validateAndGoToNextPage()}
-              >
-                Choose your components
-                <HiArrowRight className="ml-2" />{" "}
-              </Button>
-            </div>
-          ) : page == "components" ? (
-            <div className="pl-12 pt-12 pr-12 pb-20">
-              <h2 className="text-xl font-medium leading-6">
-                Second, we want to know which components you want to display in
-                your dashboard.
-              </h2>
-              <p className="text-md mt-1 text-gray-400">
-                This dashboard utilizes a number of different ways to represent
-                your progress and engagement when you complete assignments.
-                Please select the components you want your dashboard to include.
-                We advice that you choose all of them, and later remove the ones
-                you don&apos;t like or don&apos;t have any use of. You can
-                always go back into settings to change your preferences later.
-              </p>
-              <div
-                className={`mt-5 grid w-full select-none grid-cols-2 gap-x-8 gap-y-4  overflow-auto hover:overscroll-contain`}
-              >
-                <div className="course-card relative rounded-2xl border border-zinc-400 px-6 pt-6 dark:border-zinc-600">
-                  <h5 className="mb-2 text-2xl font-bold tracking-tight">
-                    Stats
-                  </h5>
-
-                  <p className="col-start-1 text-sm text-gray-700 dark:text-gray-400">
-                    This component shows number of completed tasks and number of
-                    average attempts you have done in the previous week compared
-                    to the week before.
-                  </p>
-                  <div className="mb-12 scale-90">
-                    <StatsPreview />
-                  </div>
-                  <div className="absolute bottom-2 my-6 ml-4 flex items-center gap-2 ">
-                    <Checkbox
-                      {...register("selectedComponents")}
-                      id="select"
-                      value={SelectedEnum.STATS}
-                    />
-                    <label htmlFor="select">Select</label>
-                  </div>
-
-                  <div className="col-start-2 grid items-center "></div>
-                </div>
-                <div className="course-card relative rounded-2xl border border-zinc-400 px-6 pt-6 dark:border-zinc-600">
-                  <h5 className="mb-2 text-2xl font-bold tracking-tight">
-                    History Graph
-                  </h5>
-
-                  <p className="col-start-1 text-sm text-gray-700 dark:text-gray-400">
-                    This component shows how many tasks completed per day
-                    represented as a graph.
-                  </p>
+                <div className="space-y-6">
+                  {/* USN Email */}
                   <div>
-                    <HistoryGraphPreview />
-                  </div>
-                  <div className="absolute bottom-2 my-6 ml-4 flex items-center gap-2">
-                    <Checkbox
-                      {...register("selectedComponents")}
-                      id="select"
-                      value={SelectedEnum.HISTORYGRAPH}
-                    />
-                    <label htmlFor="select">Select</label>
-                  </div>
-
-                  <div className="col-start-2 grid items-center "></div>
-                </div>
-                <div className="course-card relative h-auto grid-cols-1 rounded-2xl border border-zinc-400 px-6 pt-6 dark:border-zinc-600">
-                  <h5 className="mb-2 text-2xl font-bold tracking-tight">
-                    Exercise Planner
-                  </h5>
-
-                  <p className="text-sm text-gray-700 dark:text-gray-400">
-                    This component enables you to keep track of your assignments
-                    with due dates.
-                  </p>
-                  <div>
-                    <div className="scale-90">
-                      <ExercisePlannerPreview />
+                    <label className="mb-2 block text-sm font-semibold text-gray-700">
+                      USN Email Address
+                    </label>
+                    <p className="mb-3 text-sm text-gray-500">
+                      Your USN email will be used for identification during
+                      testing. All data will be anonymized in reports.
+                    </p>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-4">
+                        <Mail className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <input
+                        {...register("USNEmail")}
+                        type="email"
+                        className={`w-full rounded-xl border py-3 pl-12 pr-4 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                          errors.USNEmail
+                            ? "border-red-300 bg-red-50"
+                            : "border-gray-300 bg-white focus:border-blue-300"
+                        }`}
+                        placeholder="your.name@usn.no"
+                      />
                     </div>
                   </div>
 
-                  <div className="absolute bottom-2 my-6 ml-4 flex items-center gap-2">
-                    <Checkbox
-                      {...register("selectedComponents")}
-                      id="select"
-                      value={SelectedEnum.TODO}
-                    />
-
-                    <label htmlFor="select">Select</label>
+                  {/* Student ID */}
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-gray-700">
+                      Student ID
+                    </label>
+                    <p className="mb-3 text-sm text-gray-500">
+                      Your 5-digit student ID starting with 22 (e.g., 22170).
+                      Check your email for this information.
+                    </p>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-4">
+                        <Hash className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <input
+                        {...register("protusId", { valueAsNumber: true })}
+                        type="number"
+                        className={`w-full rounded-xl border py-3 pl-12 pr-4 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                          errors.protusId
+                            ? "border-red-300 bg-red-50"
+                            : "border-gray-300 bg-white focus:border-blue-300"
+                        }`}
+                        placeholder="22170"
+                      />
+                    </div>
                   </div>
                 </div>
-                <div className="course-card relative grid-cols-1 gap-8 rounded-2xl border border-zinc-400 px-6 pt-6 dark:border-zinc-600">
-                  <h5 className="mb-2 text-2xl font-bold tracking-tight">
-                    Activity History
-                  </h5>
 
-                  <p className="col-start-1 text-sm text-gray-700 dark:text-gray-400">
-                    This component is more detailed than Activity Graph. It
-                    shows your completed tasks per day, as a activity log.
-                  </p>
-                  <div className="mb-12 scale-90">
-                    <ExerciseHistoryPreview />
-                  </div>
-                  <div className="absolute bottom-2 my-6 ml-4 flex items-center gap-2">
-                    <Checkbox
-                      {...register("selectedComponents")}
-                      id="select"
-                      value={SelectedEnum.EXERCISEHISTORY}
-                    />
-                    <label htmlFor="select">Select</label>
-                  </div>
+                <div className="mt-8 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={validateAndNextStep}
+                    className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-semibold text-white transition-all hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  >
+                    Choose Components
+                    <ArrowRight className="h-5 w-5" />
+                  </button>
                 </div>
-              </div>
-              <div className="mt-12 flex flex-row justify-center gap-16">
-                <Button onClick={() => setPage("welcome")}>
-                  <HiArrowLeft className="mr-2" /> Go back
-                </Button>
-                <Button onClick={() => setPage("leaderboard")}>
-                  Next page
-                  <HiArrowRight className="ml-2" />{" "}
-                </Button>
               </div>
             </div>
-          ) : page == "leaderboard" ? (
-            <div className="pl-12 pt-12 pr-12">
-              <h2 className="text-xl font-medium leading-6">
-                Lastly, we want to know whether you are the competitive type.
-              </h2>
-              <p className="text-md mt-1 text-gray-400">
-                By participating in the leaderboard you can compete against your
-                classmates to see who completes the most exercises. Your
-                nickname will show up on the leaderboard.
-              </p>
-              {mutation.isError && (
-                <Alert color="failure" icon={HiInformationCircle}>
-                  The ID you submitted is taken by another user. If you are
-                  certain you entered your ID correctly, please contact{" "}
-                  <a
-                    className="text-indigo-600"
-                    href="mailto:boban.vesin@ntnu.no"
-                  >
-                    Boban Vesin
-                  </a>
-                </Alert>
-              )}
-              <div className={`mt-5 w-full select-none `}>
-                <div className="course-card w-3/5 rounded-2xl border border-zinc-400 pl-6 pr-2 pt-6 dark:border-zinc-600">
-                  <h5 className="mb-2 text-2xl font-bold tracking-tight">
-                    Leaderboard
-                  </h5>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className=" col-start-1 text-sm text-gray-700 dark:text-gray-400">
-                      I would like to participate in the leaderboard
-                      {showName && (
-                        <div className="">
-                          <h2 className="text-md pt-8 font-medium leading-6">
-                            We need your nickname to be displayed in the
-                            leaderboard
-                          </h2>
-                          <p className="mt-1 text-sm text-gray-400">
-                            This information will be displayed publicly so be
-                            careful what you share.
-                          </p>
-                          <label
-                            htmlFor="name"
-                            className="block pt-8 text-sm font-medium"
-                          >
-                            Nickname
-                          </label>
-                          <div className="mt-1 flex rounded-md">
-                            <div className="flex w-1/5">
-                              <span
-                                className={classNames(
-                                  errors.name
-                                    ? "border-red-500 bg-red-50 text-red-900 placeholder-red-700 focus:border-red-500 focus:ring-red-500 dark:border-red-400 dark:bg-red-100"
-                                    : " border-zinc-300 bg-zinc-200  text-gray-900 dark:border-zinc-600 dark:bg-zinc-700 dark:text-gray-400",
-                                  "inline-flex items-center rounded-l-md border border-r-0 px-3 text-sm"
-                                )}
-                              >
-                                <HiUser
-                                  className={
-                                    errors.name
-                                      ? " text-red-700"
-                                      : "text-gray-600 dark:text-gray-200"
-                                  }
-                                />
-                              </span>
-                              <input
-                                {...register("name")}
-                                type="text"
-                                id="name"
-                                className={classNames(
-                                  errors.name
-                                    ? "border-red-500 bg-red-50 p-2.5 text-red-900 placeholder-red-700 focus:border-red-500 focus:ring-red-500 dark:border-red-400 dark:bg-red-100"
-                                    : "border-zinc-300 bg-gray-50 text-gray-900  focus:border-blue-500 focus:ring-blue-500 dark:border-zinc-600  dark:bg-zinc-800 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500",
-                                  "block flex-1 rounded-none rounded-r-lg border p-2.5 text-sm"
-                                )}
-                                placeholder="Ola"
-                                required={false}
-                              ></input>
-                            </div>
-                          </div>
-                          {errors.name && (
-                            <div className="text-sm text-red-500">
-                              {errors.name.message}
-                            </div>
-                          )}
+          )}
+
+          {/* Step 2: Component Selection */}
+          {currentStep === 2 && (
+            <div className="mx-auto max-w-7xl">
+              <div className="mb-8 text-center">
+                <h2 className="text-3xl font-bold text-gray-900">
+                  Choose Your Dashboard Components
+                </h2>
+                <p className="text-gray-600">
+                  Select the tools that will help you learn most effectively
+                </p>
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {components.map((component) => (
+                  <div key={component.id} className="group relative">
+                    <input
+                      {...register("selectedComponents")}
+                      type="checkbox"
+                      value={component.id}
+                      id={component.id}
+                      className="peer sr-only"
+                    />
+                    <label
+                      htmlFor={component.id}
+                      className="block cursor-pointer rounded-2xl border-2 border-gray-200 bg-white p-6 transition-all hover:border-blue-300 hover:shadow-lg peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:shadow-lg"
+                    >
+                      {/* Header */}
+                      <div className="mb-4 flex items-center justify-between">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {component.title}
+                        </h3>
+                        <div className="h-6 w-6 rounded-full border-2 border-gray-300 transition-colors group-hover:border-blue-300 peer-checked:border-blue-500 peer-checked:bg-blue-500">
+                          <CheckCircle2 className="h-full w-full text-white opacity-0 transition-opacity peer-checked:opacity-100" />
                         </div>
-                      )}
+                      </div>
+
+                      {/* Description */}
+                      <p className="mb-4 text-sm text-gray-600">
+                        {component.description}
+                      </p>
+
+                      {/* Preview */}
+                      <div className="overflow-hidden rounded-lg">
+                        <div className="origin-top-left scale-75 transform">
+                          {component.preview}
+                        </div>
+                      </div>
+
+                      {/* Gradient accent */}
+                      <div
+                        className={`absolute bottom-0 left-0 right-0 h-1 rounded-b-2xl bg-gradient-to-r opacity-0 transition-opacity peer-checked:opacity-100 ${component.color}`}
+                      />
+                    </label>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-8 flex justify-between">
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(1)}
+                  className="flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-6 py-3 font-semibold text-gray-700 transition-all hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                  Go Back
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(3)}
+                  className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-semibold text-white transition-all hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                  Continue
+                  <ArrowRight className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Leaderboard */}
+          {currentStep === 3 && (
+            <div className="mx-auto max-w-4xl">
+              <div className="mb-8 text-center">
+                <h2 className="text-3xl font-bold text-gray-900">
+                  Join the Competition
+                </h2>
+                <p className="text-gray-600">
+                  Compete with your classmates and track your progress
+                </p>
+              </div>
+
+              {mutation.isError && (
+                <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
+                  <div className="flex items-center gap-2 text-red-800">
+                    <AlertCircle className="h-5 w-5" />
+                    <span className="font-medium">Error:</span>
+                    <span>
+                      The ID you submitted is already taken. Please contact
+                      support if this is incorrect.
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              <div className="rounded-2xl border border-gray-200 bg-white/80 p-8 shadow-xl backdrop-blur-sm">
+                <div className="grid gap-8 lg:grid-cols-2">
+                  {/* Left side - Options */}
+                  <div>
+                    <h3 className="mb-4 text-xl font-semibold text-gray-900">
+                      Leaderboard Participation
+                    </h3>
+
+                    <div className="mb-6">
+                      <label className="flex cursor-pointer items-start gap-3">
+                        <input
+                          {...register("leaderboard")}
+                          type="checkbox"
+                          className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <div>
+                          <span className="font-medium text-gray-900">
+                            Yes, I want to participate in the leaderboard
+                          </span>
+                          <p className="text-sm text-gray-600">
+                            Your nickname will be displayed publicly to compete
+                            with classmates
+                          </p>
+                        </div>
+                      </label>
                     </div>
 
-                    <div className="col-start-2">
+                    {/* Nickname field - shows when leaderboard is checked */}
+                    {showNameField && (
+                      <div className="space-y-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
+                        <h4 className="font-medium text-blue-900">
+                          Choose Your Nickname
+                        </h4>
+                        <p className="text-sm text-blue-700">
+                          This will be displayed publicly on the leaderboard
+                        </p>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 flex items-center pl-4">
+                            <User className="h-5 w-5 text-blue-400" />
+                          </div>
+                          <input
+                            {...register("name")}
+                            type="text"
+                            className={`w-full rounded-xl border py-3 pl-12 pr-4 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                              errors.name
+                                ? "border-red-300 bg-red-50"
+                                : "border-blue-300 bg-white focus:border-blue-400"
+                            }`}
+                            placeholder="Enter your nickname"
+                          />
+                        </div>
+                        {errors.name && (
+                          <p className="text-sm text-red-600">
+                            {errors.name.message}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Right side - Preview */}
+                  <div>
+                    <h3 className="mb-4 text-xl font-semibold text-gray-900">
+                      Preview
+                    </h3>
+                    <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
                       <LeaderboardPreview />
                     </div>
-                    <div className="col-start-1 row-start-2 my-6 flex items-center gap-2">
-                      <input
-                        {...register("leaderboard")}
-                        id="leaderboard"
-                        name="leaderboard"
-                        type="checkbox"
-                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-
-                      <Label htmlFor="select">Select</Label>
-                    </div>
                   </div>
                 </div>
-                <p className="text-md mt-8 font-medium text-gray-400">
-                  ☝🏻 Remember, you can always change your chosen components
-                  after submitting. You can do this in the Settings tab.{" "}
-                </p>
-              </div>
 
-              <div className="absolute left-1/2 bottom-16  flex -translate-x-1/2 transform flex-row gap-16">
-                <Button onClick={() => setPage("components")}>
-                  <HiArrowLeft className="mr-2" /> Go back
-                </Button>
-                <input
-                  className=" rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                  type="submit"
-                  value={
-                    mutation.isLoading
-                      ? "Loading.."
-                      : mutation.isSuccess
-                      ? "Success!"
-                      : "Submit"
-                  }
-                />
+                <div className="mt-8 border-t border-gray-200 pt-6">
+                  <p className="mb-6 text-center text-sm text-gray-600">
+                    💡 <strong>Remember:</strong> You can always change these
+                    preferences later in Settings
+                  </p>
+
+                  <div className="flex justify-between">
+                    <button
+                      type="button"
+                      onClick={() => setCurrentStep(2)}
+                      className="flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-6 py-3 font-semibold text-gray-700 transition-all hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                    >
+                      <ArrowLeft className="h-5 w-5" />
+                      Go Back
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={mutation.isLoading}
+                      className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 px-8 py-3 font-semibold text-white transition-all hover:from-green-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {mutation.isLoading ? (
+                        <>
+                          <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                          Setting up...
+                        </>
+                      ) : mutation.isSuccess ? (
+                        <>
+                          <CheckCircle2 className="h-5 w-5" />
+                          Success!
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="h-5 w-5" />
+                          Complete Setup
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
-          ) : (
-            <></>
           )}
         </form>
       </div>

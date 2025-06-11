@@ -9,7 +9,6 @@ import {
   Title,
   Tooltip,
 } from "chart.js";
-import { useAuth } from "../../contexts/AuthContext";
 import React from "react";
 import { Line } from "react-chartjs-2";
 

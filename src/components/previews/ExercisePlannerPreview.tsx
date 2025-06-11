@@ -44,14 +44,12 @@ const ExercisePlannerPreview = () => {
       </div>
 
       {todo.length > 0 ? (
-        <div className={`mb-2 grid grid-rows-${todo.length}`}>
+        <div className="mb-2 grid grid-rows-3">
           {todo.map((item, index) => {
             return (
               <div
                 key={index}
-                className={`grid grid-cols-5 row-start-${
-                  index + 1
-                } mb-3 flex flex-row items-end border-b py-2 dark:border-zinc-700 ${
+                className={`mb-3 flex grid grid-cols-5 flex-row items-end border-b py-2 dark:border-zinc-700 ${
                   item.completed && `opacity-50`
                 }`}
               >

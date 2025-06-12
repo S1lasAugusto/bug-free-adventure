@@ -58,12 +58,17 @@ const HistoryGraph = () => {
           ActivityResource: ActivityResource;
         }
       ) => {
-        const dateKey = obj.completedAt!.toISOString().split("T")[0] as string; // Get only the date part of the completedAt field
+        const dateKey =
+          obj.completedAt?.toISOString().split("T")[0] ||
+          (new Date().toISOString().split("T")[0] as string); // Get only the date part of the completedAt field
 
         if (!acc.has(dateKey)) {
           acc.set(dateKey, []);
         }
-        acc.get(dateKey)!.push(obj);
+        const existingArray = acc.get(dateKey);
+        if (existingArray) {
+          existingArray.push(obj);
+        }
         return acc;
       },
       new Map<string, typeof history>()
@@ -141,7 +146,10 @@ const HistoryGraph = () => {
   };
 
   const labels = grouped(history).map((d) => {
-    const date = new Date(d![0]?.completedAt!);
+    const firstItem = d?.[0];
+    const date = firstItem?.completedAt
+      ? new Date(firstItem.completedAt)
+      : new Date();
     return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   });
 
@@ -150,7 +158,7 @@ const HistoryGraph = () => {
     datasets: [
       {
         label: "Exercises Completed",
-        data: grouped(history).map((d) => d!.length),
+        data: grouped(history).map((d) => d?.length || 0),
         borderColor: "#3B82F6",
         backgroundColor: "rgba(59, 130, 246, 0.1)",
         fill: true,

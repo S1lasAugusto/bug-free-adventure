@@ -15,6 +15,7 @@ import {
   Circle,
   ClipboardList,
   AlertCircle,
+  X,
 } from "lucide-react";
 
 const ToDoComp = () => {
@@ -27,13 +28,13 @@ const ToDoComp = () => {
 
   if (authLoading) {
     return (
-      <div className="w-full rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="w-full rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
         <div className="animate-pulse space-y-4">
-          <div className="h-6 w-3/4 rounded bg-gray-200"></div>
+          <div className="h-6 w-3/4 rounded bg-gray-200 dark:bg-gray-700"></div>
           <div className="space-y-3">
-            <div className="h-12 rounded bg-gray-200"></div>
-            <div className="h-12 rounded bg-gray-200"></div>
-            <div className="h-12 rounded bg-gray-200"></div>
+            <div className="h-12 rounded bg-gray-200 dark:bg-gray-700"></div>
+            <div className="h-12 rounded bg-gray-200 dark:bg-gray-700"></div>
+            <div className="h-12 rounded bg-gray-200 dark:bg-gray-700"></div>
           </div>
         </div>
       </div>
@@ -63,12 +64,15 @@ const ToDoComp = () => {
       return { prevData };
     },
     onSettled() {
-      ctx.userRouter.getToDosOnUser.invalidate({ userId: user.id });
+      if (user?.id) {
+        ctx.userRouter.getToDosOnUser.invalidate({ userId: user.id });
+      }
     },
   });
 
   const setCompletedMutation = api.userRouter.setToDoCompleted.useMutation({
     async onMutate(newTodo) {
+      if (!user?.id) return;
       await ctx.userRouter.getToDosOnUser.cancel();
       const prevData = ctx.userRouter.getToDosOnUser.getData({
         userId: user.id,
@@ -86,12 +90,15 @@ const ToDoComp = () => {
       return { prevData };
     },
     onSettled() {
-      ctx.userRouter.getToDosOnUser.invalidate({ userId: user.id });
+      if (user?.id) {
+        ctx.userRouter.getToDosOnUser.invalidate({ userId: user.id });
+      }
     },
   });
 
   const deleteTodoMutation = api.userRouter.deleteTodo.useMutation({
     async onMutate(todoId) {
+      if (!user?.id) return;
       await ctx.userRouter.getToDosOnUser.cancel();
       const prevData = ctx.userRouter.getToDosOnUser.getData({
         userId: user.id,
@@ -105,19 +112,21 @@ const ToDoComp = () => {
       return { prevData };
     },
     onSettled() {
-      ctx.userRouter.getToDosOnUser.invalidate({ userId: user.id });
+      if (user?.id) {
+        ctx.userRouter.getToDosOnUser.invalidate({ userId: user.id });
+      }
     },
   });
 
   if (isLoading || !isSuccess) {
     return (
-      <div className="w-full rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="w-full rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
         <div className="animate-pulse space-y-4">
-          <div className="h-6 w-3/4 rounded bg-gray-200"></div>
+          <div className="h-6 w-3/4 rounded bg-gray-200 dark:bg-gray-700"></div>
           <div className="space-y-3">
-            <div className="h-12 rounded bg-gray-200"></div>
-            <div className="h-12 rounded bg-gray-200"></div>
-            <div className="h-12 rounded bg-gray-200"></div>
+            <div className="h-12 rounded bg-gray-200 dark:bg-gray-700"></div>
+            <div className="h-12 rounded bg-gray-200 dark:bg-gray-700"></div>
+            <div className="h-12 rounded bg-gray-200 dark:bg-gray-700"></div>
           </div>
         </div>
       </div>
@@ -125,6 +134,7 @@ const ToDoComp = () => {
   }
 
   const onSubmit: SubmitHandler<ToDoForm> = (data: ToDoForm) => {
+    if (!user?.id) return;
     addToDoMutation.mutate(
       {
         toDo: { ...data, userId: user.id },
@@ -198,210 +208,221 @@ const ToDoComp = () => {
 
   const isOverdue = (date: Date) => {
     const today = new Date();
-    return date < today && date.toDateString() !== today.toDateString();
+    today.setHours(0, 0, 0, 0);
+    date.setHours(0, 0, 0, 0);
+    return date < today;
+  };
+
+  const TodoItem = ({ todo }: { todo: ToDo }) => {
+    const overdue = isOverdue(new Date(todo.dueDate));
+
+    return (
+      <div
+        className={`group rounded-lg border p-4 transition-all duration-200 hover:shadow-md ${
+          todo.completed
+            ? "border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800"
+            : overdue
+            ? "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20"
+            : "border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+        }`}
+      >
+        <div className="flex items-start gap-3">
+          {/* Checkbox */}
+          <button
+            onClick={() => onComplete(todo.todoId)}
+            className={`mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border-2 transition-colors ${
+              todo.completed
+                ? "border-green-500 bg-green-500 text-white"
+                : "border-gray-300 hover:border-green-400 dark:border-gray-600"
+            }`}
+            disabled={todo.completed}
+          >
+            {todo.completed && <CheckCircle2 className="h-3 w-3" />}
+          </button>
+
+          {/* Content */}
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h3
+                  className={`font-medium ${
+                    todo.completed
+                      ? "text-gray-500 line-through dark:text-gray-400"
+                      : "text-gray-900 dark:text-white"
+                  }`}
+                >
+                  {todo.name}
+                </h3>
+
+                <div className="mt-1 flex items-center gap-2 text-sm">
+                  <Calendar className="h-4 w-4 text-gray-400" />
+                  <span
+                    className={`${
+                      overdue && !todo.completed
+                        ? "font-medium text-red-600 dark:text-red-400"
+                        : "text-gray-500 dark:text-gray-400"
+                    }`}
+                  >
+                    {formatDate(new Date(todo.dueDate))}
+                  </span>
+                  {overdue && !todo.completed && (
+                    <span className="flex items-center gap-1 text-xs font-medium text-red-600 dark:text-red-400">
+                      <AlertCircle className="h-3 w-3" />
+                      Overdue
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Delete button */}
+              <button
+                onClick={() => onDeleteTodo(todo.todoId)}
+                className="p-1 text-gray-400 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100 dark:text-gray-500 dark:hover:text-red-400"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
-    <div className="w-full rounded-xl border border-gray-200 bg-white shadow-sm">
+    <div className="w-full rounded-xl bg-white shadow-sm dark:bg-gray-800">
       {/* Header */}
-      <div className="border-b border-gray-200 p-6">
-        <div className="mb-2 flex items-center gap-2">
-          <ClipboardList className="h-5 w-5 text-blue-600" />
-          <h2 className="text-lg font-bold text-gray-900">Task Planner</h2>
-        </div>
-        <p className="text-sm text-gray-600">
-          Organize your assignments and deadlines
-        </p>
-      </div>
-
-      {/* Error Messages */}
-      {(deleteTodoMutation.isError ||
-        addToDoMutation.isError ||
-        setCompletedMutation.isError) && (
-        <div className="mx-6 mt-4 rounded-lg border border-red-200 bg-red-50 p-3">
-          <div className="flex items-center gap-2 text-red-800">
-            <AlertCircle className="h-4 w-4" />
-            <span className="text-sm font-medium">
-              {deleteTodoMutation.isError && "Failed to delete task"}
-              {addToDoMutation.isError && "Failed to add task"}
-              {setCompletedMutation.isError && "Failed to complete task"}
-            </span>
+      <div className="border-b border-gray-200 p-6 dark:border-gray-700">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <ClipboardList className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+              Task Planner
+            </h2>
           </div>
-        </div>
-      )}
 
-      {/* Content */}
-      <div className="p-6">
-        {/* Stats */}
-        <div className="mb-6 grid grid-cols-2 gap-4">
-          <div className="rounded-lg bg-blue-50 p-4">
-            <div className="text-2xl font-bold text-blue-900">
-              {activeTodos.length}
-            </div>
-            <div className="text-sm text-blue-700">Active Tasks</div>
-          </div>
-          <div className="rounded-lg bg-green-50 p-4">
-            <div className="text-2xl font-bold text-green-900">
-              {completedTodos.length}
-            </div>
-            <div className="text-sm text-green-700">Completed</div>
-          </div>
-        </div>
-
-        {/* Task List */}
-        <div className="mb-6 space-y-3">
-          {visibleTodos.length > 0 ? (
-            visibleTodos.map((item, index) => (
-              <div
-                key={item.todoId}
-                className={`flex items-center gap-3 rounded-lg border p-4 transition-all hover:shadow-sm ${
-                  item.completed
-                    ? "border-green-200 bg-green-50"
-                    : isOverdue(item.dueDate)
-                    ? "border-red-200 bg-red-50"
-                    : "border-gray-200 bg-white hover:border-blue-200"
-                }`}
-              >
-                {/* Checkbox */}
-                <button
-                  onClick={() => onComplete(item.todoId)}
-                  className={`flex-shrink-0 transition-colors ${
-                    item.completed
-                      ? "text-green-600"
-                      : "text-gray-400 hover:text-blue-600"
-                  }`}
-                >
-                  {item.completed ? (
-                    <CheckCircle2 className="h-5 w-5" />
-                  ) : (
-                    <Circle className="h-5 w-5" />
-                  )}
-                </button>
-
-                {/* Task Content */}
-                <div className="flex-1">
-                  <div
-                    className={`font-medium ${
-                      item.completed
-                        ? "text-gray-500 line-through"
-                        : "text-gray-900"
-                    }`}
-                  >
-                    {item.name}
-                  </div>
-                  <div className="mt-1 flex items-center gap-1">
-                    <Calendar className="h-3 w-3 text-gray-400" />
-                    <span
-                      className={`text-xs ${
-                        isOverdue(item.dueDate) && !item.completed
-                          ? "font-medium text-red-600"
-                          : "text-gray-500"
-                      }`}
-                    >
-                      {formatDate(item.dueDate)}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Delete Button */}
-                <button
-                  onClick={() => onDeleteTodo(item.todoId)}
-                  className="flex-shrink-0 text-gray-400 transition-colors hover:text-red-600"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-            ))
-          ) : (
-            <div className="py-8 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-                <ClipboardList className="h-8 w-8 text-gray-400" />
-              </div>
-              <h3 className="mb-2 text-lg font-semibold text-gray-900">
-                No tasks yet
-              </h3>
-              <p className="text-gray-600">
-                Add your first task to get started!
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Add New Task */}
-        <div className="border-t border-gray-200 pt-4">
-          {!openAddToDo ? (
-            <button
-              onClick={() => setOpenAddToDo(true)}
-              className="flex w-full items-center gap-2 rounded-lg border-2 border-dashed border-gray-300 p-4 text-gray-600 transition-colors hover:border-blue-400 hover:text-blue-600"
-            >
-              <Plus className="h-5 w-5" />
-              Add new task
-            </button>
-          ) : (
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Task Name
-                  </label>
-                  <input
-                    {...register("name")}
-                    type="text"
-                    required
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    placeholder="Enter task name..."
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Due Date
-                  </label>
-                  <input
-                    {...register("dueDate", { valueAsDate: true })}
-                    type="date"
-                    required
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  type="submit"
-                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-                >
-                  <Plus className="h-4 w-4" />
-                  Add Task
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOpenAddToDo(false);
-                    reset();
-                  }}
-                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          )}
-        </div>
-
-        {/* Toggle Completed */}
-        {completedTodos.length > 0 && (
-          <div className="mt-4 border-t border-gray-200 pt-4">
+          <div className="flex items-center gap-2">
+            {/* Toggle completed visibility */}
             <button
               onClick={() => setShowCompleted(!showCompleted)}
-              className="flex items-center gap-2 text-sm text-gray-600 transition-colors hover:text-gray-900"
+              className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
             >
               {showCompleted ? (
                 <EyeOff className="h-4 w-4" />
               ) : (
                 <Eye className="h-4 w-4" />
               )}
-              {showCompleted ? "Hide" : "Show"} completed tasks (
-              {completedTodos.length})
+              {showCompleted ? "Hide" : "Show"} completed
             </button>
+
+            {/* Add todo button */}
+            <button
+              onClick={() => setOpenAddToDo(true)}
+              className="flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600"
+            >
+              <Plus className="h-4 w-4" />
+              Add Task
+            </button>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="mt-4 flex gap-4 text-sm">
+          <span className="text-gray-600 dark:text-gray-400">
+            <span className="font-semibold text-gray-900 dark:text-white">
+              {activeTodos.length}
+            </span>{" "}
+            active
+          </span>
+          <span className="text-gray-600 dark:text-gray-400">
+            <span className="font-semibold text-gray-900 dark:text-white">
+              {completedTodos.length}
+            </span>{" "}
+            completed
+          </span>
+        </div>
+      </div>
+
+      {/* Add Todo Form */}
+      {openAddToDo && (
+        <div className="border-b border-gray-200 bg-gray-50 p-6 dark:border-gray-700 dark:bg-gray-900/50">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-medium text-gray-900 dark:text-white">
+                Add New Task
+              </h3>
+              <button
+                type="button"
+                onClick={() => setOpenAddToDo(false)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Task Name
+                </label>
+                <input
+                  {...register("name", { required: true })}
+                  type="text"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  placeholder="Enter task name..."
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Due Date
+                </label>
+                <input
+                  {...register("dueDate", {
+                    required: true,
+                    valueAsDate: true,
+                  })}
+                  type="date"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600"
+              >
+                Add Task
+              </button>
+              <button
+                type="button"
+                onClick={() => setOpenAddToDo(false)}
+                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Todo List */}
+      <div className="p-6">
+        {visibleTodos.length === 0 ? (
+          <div className="py-12 text-center">
+            <ClipboardList className="mx-auto h-12 w-12 text-gray-400" />
+            <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-white">
+              No tasks yet
+            </h3>
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              Get started by adding your first task.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {visibleTodos.map((todoItem) => (
+              <TodoItem key={todoItem.todoId} todo={todoItem as ToDo} />
+            ))}
           </div>
         )}
       </div>

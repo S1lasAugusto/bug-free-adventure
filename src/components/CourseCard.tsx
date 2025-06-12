@@ -14,10 +14,16 @@ const CourseCard = ({ courseName }: { courseName: string }) => {
 
   if (!isSuccess || isLoading) {
     return (
-      <div className="mx-auto w-full rounded-md p-4">
-        <div className="flex animate-pulse space-x-4">
-          <div className="flex-1 space-y-6 py-1">
-            <div className="loading h-60 rounded"></div>
+      <div className="w-full rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
+        <div className="animate-pulse">
+          <div className="mb-4 flex items-center space-x-4">
+            <div className="h-12 w-12 rounded-xl bg-gray-200 dark:bg-gray-700"></div>
+            <div className="h-6 w-24 rounded bg-gray-200 dark:bg-gray-700"></div>
+          </div>
+          <div className="space-y-3">
+            <div className="h-4 w-3/4 rounded bg-gray-200 dark:bg-gray-700"></div>
+            <div className="h-2 w-full rounded bg-gray-200 dark:bg-gray-700"></div>
+            <div className="h-4 w-1/2 rounded bg-gray-200 dark:bg-gray-700"></div>
           </div>
         </div>
       </div>
@@ -42,43 +48,71 @@ const CourseCard = ({ courseName }: { courseName: string }) => {
   ).length;
 
   const allExercises = listOfExercises.length;
+  const progressPercentage = Math.round((exercisesDone / allExercises) * 100);
 
   return (
     <div
       onClick={(e) => onClick("/courses/Java", e)}
-      className={`course-card w-full cursor-pointer rounded-lg p-4  hover:scale-105`}
+      className="group w-full cursor-pointer rounded-xl bg-white p-6 shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-lg dark:bg-gray-800 dark:shadow-lg"
     >
-      <div className="my-4 ml-4 flex flex-row items-center">
-        <div
-          className={` w-12 items-end rounded-3xl bg-[#627bfc] p-2 dark:bg-[#6f69ee] `}
-        >
-          <CommandLineIcon className="text-white"></CommandLineIcon>
+      {/* Header */}
+      <div className="mb-6 flex items-center space-x-4">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg">
+          <CommandLineIcon className="h-6 w-6 text-white" />
         </div>
-        <div className="text-color px-4 py-4 text-2xl font-semibold uppercase">
-          {courseName.toUpperCase()}
+        <div>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+            {courseName.toUpperCase()}
+          </h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Programming Course
+          </p>
         </div>
       </div>
-      <div className="text-color flex flex-row items-baseline px-4 pt-2 text-lg font-bold">
-        <p>{exercisesDone}/</p>
-        <p className="text-color-light font-normal uppercase">
-          {listOfExercises.length}
-        </p>
-        <p className="text-color-light tfont-semibold px-2 text-sm uppercase">
-          completed tasks
-        </p>
-      </div>
-      <div className="text-color mt-4 px-4 py-2 text-sm font-semibold uppercase">
-        Progress
-      </div>
-      <div className="mb-4 flex w-full flex-row items-center">
-        <div className="fill-color-light mx-4  h-2 w-4/5 rounded">
-          <div
-            className={`green-color h-2  rounded`}
-            style={{ width: (exercisesDone / allExercises) * 100 + "%" }}
-          ></div>
+
+      {/* Progress Stats */}
+      <div className="mb-4 space-y-2">
+        <div className="flex items-baseline space-x-2">
+          <span className="text-2xl font-bold text-gray-900 dark:text-white">
+            {exercisesDone}
+          </span>
+          <span className="text-lg text-gray-500 dark:text-gray-400">
+            / {allExercises}
+          </span>
+          <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+            tasks completed
+          </span>
         </div>
-        <div className="text-xs">
-          {Math.round((exercisesDone / allExercises) * 100)} %
+
+        {/* Progress Bar */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Progress
+            </span>
+            <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
+              {progressPercentage}%
+            </span>
+          </div>
+          <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+            <div
+              className="h-2 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-300"
+              style={{ width: `${progressPercentage}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="flex items-center justify-between pt-2">
+        <div className="flex items-center space-x-2">
+          <div className="h-2 w-2 rounded-full bg-green-500"></div>
+          <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+            Active
+          </span>
+        </div>
+        <div className="text-xs text-gray-500 group-hover:text-indigo-600 dark:text-gray-400 dark:group-hover:text-indigo-400">
+          Click to view →
         </div>
       </div>
     </div>

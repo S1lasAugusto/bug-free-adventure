@@ -166,7 +166,7 @@ export default function Login() {
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="bg-gradient-to-br from-blue-50 via-white to-purple-50 px-4 text-gray-500">
-                Don't have an account?
+                Don&apos;t have an account?
               </span>
             </div>
           </div>

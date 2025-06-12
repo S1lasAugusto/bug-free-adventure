@@ -1,14 +1,21 @@
 import { Disclosure } from "@headlessui/react";
 import {
-  ChartBarIcon,
+  HomeIcon,
+  BookOpenIcon,
   Cog6ToothIcon,
-  FolderIcon,
   UserCircleIcon,
   CommandLineIcon,
+  ChevronRightIcon,
+  ArrowRightOnRectangleIcon,
 } from "@heroicons/react/24/outline";
+import {
+  HomeIcon as HomeIconSolid,
+  BookOpenIcon as BookOpenIconSolid,
+  Cog6ToothIcon as Cog6ToothIconSolid,
+} from "@heroicons/react/24/solid";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { HiOutlineLogout } from "react-icons/hi";
+import Image from "next/image";
 import { useAuth } from "../contexts/AuthContext";
 import ProtectedRoute from "./ProtectedRoute";
 import ToggleTheme from "./ToggleTheme";
@@ -27,13 +34,15 @@ const Sidebar = ({ children }: { children: React.ReactElement }) => {
     {
       name: "Dashboard",
       href: "/",
-      icon: ChartBarIcon,
+      icon: HomeIcon,
+      iconSolid: HomeIconSolid,
       current: router.asPath === "/",
     },
     {
       name: "Courses",
-      icon: FolderIcon,
-      current: router.asPath === "/courses",
+      icon: BookOpenIcon,
+      iconSolid: BookOpenIconSolid,
+      current: router.asPath.startsWith("/courses"),
       children: [
         { name: "Java", href: "/courses/Java", icon: CommandLineIcon },
       ],
@@ -42,38 +51,37 @@ const Sidebar = ({ children }: { children: React.ReactElement }) => {
       name: "Settings",
       href: "/settings",
       icon: Cog6ToothIcon,
+      iconSolid: Cog6ToothIconSolid,
       current: router.asPath === "/settings",
     },
   ];
 
-  const menuItemStyling =
-    "text-color hover:text-gray-900 dark:hover:bg-[#1C1C1F] dark:hover:text-white hover:bg-indigo-50";
-  const currentItemStyling =
-    "text-gray-900 dark:text-white bg-indigo-50 dark:bg-[#303335]/75 dark:hover:bg-[#1C1C1F] hover:bg-indigo-100";
-
   if (isLoading) {
     return (
-      <div className="back-layer flex h-screen px-2 pt-2">
-        <div className="z-index-2 w-1/5 flex-shrink-0">
-          <div className="sidebar-color relative h-full rounded-l-lg py-8 dark:border-gray-500 ">
-            <div className="mb-6 mt-6 flex justify-center">
-              <img src="/logo.svg" alt="next" className="w-1/3" />
+      <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="w-64 bg-white shadow-xl dark:bg-gray-800">
+          <div className="flex h-full flex-col">
+            {/* Logo skeleton */}
+            <div className="flex h-20 items-center justify-center border-b border-gray-200 dark:border-gray-700">
+              <div className="h-20 w-20 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
             </div>
-            <div className="flex justify-center">
-              <div className="loading h-8 w-44 rounded"></div>
+
+            {/* Greeting skeleton */}
+            <div className="p-6">
+              <div className="h-12 w-full animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
             </div>
-            <div className="mt-5 flex-1 space-y-1 px-4">
-              <div className="loading h-8 rounded"></div>
-              <div className="loading h-8 rounded"></div>
-              <div className="loading h-8 rounded"></div>
+
+            {/* Navigation skeleton */}
+            <div className="flex-1 space-y-2 px-4">
+              <div className="h-10 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
+              <div className="h-10 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
+              <div className="h-10 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
             </div>
           </div>
         </div>
-        <div className="background-color relative flex-1 overflow-y-auto rounded-r-lg">
-          <div className="absolute right-0 top-4 z-10">
-            <div className="mr-8 ">
-              <ToggleTheme />
-            </div>
+        <div className="flex-1 bg-gray-50 dark:bg-gray-900">
+          <div className="flex h-20 items-center justify-end px-6">
+            <ToggleTheme />
           </div>
         </div>
       </div>
@@ -84,139 +92,134 @@ const Sidebar = ({ children }: { children: React.ReactElement }) => {
     <ProtectedRoute>
       <div>
         {user?.onBoarded ? (
-          <div className="back-layer flex h-screen px-2 pt-2">
-            <div className="z-index-2 w-1/5 flex-shrink-0">
-              <div className="sidebar-color relative h-full rounded-l-lg py-8 dark:border-gray-500 ">
-                <div className="mb-6 mt-6 flex items-center justify-center">
-                  <img src="/logo.svg" alt="next" className="w-1/3" />
+          <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+            {/* Sidebar */}
+            <div className="w-64 bg-white shadow-xl dark:bg-gray-800">
+              <div className="flex h-full flex-col">
+                {/* Logo */}
+                <div className="flex h-20 items-center justify-center border-b border-gray-200 px-6 dark:border-gray-700">
+                  <Image
+                    src="/logo.svg"
+                    alt="Logo"
+                    width={80}
+                    height={80}
+                    className="h-20 w-auto"
+                  />
                 </div>
-                <div className="flex-y-grow my-8 flex justify-center px-4">
-                  <Greeting />
+
+                {/* Greeting */}
+                <div className="p-6">
+                  <div className="rounded-lg bg-gradient-to-r from-indigo-50 to-blue-50 p-4 dark:from-indigo-900/20 dark:to-blue-900/20">
+                    <Greeting />
+                  </div>
                 </div>
-                <div className="mt-5 flex flex-grow flex-col">
-                  <nav className="flex-1 space-y-1 px-2" aria-label="Sidebar">
-                    {navigation.map((item) =>
-                      !item.children ? (
-                        <div key={item.name}>
-                          <Link href={item.href}>
-                            <div
+
+                {/* Navigation */}
+                <nav className="flex-1 space-y-1 px-4 pb-4">
+                  {navigation.map((item) =>
+                    !item.children ? (
+                      <Link key={item.name} href={item.href || "#"}>
+                        <div
+                          className={classNames(
+                            item.current
+                              ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300"
+                              : "text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white",
+                            "group flex cursor-pointer items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200"
+                          )}
+                        >
+                          {item.current ? (
+                            <item.iconSolid className="mr-3 h-5 w-5 flex-shrink-0" />
+                          ) : (
+                            <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                          )}
+                          {item.name}
+                        </div>
+                      </Link>
+                    ) : (
+                      <Disclosure
+                        as="div"
+                        key={item.name}
+                        className="space-y-1"
+                      >
+                        {({ open }) => (
+                          <>
+                            <Disclosure.Button
                               className={classNames(
                                 item.current
-                                  ? currentItemStyling
-                                  : menuItemStyling,
-                                "group flex w-full cursor-pointer items-center rounded-md py-2 pl-2 text-sm font-medium"
+                                  ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300"
+                                  : "text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white",
+                                "group flex w-full items-center rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
                               )}
                             >
-                              <item.icon
-                                className="mr-3 h-6 w-6 flex-shrink-0 text-gray-400 group-hover:text-gray-500"
-                                aria-hidden="true"
-                              />
-                              <p>{item.name}</p>
-                            </div>
-                          </Link>
-                        </div>
-                      ) : (
-                        <Disclosure
-                          as="div"
-                          key={item.name}
-                          className="space-y-1"
-                        >
-                          {({ open }) => (
-                            <>
-                              <Disclosure.Button
+                              {item.current ? (
+                                <item.iconSolid className="mr-3 h-5 w-5 flex-shrink-0" />
+                              ) : (
+                                <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                              )}
+                              <span className="flex-1">{item.name}</span>
+                              <ChevronRightIcon
                                 className={classNames(
-                                  item.current
-                                    ? currentItemStyling
-                                    : menuItemStyling,
-                                  "group flex w-full items-center rounded-md py-2 pl-2 pr-1 text-left text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                  open ? "rotate-90" : "",
+                                  "ml-3 h-4 w-4 flex-shrink-0 transform transition-transform duration-200"
                                 )}
-                              >
-                                <item.icon
-                                  className={classNames(
-                                    item.current
-                                      ? "text-violet-800"
-                                      : "text-gray-400 group-hover:text-gray-500",
-                                    "mr-3 h-6 w-6 flex-shrink-0"
-                                  )}
-                                  aria-hidden="true"
-                                />
-                                <span className="flex-1">{item.name}</span>
-                                <svg
-                                  className={classNames(
-                                    open
-                                      ? "rotate-90 text-gray-400"
-                                      : "text-gray-300",
-                                    "ml-3 h-5 w-5 flex-shrink-0 transform transition-colors duration-150 ease-in-out group-hover:text-gray-400"
-                                  )}
-                                  viewBox="0 0 20 20"
-                                  aria-hidden="true"
-                                >
-                                  <path
-                                    d="M6 6L14 10L6 14V6Z"
-                                    fill="currentColor"
-                                  />
-                                </svg>
-                              </Disclosure.Button>
-                              <Disclosure.Panel className="space-y-1">
-                                {item.children.map((subItem) => (
-                                  <Disclosure.Button
-                                    key={subItem.name}
-                                    as="a"
-                                    href={subItem.href}
-                                    className={classNames(
-                                      item.current
-                                        ? currentItemStyling
-                                        : menuItemStyling,
-                                      "group flex w-full items-center rounded-md py-2 pl-11 pl-6 text-sm font-medium opacity-80"
-                                    )}
-                                  >
-                                    <subItem.icon
-                                      className="mr-1 h-5 w-5 flex-shrink-0 text-gray-600 group-hover:text-gray-500 dark:text-gray-300"
-                                      aria-hidden="true"
-                                    />
-                                    <p className="text-gray-700 dark:text-gray-300">
-                                      {subItem.name}
-                                    </p>
-                                  </Disclosure.Button>
-                                ))}
-                              </Disclosure.Panel>
-                            </>
-                          )}
-                        </Disclosure>
-                      )
-                    )}
-                  </nav>
-                </div>
-                <div className="absolute bottom-4 flex w-full flex-shrink-0 border-t border-gray-200 p-4 dark:border-gray-500">
-                  <div className="group block flex w-full flex-shrink-0 flex-row items-center">
+                              />
+                            </Disclosure.Button>
+                            <Disclosure.Panel className="space-y-1">
+                              {item.children.map((subItem) => (
+                                <Link key={subItem.name} href={subItem.href}>
+                                  <div className="group flex cursor-pointer items-center rounded-lg py-2 pl-11 pr-3 text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                                    <subItem.icon className="mr-2 h-4 w-4 flex-shrink-0" />
+                                    {subItem.name}
+                                  </div>
+                                </Link>
+                              ))}
+                            </Disclosure.Panel>
+                          </>
+                        )}
+                      </Disclosure>
+                    )
+                  )}
+                </nav>
+
+                {/* User Profile & Logout */}
+                <div className="border-t border-gray-200 p-4 dark:border-gray-700">
+                  <div className="flex items-center justify-between">
                     <Link href="/profile">
-                      <div className="flex cursor-pointer flex-row items-center">
-                        <UserCircleIcon className="text-color mr-2 h-8 w-8"></UserCircleIcon>
-                        <div className="ml-1">
-                          <p className="text-color text-sm font-medium">
+                      <div className="flex cursor-pointer items-center space-x-3 rounded-lg p-2 transition-colors duration-200 hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <UserCircleIcon className="h-8 w-8 text-gray-400" />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
                             {user?.name}
                           </p>
-                          <p className="text-color text-xs">Ver perfil</p>
+                          <p className="truncate text-xs text-gray-500 dark:text-gray-400">
+                            View profile
+                          </p>
                         </div>
                       </div>
                     </Link>
                     <button
                       onClick={logout}
-                      className="ml-auto flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
+                      className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 transition-colors duration-200 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                      title="Logout"
                     >
-                      <HiOutlineLogout className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                      <ArrowRightOnRectangleIcon className="h-5 w-5" />
                     </button>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="background-color relative flex-1 overflow-y-auto rounded-r-lg">
-              <div className="absolute right-0 top-4 z-10">
-                <div className="mr-8 ">
-                  <ToggleTheme />
-                </div>
+
+            {/* Main Content */}
+            <div className="flex flex-1 flex-col overflow-hidden">
+              {/* Top Bar */}
+              <div className="flex h-20 items-center justify-end bg-white px-6 shadow-sm dark:bg-gray-800">
+                <ToggleTheme />
               </div>
-              <div className="relative h-full">{children}</div>
+
+              {/* Content */}
+              <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">
+                {children}
+              </div>
             </div>
           </div>
         ) : (

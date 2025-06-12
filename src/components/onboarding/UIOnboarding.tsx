@@ -138,7 +138,7 @@ const UIOnboarding = () => {
             Welcome to Progresso! 👋
           </h1>
           <p className="text-lg text-gray-600">
-            Let's set up your personalized learning dashboard
+            Let&apos;s set up your personalized learning dashboard
           </p>
 
           {/* Progress bar */}

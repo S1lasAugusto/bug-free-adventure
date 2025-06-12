@@ -63,7 +63,7 @@ const Profile = () => {
             <p className=" col-start-1 text-sm font-semibold uppercase">
               E-mail
             </p>
-            <p className=" col-span-2 col-start-2 text-lg">{user?.USNEmail}</p>
+            <p className=" col-span-2 col-start-2 text-lg">{user?.email}</p>
           </div>
           <div className="my-8 grid grid-cols-3 items-baseline border-b dark:border-zinc-700">
             <p className=" col-start-1 text-sm font-semibold uppercase">ID</p>

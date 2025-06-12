@@ -34,8 +34,17 @@ export const generalPlanRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      return prisma.generalPlan.updateMany({
+      // Busca o plano geral do usuário primeiro
+      const existingPlan = await prisma.generalPlan.findFirst({
         where: { userId: ctx.user.id },
+      });
+
+      if (!existingPlan) {
+        throw new Error("General plan not found for this user");
+      }
+
+      return prisma.generalPlan.update({
+        where: { id: existingPlan.id },
         data: input,
       });
     }),

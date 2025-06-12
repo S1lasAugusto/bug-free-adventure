@@ -75,7 +75,7 @@ model ToDo {
 
 model GeneralPlan {
   id        String   @id @default(cuid())
-  userId    String
+  userId    String   @unique
   name      String
   gradeGoal String
   createdAt DateTime @default(now())

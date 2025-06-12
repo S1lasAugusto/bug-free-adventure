@@ -19,7 +19,6 @@ import Image from "next/image";
 import { useAuth } from "../contexts/AuthContext";
 import ProtectedRoute from "./ProtectedRoute";
 import ToggleTheme from "./ToggleTheme";
-import Greeting from "./Greeting";
 import UIOnboarding from "./onboarding/UIOnboarding";
 
 function classNames(...classes: string[]) {
@@ -66,11 +65,6 @@ const Sidebar = ({ children }: { children: React.ReactElement }) => {
               <div className="h-20 w-20 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
             </div>
 
-            {/* Greeting skeleton */}
-            <div className="p-6">
-              <div className="h-12 w-full animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
-            </div>
-
             {/* Navigation skeleton */}
             <div className="flex-1 space-y-2 px-4">
               <div className="h-10 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
@@ -105,13 +99,6 @@ const Sidebar = ({ children }: { children: React.ReactElement }) => {
                     height={80}
                     className="h-20 w-auto"
                   />
-                </div>
-
-                {/* Greeting */}
-                <div className="p-6">
-                  <div className="rounded-lg bg-gradient-to-r from-indigo-50 to-blue-50 p-4 dark:from-indigo-900/20 dark:to-blue-900/20">
-                    <Greeting />
-                  </div>
                 </div>
 
                 {/* Navigation */}

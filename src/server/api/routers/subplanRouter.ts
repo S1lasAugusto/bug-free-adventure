@@ -39,7 +39,7 @@ export const subplanRouter = createTRPCRouter({
 
   // Obter todos os subplans do usuário atual
   getAll: protectedProcedure.query(async ({ ctx }) => {
-    console.log("[SERVER] getAll - Sessão:", ctx.session);
+    console.log("[SERVER] getAll - Usuário:", ctx.user);
     console.log("[SERVER] getAll - ID do usuário:", ctx.user.id);
 
     try {

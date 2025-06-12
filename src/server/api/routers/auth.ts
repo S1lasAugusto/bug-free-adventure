@@ -113,7 +113,7 @@ export const authRouter = createTRPCRouter({
       ? authHeader.slice(7)
       : ctx.req?.headers.cookie
           ?.split(";")
-          .find((c) => c.trim().startsWith("auth-token="))
+          .find((c: string) => c.trim().startsWith("auth-token="))
           ?.split("=")[1];
 
     if (!token) {

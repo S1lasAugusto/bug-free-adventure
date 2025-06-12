@@ -189,7 +189,19 @@ export const userRouter = createTRPCRouter({
   updateExerciseHistory: protectedProcedure
     .input(z.object({ activityId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const activityAnalytics = (await learnerActivity(ctx.prisma, ctx.user))
+      // Buscar o usuário completo do banco
+      const fullUser = await ctx.prisma.user.findUnique({
+        where: { id: ctx.user.id },
+      });
+
+      if (!fullUser) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found",
+        });
+      }
+
+      const activityAnalytics = (await learnerActivity(ctx.prisma, fullUser))
         .activityAnalytics;
 
       const attempts = [

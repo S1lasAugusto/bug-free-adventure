@@ -14,7 +14,6 @@ import {
   User,
   Mail,
   Hash,
-  Sparkles,
   CheckCircle2,
   AlertCircle,
 } from "lucide-react";
@@ -128,14 +127,8 @@ const UIOnboarding = () => {
       <div className="mx-auto max-w-6xl px-4 py-8">
         {/* Header com progresso */}
         <div className="mb-8 text-center">
-          <div className="mb-6 flex items-center justify-center">
-            <div className="rounded-full bg-gradient-to-r from-blue-600 to-purple-600 p-3">
-              <Sparkles className="h-8 w-8 text-white" />
-            </div>
-          </div>
-
           <h1 className="mb-2 text-4xl font-bold text-gray-900">
-            Welcome to Progresso! 👋
+            Welcome to Progressor!
           </h1>
           <p className="text-lg text-gray-600">
             Let&apos;s set up your personalized learning dashboard
@@ -463,10 +456,7 @@ const UIOnboarding = () => {
                           Success!
                         </>
                       ) : (
-                        <>
-                          <Sparkles className="h-5 w-5" />
-                          Complete Setup
-                        </>
+                        <>Complete Setup</>
                       )}
                     </button>
                   </div>

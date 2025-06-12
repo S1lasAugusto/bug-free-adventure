@@ -70,8 +70,8 @@ const Dashboard: NextPage = () => {
   }
 
   return (
-    <div>
-      <div className="background-color grid h-screen rounded-r-lg p-16 ">
+    <div className="background-color rounded-r-lg">
+      <div className="container mx-auto max-w-7xl px-6 py-8">
         <SelectedComponentsContainer
           selected={userPreferences?.selectedComponents || []}
           leaderboard={userPreferences?.leaderboard || false}

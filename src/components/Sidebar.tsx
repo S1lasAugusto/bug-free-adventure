@@ -53,9 +53,9 @@ const Sidebar = ({ children }: { children: React.ReactElement }) => {
 
   if (isLoading) {
     return (
-      <div className="back-layer grid grid-cols-5 px-2 pt-2 ">
-        <div className="grid-col-1 z-index-2 grid h-screen">
-          <div className="sidebar-color relative rounded-l-lg py-8 dark:border-gray-500 ">
+      <div className="back-layer flex h-screen px-2 pt-2">
+        <div className="z-index-2 w-1/5 flex-shrink-0">
+          <div className="sidebar-color relative h-full rounded-l-lg py-8 dark:border-gray-500 ">
             <div className="mb-6 mt-6 flex justify-center">
               <img src="/logo.svg" alt="next" className="w-1/3" />
             </div>
@@ -69,8 +69,8 @@ const Sidebar = ({ children }: { children: React.ReactElement }) => {
             </div>
           </div>
         </div>
-        <div className="grid-col-2 background-color relative col-span-4 grid overflow-auto rounded-r-lg">
-          <div className="absolute right-0 top-4">
+        <div className="background-color relative flex-1 overflow-y-auto rounded-r-lg">
+          <div className="absolute right-0 top-4 z-10">
             <div className="mr-8 ">
               <ToggleTheme />
             </div>
@@ -84,9 +84,9 @@ const Sidebar = ({ children }: { children: React.ReactElement }) => {
     <ProtectedRoute>
       <div>
         {user?.onBoarded ? (
-          <div className="back-layer grid grid-cols-5 px-2 pt-2 ">
-            <div className="grid-col-1 z-index-2 grid h-screen">
-              <div className="sidebar-color relative rounded-l-lg py-8 dark:border-gray-500 ">
+          <div className="back-layer flex h-screen px-2 pt-2">
+            <div className="z-index-2 w-1/5 flex-shrink-0">
+              <div className="sidebar-color relative h-full rounded-l-lg py-8 dark:border-gray-500 ">
                 <div className="mb-6 mt-6 flex items-center justify-center">
                   <img src="/logo.svg" alt="next" className="w-1/3" />
                 </div>
@@ -210,13 +210,13 @@ const Sidebar = ({ children }: { children: React.ReactElement }) => {
                 </div>
               </div>
             </div>
-            <div className="grid-col-2 background-color relative col-span-4 grid overflow-auto rounded-r-lg">
-              <div className="absolute right-0 top-4">
+            <div className="background-color relative flex-1 overflow-y-auto rounded-r-lg">
+              <div className="absolute right-0 top-4 z-10">
                 <div className="mr-8 ">
                   <ToggleTheme />
                 </div>
               </div>
-              <div className="relative p-4">{children}</div>
+              <div className="relative h-full">{children}</div>
             </div>
           </div>
         ) : (

@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from "react";
 // Corrigir importação do d3-cloud
-// @ts-ignore
-import cloud = require("d3-cloud");
+import cloud from "d3-cloud";
 import * as d3 from "d3";
 import { Cloud } from "lucide-react";
 

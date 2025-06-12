@@ -1,11 +1,8 @@
 import { useAuth } from "../contexts/AuthContext";
 import { api } from "../utils/api";
+import { Trophy, Medal, Award, Star } from "lucide-react";
 
 const Leaderboard = () => {
-  function classNames(...classes: string[]) {
-    return classes.filter(Boolean).join(" ");
-  }
-
   const { user, isLoading: authLoading } = useAuth();
 
   const {
@@ -35,71 +32,134 @@ const Leaderboard = () => {
     leaderboard.findIndex((x) => x.userId === user?.id) + 1;
   const userScore = leaderboard[leaderboardPosition - 1]?.score;
 
+  const getRankIcon = (position: number) => {
+    switch (position) {
+      case 1:
+        return <Trophy className="h-4 w-4 text-yellow-500" />;
+      case 2:
+        return <Medal className="h-4 w-4 text-gray-400" />;
+      case 3:
+        return <Award className="h-4 w-4 text-amber-600" />;
+      default:
+        return <Star className="h-4 w-4 text-blue-500" />;
+    }
+  };
+
+  const getRankBg = (position: number, isCurrentUser: boolean) => {
+    if (isCurrentUser) {
+      return "bg-blue-50 border-l-4 border-blue-500 shadow-md";
+    }
+    switch (position) {
+      case 1:
+        return "bg-gradient-to-r from-yellow-50 to-yellow-100";
+      case 2:
+        return "bg-gradient-to-r from-gray-50 to-gray-100";
+      case 3:
+        return "bg-gradient-to-r from-amber-50 to-amber-100";
+      default:
+        return "bg-white hover:bg-gray-50";
+    }
+  };
+
   return (
-    <div className="relative  overflow-x-auto rounded-lg">
-      <div className="text-color absolute right-0 top-0 grid h-6 w-16 place-items-center rounded-t-lg bg-gray-200 text-sm font-semibold uppercase dark:bg-[#212124] ">
-        <p>java</p>
+    <div className="w-full max-w-lg rounded-lg border border-gray-200 bg-white shadow-sm">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-gray-200 p-4">
+        <div className="flex items-center gap-2">
+          <Trophy className="h-5 w-5 text-blue-600" />
+          <span className="text-lg font-bold text-gray-800">Leaderboard</span>
+        </div>
+        <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-700">
+          Java
+        </span>
       </div>
-      <table className="text-color mt-6 w-full table-fixed text-left text-sm">
-        <thead>
-          <tr className="border-b border-[#988efe] bg-[#988efe] uppercase text-white ">
-            <th className="w-1/5 rounded-tl-lg border-r border-[#988efe] px-6 ">
-              Ranking
-            </th>
-            <th className="w-3/5 px-6 py-2">Name</th>
-            <th className="w-1/5 border-l border-[#988efe] px-6 py-2 ">
-              Score
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {leaderboardTop10.map((person, index) => {
-            return (
-              <tr
-                key={index}
-                className={classNames(
-                  person.userId == user?.id
-                    ? `bg-[#BFF7E0] dark:bg-[#BFF7E0] dark:text-gray-700`
-                    : `bg-[#fff] dark:bg-[#212124]`,
-                  `text-color border-t  font-semibold dark:border-zinc-700 `
-                )}
-              >
-                <td className="grid place-items-center px-6 py-2 text-center">
-                  <div
-                    className={classNames(
-                      index == 0
-                        ? `bg-gradient-to-tr from-[#feda15] via-[#feea74] to-[#feda15] dark:text-gray-700`
-                        : index == 1
-                        ? `bg-gradient-to-tr from-[#a7b1c9] via-[#dee2e7] to-[#a7b1c9] dark:text-gray-700`
-                        : index == 2
-                        ? `bg-gradient-to-tr from-[#d89142] via-[#eaa85f] to-[#d89142] dark:text-gray-700`
-                        : ``,
-                      "h-5 w-5 rounded-2xl text-center"
-                    )}
-                  >
-                    {index + 1}
+
+      {/* Leaderboard List */}
+      <div className="space-y-2 p-4">
+        {leaderboardTop10.map((person, index) => {
+          const position = index + 1;
+          const isCurrentUser = person.userId === user?.id;
+
+          return (
+            <div
+              key={person.userId}
+              className={`flex items-center justify-between rounded-lg p-3 transition-all duration-200 ${getRankBg(
+                position,
+                isCurrentUser
+              )}`}
+            >
+              {/* Left side - Rank and name */}
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-sm">
+                  {getRankIcon(position)}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-gray-900">
+                      {person.name}
+                      {isCurrentUser && (
+                        <span className="ml-1 text-xs font-semibold text-blue-600">
+                          (You)
+                        </span>
+                      )}
+                    </span>
                   </div>
-                </td>
-                <td className="px-6 py-2">{person.name}</td>
-                <td className=" px-6 py-2 text-center">{person.score}</td>
-              </tr>
-            );
-          })}
-          {leaderboardTop10.some((e) => e.userId === user.id) ? (
-            <></>
-          ) : (
-            <tr className="text-color border-t-2 border-[#EFADBF]  bg-[#F7D6DF] font-semibold dark:text-gray-700  ">
-              <td className="grid place-items-center border-r border-[#F7D6DF] px-6 py-2 text-center">
-                {leaderboardPosition}
-              </td>
-              <td className=" px-6 py-2">{user.name}</td>
-              <td className=" border-l border-[#F7D6DF] px-6 py-2 text-center">
-                {userScore}
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+                  <span className="text-xs text-gray-500">#{position}</span>
+                </div>
+              </div>
+
+              {/* Right side - Score */}
+              <div className="text-right">
+                <div className="font-bold text-gray-900">{person.score}</div>
+                <div className="text-xs text-gray-500">points</div>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Show current user if not in top 10 */}
+        {!leaderboardTop10.some((e) => e.userId === user?.id) && (
+          <>
+            <div className="my-2 border-t border-gray-200 pt-2">
+              <div className="mb-2 text-center text-xs text-gray-500">...</div>
+            </div>
+            <div className="flex items-center justify-between rounded-lg border-l-4 border-blue-500 bg-blue-50 p-3 shadow-md">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-sm">
+                  <Star className="h-4 w-4 text-blue-500" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-gray-900">
+                      {user?.name || "Unknown"}
+                      <span className="ml-1 text-xs font-semibold text-blue-600">
+                        (You)
+                      </span>
+                    </span>
+                  </div>
+                  <span className="text-xs text-gray-500">
+                    #{leaderboardPosition}
+                  </span>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="font-bold text-gray-900">{userScore}</div>
+                <div className="text-xs text-gray-500">points</div>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="rounded-b-lg border-t border-gray-200 bg-gray-50 px-4 py-3">
+        <div className="text-sm text-gray-600">
+          Your current rank:{" "}
+          <span className="font-semibold text-gray-900">
+            #{leaderboardPosition || "N/A"}
+          </span>
+        </div>
+      </div>
     </div>
   );
 };

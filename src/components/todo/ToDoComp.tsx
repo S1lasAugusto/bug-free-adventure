@@ -1,18 +1,21 @@
-import {
-  EyeIcon,
-  EyeSlashIcon,
-  PlusIcon,
-  TrashIcon,
-} from "@heroicons/react/24/outline";
 import { ToDo } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import { Badge } from "flowbite-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { HiInformationCircle } from "react-icons/hi";
 import { ToDoForm } from "../../server/schema/UserSchema";
 import { api } from "../../utils/api";
+import {
+  Plus,
+  Trash2,
+  Eye,
+  EyeOff,
+  Calendar,
+  CheckCircle2,
+  Circle,
+  ClipboardList,
+  AlertCircle,
+} from "lucide-react";
 
 const ToDoComp = () => {
   const ctx = api.useContext();
@@ -24,10 +27,13 @@ const ToDoComp = () => {
 
   if (authLoading) {
     return (
-      <div className="mx-auto w-full rounded-md p-4">
-        <div className="flex animate-pulse space-x-4">
-          <div className="flex-1 space-y-6 py-1">
-            <div className="loading h-64 rounded"></div>
+      <div className="w-full rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="animate-pulse space-y-4">
+          <div className="h-6 w-3/4 rounded bg-gray-200"></div>
+          <div className="space-y-3">
+            <div className="h-12 rounded bg-gray-200"></div>
+            <div className="h-12 rounded bg-gray-200"></div>
+            <div className="h-12 rounded bg-gray-200"></div>
           </div>
         </div>
       </div>
@@ -38,23 +44,24 @@ const ToDoComp = () => {
     data: todo,
     isSuccess,
     isLoading,
-  } = api.userRouter.getToDosOnUser.useQuery({ userId: user.id });
+  } = api.userRouter.getToDosOnUser.useQuery(
+    { userId: user?.id || "" },
+    { enabled: !!user }
+  );
 
   const addToDoMutation = api.userRouter.addToDoToUser.useMutation({
     async onMutate(newToDo) {
-      // Optimistic update, delete the transaction from the list immediately
       await ctx.userRouter.getToDosOnUser.cancel();
       const prevData = ctx.userRouter.getToDosOnUser.getData({
-        userId: user.id,
+        userId: user?.id || "",
       });
-      ctx.userRouter.getToDosOnUser.setData({ userId: user.id }, (old: any) => [
-        ...old,
-        newToDo.toDo,
-      ]);
+      ctx.userRouter.getToDosOnUser.setData(
+        { userId: user?.id || "" },
+        (old: any) => [...old, newToDo.toDo]
+      );
 
       return { prevData };
     },
-    // Invalidate the query after the mutation is complete to sync wit server
     onSettled() {
       ctx.userRouter.getToDosOnUser.invalidate({ userId: user.id });
     },
@@ -62,7 +69,6 @@ const ToDoComp = () => {
 
   const setCompletedMutation = api.userRouter.setToDoCompleted.useMutation({
     async onMutate(newTodo) {
-      // Optimistic update, delete the transaction from the list immediately
       await ctx.userRouter.getToDosOnUser.cancel();
       const prevData = ctx.userRouter.getToDosOnUser.getData({
         userId: user.id,
@@ -79,7 +85,6 @@ const ToDoComp = () => {
 
       return { prevData };
     },
-    // Invalidate the query after the mutation is complete to sync wit server
     onSettled() {
       ctx.userRouter.getToDosOnUser.invalidate({ userId: user.id });
     },
@@ -87,7 +92,6 @@ const ToDoComp = () => {
 
   const deleteTodoMutation = api.userRouter.deleteTodo.useMutation({
     async onMutate(todoId) {
-      // Optimistic update, delete the transaction from the list immediately
       await ctx.userRouter.getToDosOnUser.cancel();
       const prevData = ctx.userRouter.getToDosOnUser.getData({
         userId: user.id,
@@ -107,10 +111,13 @@ const ToDoComp = () => {
 
   if (isLoading || !isSuccess) {
     return (
-      <div className="mx-auto w-full rounded-md p-4">
-        <div className="flex animate-pulse space-x-4">
-          <div className="flex-1 space-y-6 py-1">
-            <div className="loading h-64 rounded"></div>
+      <div className="w-full rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="animate-pulse space-y-4">
+          <div className="h-6 w-3/4 rounded bg-gray-200"></div>
+          <div className="space-y-3">
+            <div className="h-12 rounded bg-gray-200"></div>
+            <div className="h-12 rounded bg-gray-200"></div>
+            <div className="h-12 rounded bg-gray-200"></div>
           </div>
         </div>
       </div>
@@ -132,6 +139,7 @@ const ToDoComp = () => {
       }
     );
     reset();
+    setOpenAddToDo(false);
   };
 
   const onComplete = (todoId: string) => {
@@ -172,144 +180,229 @@ const ToDoComp = () => {
     );
   };
 
-  function classNames(...classes: string[]) {
-    return classes.filter(Boolean).join(" ");
-  }
+  const activeTodos = todo.filter((t) => !t.completed);
+  const completedTodos = todo.filter((t) => t.completed);
+  const visibleTodos = showCompleted ? todo : activeTodos;
+
+  const formatDate = (date: Date) => {
+    const today = new Date();
+    const diffTime = date.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Tomorrow";
+    if (diffDays === -1) return "Yesterday";
+    if (diffDays < 0) return `${Math.abs(diffDays)} days ago`;
+    return `${diffDays} days`;
+  };
+
+  const isOverdue = (date: Date) => {
+    const today = new Date();
+    return date < today && date.toDateString() !== today.toDateString();
+  };
 
   return (
-    <div className="course-card text-color relative mb-2 h-full w-full rounded-xl p-8">
-      <div>
-        {deleteTodoMutation.isError && (
-          <Badge icon={HiInformationCircle} color="failure">
-            Failed to delete Todo
-          </Badge>
-        )}
-      </div>
-      <div>
-        {addToDoMutation.isError && (
-          <Badge icon={HiInformationCircle} color="failure">
-            Failed to add Todo
-          </Badge>
-        )}
-      </div>
-      <div>
-        {setCompletedMutation.isError && (
-          <Badge icon={HiInformationCircle} color="failure">
-            Failed to complete Todo
-          </Badge>
-        )}
-      </div>
-      <div className="tems-center mx-8 mb-8 mt-2 grid grid-cols-2 grid-rows-1">
-        <h1 className="col-start-1 mx-auto flex items-center text-4xl font-semibold">
-          Exercise <p className="text-blue-color">Planner</p>
-        </h1>
+    <div className="w-full rounded-xl border border-gray-200 bg-white shadow-sm">
+      {/* Header */}
+      <div className="border-b border-gray-200 p-6">
+        <div className="mb-2 flex items-center gap-2">
+          <ClipboardList className="h-5 w-5 text-blue-600" />
+          <h2 className="text-lg font-bold text-gray-900">Task Planner</h2>
+        </div>
+        <p className="text-sm text-gray-600">
+          Organize your assignments and deadlines
+        </p>
       </div>
 
-      {todo.length > 0 ? (
-        <div className={`mb-2 grid grid-rows-${todo.length}`}>
-          {todo.map((item, index) => {
-            return (
+      {/* Error Messages */}
+      {(deleteTodoMutation.isError ||
+        addToDoMutation.isError ||
+        setCompletedMutation.isError) && (
+        <div className="mx-6 mt-4 rounded-lg border border-red-200 bg-red-50 p-3">
+          <div className="flex items-center gap-2 text-red-800">
+            <AlertCircle className="h-4 w-4" />
+            <span className="text-sm font-medium">
+              {deleteTodoMutation.isError && "Failed to delete task"}
+              {addToDoMutation.isError && "Failed to add task"}
+              {setCompletedMutation.isError && "Failed to complete task"}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Content */}
+      <div className="p-6">
+        {/* Stats */}
+        <div className="mb-6 grid grid-cols-2 gap-4">
+          <div className="rounded-lg bg-blue-50 p-4">
+            <div className="text-2xl font-bold text-blue-900">
+              {activeTodos.length}
+            </div>
+            <div className="text-sm text-blue-700">Active Tasks</div>
+          </div>
+          <div className="rounded-lg bg-green-50 p-4">
+            <div className="text-2xl font-bold text-green-900">
+              {completedTodos.length}
+            </div>
+            <div className="text-sm text-green-700">Completed</div>
+          </div>
+        </div>
+
+        {/* Task List */}
+        <div className="mb-6 space-y-3">
+          {visibleTodos.length > 0 ? (
+            visibleTodos.map((item, index) => (
               <div
-                key={index}
-                className={
-                  !showCompleted && item.completed
-                    ? `hidden`
-                    : `grid grid-cols-5 row-start-${
-                        index + 1
-                      } mb-3 flex flex-row items-end border-b py-2 dark:border-zinc-700 ${
-                        item.completed && `opacity-50`
-                      }`
-                }
+                key={item.todoId}
+                className={`flex items-center gap-3 rounded-lg border p-4 transition-all hover:shadow-sm ${
+                  item.completed
+                    ? "border-green-200 bg-green-50"
+                    : isOverdue(item.dueDate)
+                    ? "border-red-200 bg-red-50"
+                    : "border-gray-200 bg-white hover:border-blue-200"
+                }`}
               >
-                <p className={`col-start-1 col-end-3 font-semibold`}>
-                  {item.name}
-                </p>
-                <p className="text-color-light col-start-3 col-end-5 text-sm">
-                  {item.dueDate.toLocaleDateString("no-NO", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                  })}
-                </p>
-                <div className="col-start-5 mr-2 flex flex-row items-center gap-4 place-self-end">
+                {/* Checkbox */}
+                <button
+                  onClick={() => onComplete(item.todoId)}
+                  className={`flex-shrink-0 transition-colors ${
+                    item.completed
+                      ? "text-green-600"
+                      : "text-gray-400 hover:text-blue-600"
+                  }`}
+                >
+                  {item.completed ? (
+                    <CheckCircle2 className="h-5 w-5" />
+                  ) : (
+                    <Circle className="h-5 w-5" />
+                  )}
+                </button>
+
+                {/* Task Content */}
+                <div className="flex-1">
                   <div
-                    onClick={() => onComplete(item.todoId)}
-                    className={`${
+                    className={`font-medium ${
                       item.completed
-                        ? `border-[#988efe] opacity-75`
-                        : `border-zinc-300`
-                    } grid h-6 w-6 cursor-pointer rounded-lg  border-2 bg-white hover:border-[#627bfc] dark:bg-[#fcfcfc]`}
+                        ? "text-gray-500 line-through"
+                        : "text-gray-900"
+                    }`}
                   >
-                    {item.completed ? (
-                      <div className=" h-4 w-4 place-self-center rounded-md bg-[#988efe]"></div>
-                    ) : (
-                      <></>
-                    )}
+                    {item.name}
                   </div>
-                  <TrashIcon
-                    onClick={() => onDeleteTodo(item.todoId)}
-                    className={classNames(
-                      !item.completed ? `opacity-50` : ``,
-                      `h-4 w-4 cursor-pointer`
-                    )}
+                  <div className="mt-1 flex items-center gap-1">
+                    <Calendar className="h-3 w-3 text-gray-400" />
+                    <span
+                      className={`text-xs ${
+                        isOverdue(item.dueDate) && !item.completed
+                          ? "font-medium text-red-600"
+                          : "text-gray-500"
+                      }`}
+                    >
+                      {formatDate(item.dueDate)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Delete Button */}
+                <button
+                  onClick={() => onDeleteTodo(item.todoId)}
+                  className="flex-shrink-0 text-gray-400 transition-colors hover:text-red-600"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ))
+          ) : (
+            <div className="py-8 text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+                <ClipboardList className="h-8 w-8 text-gray-400" />
+              </div>
+              <h3 className="mb-2 text-lg font-semibold text-gray-900">
+                No tasks yet
+              </h3>
+              <p className="text-gray-600">
+                Add your first task to get started!
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Add New Task */}
+        <div className="border-t border-gray-200 pt-4">
+          {!openAddToDo ? (
+            <button
+              onClick={() => setOpenAddToDo(true)}
+              className="flex w-full items-center gap-2 rounded-lg border-2 border-dashed border-gray-300 p-4 text-gray-600 transition-colors hover:border-blue-400 hover:text-blue-600"
+            >
+              <Plus className="h-5 w-5" />
+              Add new task
+            </button>
+          ) : (
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">
+                    Task Name
+                  </label>
+                  <input
+                    {...register("name")}
+                    type="text"
+                    required
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    placeholder="Enter task name..."
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">
+                    Due Date
+                  </label>
+                  <input
+                    {...register("dueDate", { valueAsDate: true })}
+                    type="date"
+                    required
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
               </div>
-            );
-          })}
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Task
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpenAddToDo(false);
+                    reset();
+                  }}
+                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
         </div>
-      ) : (
-        <div className="mb-2 text-sm font-semibold">
-          Add your first to do by clicking the plus sign!{" "}
-        </div>
-      )}
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="mb-2 flex grid grid-cols-10 grid-rows-1 flex-row"
-      >
-        <PlusIcon
-          onClick={() => setOpenAddToDo(!openAddToDo)}
-          className="col-start-1 col-end-2 h-7 w-7 cursor-pointer self-center"
-        />
-        {openAddToDo ? (
-          <div className="col-start-2 col-end-10 grid grid-cols-5">
-            <input
-              required
-              type="text"
-              {...register("name")}
-              id="name"
-              className="text-color-light col-start-1 col-end-3 mr-1 rounded border-0 opacity-75 dark:bg-[#212124]"
-              placeholder="Your todo.."
-            ></input>
 
-            <input
-              type="date"
-              {...register("dueDate", { valueAsDate: true })}
-              id="dueDate"
-              required
-              className="text-color-light col-start-3 col-end-5 rounded border-0 dark:bg-[#212124]"
-            ></input>
+        {/* Toggle Completed */}
+        {completedTodos.length > 0 && (
+          <div className="mt-4 border-t border-gray-200 pt-4">
             <button
-              type="submit"
-              className="col-start-5 place-self-end self-center rounded bg-[#627bfc] px-2 py-1 text-sm font-semibold text-white opacity-80"
+              onClick={() => setShowCompleted(!showCompleted)}
+              className="flex items-center gap-2 text-sm text-gray-600 transition-colors hover:text-gray-900"
             >
-              ADD
+              {showCompleted ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+              {showCompleted ? "Hide" : "Show"} completed tasks (
+              {completedTodos.length})
             </button>
           </div>
-        ) : (
-          <></>
-        )}{" "}
-      </form>
-
-      <div
-        onClick={() => setShowCompleted(!showCompleted)}
-        className="text-color-light absolute bottom-4 right-8 flex cursor-pointer flex-row gap-2 text-sm"
-      >
-        <p>{showCompleted ? "Hide completed tasks" : "Show completed tasks"}</p>
-        {showCompleted ? (
-          <EyeSlashIcon className="h-4 w-4 place-self-center" />
-        ) : (
-          <EyeIcon className="h-4 w-4 place-self-center" />
         )}
       </div>
     </div>

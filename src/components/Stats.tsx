@@ -1,15 +1,15 @@
 import {
-  ArrowTrendingUpIcon,
-  ArrowTrendingDownIcon,
-} from "@heroicons/react/24/solid";
+  TrendingUp,
+  TrendingDown,
+  Target,
+  BookOpen,
+  Code,
+  Activity,
+} from "lucide-react";
 import { type } from "@prisma/client";
 import { useAuth } from "../contexts/AuthContext";
 import { api } from "../utils/api";
 import { summary } from "date-streaks";
-
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(" ");
-}
 
 const Stats = () => {
   const {
@@ -20,10 +20,13 @@ const Stats = () => {
 
   if (historyIsLoading || !historyIsSuccess) {
     return (
-      <div className="mx-auto w-full rounded-md p-4">
-        <div className="flex animate-pulse space-x-4">
-          <div className="flex-1 space-y-6 py-1">
-            <div className="loading h-60 rounded"></div>
+      <div className="w-full rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="animate-pulse space-y-4">
+          <div className="h-6 w-3/4 rounded bg-gray-200"></div>
+          <div className="space-y-3">
+            <div className="h-20 rounded bg-gray-200"></div>
+            <div className="h-20 rounded bg-gray-200"></div>
+            <div className="h-20 rounded bg-gray-200"></div>
           </div>
         </div>
       </div>
@@ -59,7 +62,6 @@ const Stats = () => {
       .map((e) => e.attempts);
 
     const sum = attempts.reduce((a, b) => a! + b!, 0);
-
     return Math.round(sum ? sum / attempts.length : 0);
   };
 
@@ -74,7 +76,6 @@ const Stats = () => {
       )
       .map((e) => e.attempts);
     const sum = attempts.reduce((a, b) => a! + b!, 0);
-
     return Math.round(sum ? sum / attempts.length : 0);
   };
 
@@ -141,251 +142,127 @@ const Stats = () => {
 
   const currentStreak = summary(datesDoneExercises).currentStreak;
 
-  return (
-    <div className="text-color  cursor-pointer rounded-lg">
-      <div className="mb-8 mt-4">
-        <p className="text-md font-semibold uppercase">Exercises done</p>
-        <p className="text-color-light text-sm font-semibold uppercase ">
-          Last 7 days compared to the 7 days before
-        </p>
-        <div className="course-card mt-2 grid grid-cols-3 divide-x rounded px-2 py-4 dark:divide-gray-400">
-          <div className="grid grid-cols-2 justify-items-stretch">
-            <p className="col-start-1 row-start-1 text-sm font-semibold">
-              Examples
-            </p>
-            <div className="col-start-1 row-start-2 flex flex-row text-xs">
-              <p className="text-blue-color mr-1 font-semibold">
-                {StatsWithType(type.EXAMPLE).doneLast7Days}
-              </p>{" "}
-              <p className="text-color-light ">
-                from {StatsWithType(type.EXAMPLE).done7DaysBefore}
-              </p>
-            </div>
-            <div className="col-start-2 row-span-2 mr-2 flex items-center justify-self-end">
-              <div
-                className={classNames(
-                  StatsWithType(type.EXAMPLE).changeInPercentage > 0 &&
-                    StatsWithType(type.EXAMPLE).doneLast7Days >
-                      StatsWithType(type.EXAMPLE).done7DaysBefore
-                    ? "bg-[#0de890] text-gray-700"
-                    : "bg-[#DE5B7E] text-white",
-                  "flex flex-row items-center rounded ",
-                  StatsWithType(type.EXAMPLE).changeInPercentage === 100
-                    ? "w-15"
-                    : "w-14"
-                )}
-              >
-                {StatsWithType(type.EXAMPLE).changeInPercentage > 0 &&
-                StatsWithType(type.EXAMPLE).doneLast7Days >
-                  StatsWithType(type.EXAMPLE).done7DaysBefore ? (
-                  <ArrowTrendingUpIcon className="mx-1 h-4 w-4 text-gray-700 " />
-                ) : (
-                  <ArrowTrendingDownIcon className="mx-1 h-4 w-4 text-white " />
-                )}
-                <p className="text-sm font-semibold">
-                  {Math.abs(StatsWithType(type.EXAMPLE).changeInPercentage)}%
-                </p>
-              </div>
-            </div>
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case "EXAMPLE":
+        return <BookOpen className="h-5 w-5" />;
+      case "CHALLENGE":
+        return <Target className="h-5 w-5" />;
+      case "CODING":
+        return <Code className="h-5 w-5" />;
+      default:
+        return <Activity className="h-5 w-5" />;
+    }
+  };
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case "EXAMPLE":
+        return "text-blue-600 bg-blue-50 border-blue-200";
+      case "CHALLENGE":
+        return "text-purple-600 bg-purple-50 border-purple-200";
+      case "CODING":
+        return "text-green-600 bg-green-50 border-green-200";
+      default:
+        return "text-gray-600 bg-gray-50 border-gray-200";
+    }
+  };
+
+  const StatCard = ({ type, title }: { type: string; title: string }) => {
+    const stats = StatsWithType(type);
+    const attempts = exerciseAttempts(type as type);
+    const isPositive =
+      stats.changeInPercentage > 0 &&
+      stats.doneLast7Days > stats.done7DaysBefore;
+
+    return (
+      <div
+        className={`rounded-xl border p-4 transition-all hover:shadow-md ${getTypeColor(
+          type
+        )}`}
+      >
+        <div className="mb-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {getTypeIcon(type)}
+            <h3 className="text-sm font-semibold">{title}</h3>
           </div>
-          <div className="grid grid-cols-2 justify-items-stretch pl-2">
-            <p className="col-start-1 row-start-1 text-sm font-semibold">
-              Challenges
-            </p>
-            <div className="col-start-1 row-start-2 flex flex-row text-xs">
-              <p className="text-blue-color mr-1 font-semibold">
-                {StatsWithType(type.CHALLENGE).doneLast7Days}
-              </p>{" "}
-              <p className="text-color-light ">
-                from {Math.abs(StatsWithType(type.CHALLENGE).done7DaysBefore)}
-              </p>
-            </div>
-            <div className="col-start-2 row-span-2 mr-2 flex items-center justify-self-end">
-              <div
-                className={classNames(
-                  StatsWithType(type.CHALLENGE).changeInPercentage > 0
-                    ? "bg-[#0de890] text-gray-700"
-                    : "bg-[#DE5B7E] text-white",
-                  "flex flex-row items-center rounded",
-                  StatsWithType(type.CHALLENGE).changeInPercentage === 100
-                    ? "w-15"
-                    : "w-14"
-                )}
-              >
-                {StatsWithType(type.CHALLENGE).changeInPercentage > 0 &&
-                StatsWithType(type.CHALLENGE).doneLast7Days >
-                  StatsWithType(type.CHALLENGE).done7DaysBefore ? (
-                  <ArrowTrendingUpIcon className="mx-1 h-4 w-4 text-gray-700 " />
-                ) : (
-                  <ArrowTrendingDownIcon className="mx-1 h-4 w-4 text-white " />
-                )}
-                <p className="text-sm font-semibold">
-                  {StatsWithType(type.CHALLENGE).changeInPercentage}%
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 justify-items-stretch pl-2">
-            <p className="col-start-1 row-start-1 text-sm font-semibold">
-              Coding Ex.
-            </p>
-            <div className="col-start-1 row-start-2 flex flex-row text-xs">
-              <p className="text-blue-color mr-1 font-semibold">
-                {StatsWithType(type.CODING).doneLast7Days}
-              </p>{" "}
-              <p className="text-color-light ">
-                from {StatsWithType(type.CODING).done7DaysBefore}
-              </p>
-            </div>
-            <div className="col-start-2 row-span-2 mr-2 flex items-center justify-self-end">
-              <div
-                className={classNames(
-                  StatsWithType(type.CODING).changeInPercentage > 0
-                    ? "bg-[#0de890] text-gray-700"
-                    : "bg-[#DE5B7E] text-white",
-                  "flex flex-row items-center rounded",
-                  StatsWithType(type.CODING).changeInPercentage === 100
-                    ? "w-15"
-                    : "w-14"
-                )}
-              >
-                {StatsWithType(type.CODING).changeInPercentage > 0 &&
-                StatsWithType(type.CODING).doneLast7Days >
-                  StatsWithType(type.CODING).done7DaysBefore ? (
-                  <ArrowTrendingUpIcon className="mx-1 h-4 w-4 text-gray-700 " />
-                ) : (
-                  <ArrowTrendingDownIcon className="mx-1 h-4 w-4 text-white " />
-                )}
-                <p className="text-sm font-semibold">
-                  {Math.abs(StatsWithType(type.CODING).changeInPercentage)}%
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="my-6">
-        <p className="text-md font-semibold uppercase">
-          Average attempts on exercises
-        </p>
-        <p className="text-color-light text-sm font-semibold uppercase ">
-          Last 7 days compared to the 7 days before
-        </p>
-        <div className="course-card mt-2 grid grid-cols-2 divide-x rounded px-2 py-4 dark:divide-gray-400">
-          <div className="grid grid-cols-2 justify-items-stretch pl-2">
-            <p className="col-start-1 row-start-1 text-sm font-semibold">
-              Challenges
-            </p>
-            <div className="col-start-1 row-start-2 flex flex-row text-xs">
-              <p className="text-blue-color mr-1 font-semibold">
-                {exerciseAttempts(type.CHALLENGE).attemptsLast7Days}
-              </p>{" "}
-              <p className="text-color-light ">
-                from {exerciseAttempts(type.CHALLENGE).attempts7DaysBefore}
-              </p>
-            </div>
-            <div className="col-start-2 row-span-2 mr-2 flex items-center justify-self-end">
-              <div
-                className={classNames(
-                  exerciseAttempts(type.CHALLENGE).attempts7DaysBefore >
-                    exerciseAttempts(type.CHALLENGE).attemptsLast7Days ||
-                    exerciseAttempts(type.CHALLENGE).changeInPercentage == 0
-                    ? "bg-[#0de890] text-gray-700"
-                    : "bg-[#DE5B7E] text-white",
-                  "flex flex-row items-center rounded"
-                )}
-              >
-                {" "}
-                {exerciseAttempts(type.CHALLENGE).attempts7DaysBefore >
-                  exerciseAttempts(type.CHALLENGE).attemptsLast7Days ||
-                exerciseAttempts(type.CHALLENGE).changeInPercentage == 0 ? (
-                  <ArrowTrendingDownIcon className="mx-1 h-4 w-4 text-gray-700 " />
-                ) : (
-                  <ArrowTrendingUpIcon className="mx-1 h-4 w-4 text-white " />
-                )}
-                <p className="text-sm font-semibold">
-                  {Math.abs(
-                    exerciseAttempts(type.CHALLENGE).changeInPercentage
-                  )}
-                  %
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 justify-items-stretch pl-2">
-            <p className="col-start-1 row-start-1  text-sm font-semibold">
-              Coding Ex.
-            </p>
-            <div className="col-start-1 row-start-2 flex flex-row text-xs">
-              <p className="text-blue-color mr-1 font-semibold">
-                {exerciseAttempts(type.CODING).attemptsLast7Days}
-              </p>{" "}
-              <p className="text-color-light ">
-                from {exerciseAttempts(type.CODING).attempts7DaysBefore}
-              </p>
-            </div>
-            <div className="col-start-2 row-span-2 mr-2 flex items-center justify-self-end">
-              <div
-                className={classNames(
-                  exerciseAttempts(type.CODING).attempts7DaysBefore >
-                    exerciseAttempts(type.CODING).attemptsLast7Days ||
-                    exerciseAttempts(type.CODING).changeInPercentage == 0
-                    ? "bg-[#0de890] text-gray-700"
-                    : "bg-[#DE5B7E] text-white",
-                  "flex flex-row items-center rounded"
-                )}
-              >
-                {exerciseAttempts(type.CODING).attempts7DaysBefore >
-                  exerciseAttempts(type.CODING).attemptsLast7Days ||
-                exerciseAttempts(type.CODING).changeInPercentage == 0 ? (
-                  <ArrowTrendingDownIcon className="mx-1 h-4 w-4 text-gray-700 " />
-                ) : (
-                  <ArrowTrendingUpIcon className="text-gray-white mx-1 h-4 w-4 " />
-                )}
-                <p className="text-sm font-semibold">
-                  {Math.abs(exerciseAttempts(type.CODING).changeInPercentage)}%
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="my-4 flex flex-row justify-center text-sm uppercase">
-        <div className="flex flex-row justify-self-center">
-          <p>Current streak</p>
-          <p className="ml-2 font-semibold uppercase">
-            {currentStreak} {currentStreak == 1 ? "day" : "days"} 🔥
-          </p>
-        </div>
-        {/* <div className="flex flex-row justify-self-center"><p>Longest streak</p><p className="ml-2 uppercase font-semibold"> 6 days 🔥</p></div> */}
-      </div>
-      <div className="my-4 flex flex-row justify-center font-semibold uppercase">
-        <p>You did</p>
-        {!(
-          exercisesDoneLast7Days.length === exercisesDone7DaysBefore.length
-        ) && (
           <div
-            className={classNames(
-              exercisesDone7DaysBefore < exercisesDoneLast7Days
-                ? "bg-[#0de890] text-gray-700"
-                : "bg-[#DE5B7E] text-white",
-              "mx-2 w-12 rounded "
-            )}
+            className={`flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold ${
+              isPositive
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-800"
+            }`}
           >
-            <p className="text-center">
-              {Math.abs(
-                exercisesDoneLast7Days.length - exercisesDone7DaysBefore.length
-              )}
-            </p>
+            {isPositive ? (
+              <TrendingUp className="h-3 w-3" />
+            ) : (
+              <TrendingDown className="h-3 w-3" />
+            )}
+            {Math.abs(stats.changeInPercentage)}%
           </div>
-        )}
-        <p>
-          {exercisesDone7DaysBefore === exercisesDoneLast7Days
-            ? "the same amount of exercises as last week 📈"
-            : exercisesDone7DaysBefore < exercisesDoneLast7Days
-            ? " exercises more than last week 📈"
-            : " exercises less than last week 📉"}
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl font-bold text-gray-900">
+              {stats.doneLast7Days}
+            </span>
+            <span className="text-sm text-gray-600">completed</span>
+          </div>
+          <div className="text-xs text-gray-500">
+            vs {stats.done7DaysBefore} last week
+          </div>
+          <div className="border-t border-gray-200 pt-2">
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-600">Avg attempts:</span>
+              <span className="font-semibold">
+                {attempts.attemptsLast7Days}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="w-full rounded-xl border border-gray-200 bg-white shadow-sm">
+      {/* Header */}
+      <div className="border-b border-gray-200 p-6">
+        <div className="mb-2 flex items-center gap-2">
+          <Activity className="h-5 w-5 text-blue-600" />
+          <h2 className="text-lg font-bold text-gray-900">Performance Stats</h2>
+        </div>
+        <p className="text-sm text-gray-600">
+          Last 7 days compared to previous week
         </p>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="p-6">
+        <div className="grid gap-4 md:grid-cols-3">
+          <StatCard type="EXAMPLE" title="Examples" />
+          <StatCard type="CHALLENGE" title="Challenges" />
+          <StatCard type="CODING" title="Coding" />
+        </div>
+
+        {/* Current Streak */}
+        <div className="mt-6 rounded-xl border border-orange-200 bg-orange-50 p-4">
+          <div className="mb-2 flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-100">
+              🔥
+            </div>
+            <div>
+              <h3 className="font-semibold text-orange-900">Current Streak</h3>
+              <p className="text-sm text-orange-700">
+                Keep the momentum going!
+              </p>
+            </div>
+          </div>
+          <div className="text-2xl font-bold text-orange-900">
+            {currentStreak} day{currentStreak !== 1 ? "s" : ""}
+          </div>
+        </div>
       </div>
     </div>
   );

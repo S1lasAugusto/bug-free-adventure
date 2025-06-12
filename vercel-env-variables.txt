@@ -1,0 +1,14 @@
+# ========================================
+# VARIÁVEIS DE AMBIENTE PARA O VERCEL
+# ========================================
+
+DATABASE_URL=postgresql://postgres.ybdezzbkmikwkgrowwax:xHPyYAxtNSi6eC22@aws-0-us-east-2.pooler.supabase.com:6543/postgres?pgbouncer=true
+
+DIRECT_URL=postgresql://postgres.ybdezzbkmikwkgrowwax:xHPyYAxtNSi6eC22@aws-0-us-east-2.pooler.supabase.com:5432/postgres
+
+JWT_SECRET=minha-chave-super-secreta-jwt-production-2025-bug-free-adventure
+
+NEXTAUTH_SECRET=outra-chave-diferente-nextauth-production-2025-vercel-deploy
+
+# Após o primeiro deploy, adicione:
+# NEXTAUTH_URL=https://seu-dominio.vercel.app 

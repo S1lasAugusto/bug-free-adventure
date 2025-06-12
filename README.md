@@ -62,16 +62,20 @@ DIRECT_URL="postgresql://postgres.[ref]:[password]@aws-0-us-east-2.pooler.supaba
 
 ### 2. Database Schema Setup
 
+**Important**: Use the DIRECT_URL (port 5432) for schema operations:
+
 ```bash
 # Generate Prisma client
 npx prisma generate
 
-# Push schema to Supabase (creates all tables)
-npx prisma db push
+# Push schema to Supabase (creates all tables) - using direct connection
+DATABASE_URL="postgresql://postgres.ybdezzbkmikwkgrowwax:xHPyYAxtNSi6eC22@aws-0-us-east-2.pooler.supabase.com:5432/postgres" npx prisma db push
 
-# Populate with initial data (Java course + 850+ activities)
-npm run db:seed
+# Populate with initial data (Java course + 850+ activities) - using direct connection
+DATABASE_URL="postgresql://postgres.ybdezzbkmikwkgrowwax:xHPyYAxtNSi6eC22@aws-0-us-east-2.pooler.supabase.com:5432/postgres" npx prisma db seed
 ```
+
+**Note**: The pooled connection (port 6543) is used for application runtime, while the direct connection (port 5432) is required for schema migrations and seeding.
 
 ### 3. Database Tables Created
 
@@ -117,10 +121,26 @@ npm run dev
 
 ## 🌐 Deployment (Vercel)
 
+### Environment Variables Configuration
+
+Add these exact variables in Vercel dashboard:
+
+```env
+DATABASE_URL=postgresql://postgres.ybdezzbkmikwkgrowwax:xHPyYAxtNSi6eC22@aws-0-us-east-2.pooler.supabase.com:6543/postgres?pgbouncer=true
+DIRECT_URL=postgresql://postgres.ybdezzbkmikwkgrowwax:xHPyYAxtNSi6eC22@aws-0-us-east-2.pooler.supabase.com:5432/postgres
+JWT_SECRET=minha-chave-super-secreta-jwt-production-2025-bug-free-adventure
+NEXTAUTH_SECRET=outra-chave-diferente-nextauth-production-2025-vercel-deploy
+NEXTAUTH_URL=https://your-project.vercel.app
+```
+
+### Deployment Steps
+
 1. Push to GitHub
 2. Import to Vercel
-3. Add environment variables
+3. Add environment variables above
 4. Deploy automatically
+5. After first deploy, update `NEXTAUTH_URL` with actual Vercel URL
+6. Redeploy
 
 ## 🔌 External API Integration
 

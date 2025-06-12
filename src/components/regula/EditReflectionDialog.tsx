@@ -459,6 +459,7 @@ export function EditReflectionDialog({
                       comment: e.target.value,
                     }))
                   }
+                  className="selectable"
                 />
               </div>
             </div>

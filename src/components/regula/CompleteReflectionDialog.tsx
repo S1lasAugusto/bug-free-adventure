@@ -84,7 +84,7 @@ export function CompleteReflectionDialog({
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="selectable mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             rows={3}
           />
         </div>

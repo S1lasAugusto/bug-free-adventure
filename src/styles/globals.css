@@ -2,7 +2,65 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  /* Prevent text selection by default for better UX - targets UI elements */
+  *:not(input):not(textarea):not([contenteditable]):not(.selectable) {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  /* Ensure interactive elements remain selectable */
+  input,
+  textarea,
+  [contenteditable],
+  [contenteditable="true"] {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+  }
+
+  /* Allow text selection for content that should be selectable */
+  .selectable,
+  .selectable *,
+  code,
+  pre {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+  }
+
+  /* Buttons should not be selectable */
+  button,
+  [role="button"],
+  .btn {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+}
+
 @layer components {
+  /* Non-selectable utility class */
+  .no-select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  /* Selectable utility class */
+  .allow-select {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+  }
+
   .background-color {
     @apply bg-[#f9f9fb] dark:bg-[#2a2d2f];
   }

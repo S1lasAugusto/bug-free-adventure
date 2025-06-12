@@ -391,7 +391,7 @@ const Settings: NextPage = () => {
                       <input
                         {...register("name")}
                         type="text"
-                        defaultValue={userPreferences.user.name}
+                        defaultValue={userPreferences?.user?.name || ""}
                         id="name"
                         className={classNames(
                           errors.name

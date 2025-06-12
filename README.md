@@ -1,359 +1,158 @@
-# 🚀 Bug Free Adventure - Sistema de Aprendizado Adaptativo
+# 🚀 Bug Free Adventure - Adaptive Learning Platform
 
-Uma plataforma moderna de aprendizado personalizada construída com Next.js, tRPC, Prisma e integração com API externa para tracking de progresso em exercícios de programação Java.
+A modern learning platform built with Next.js, tRPC, Prisma, and external API integration for Java programming exercise tracking.
 
-## 📋 Índice
+## 🎯 Overview
 
-- [Visão Geral](#-visão-geral)
-- [Funcionalidades](#-funcionalidades)
-- [Stack Tecnológica](#-stack-tecnológica)
-- [Configuração do Ambiente](#-configuração-do-ambiente)
-- [Configuração do Banco de Dados](#-configuração-do-banco-de-dados)
-- [Instalação e Execução](#-instalação-e-execução)
-- [Deploy no Vercel](#-deploy-no-vercel)
-- [Estrutura do Projeto](#-estrutura-do-projeto)
-- [API Externa](#-api-externa)
+**Bug Free Adventure** is a personalized learning platform for Java programming students. The system integrates with the external Adapt/Protus API to sync exercise progress and provides interactive dashboards for learning analytics.
 
-## 🎯 Visão Geral
+### Key Features
 
-O **Bug Free Adventure** é uma plataforma de aprendizado que oferece uma experiência personalizada para estudantes de programação Java. O sistema integra com a API externa Adapt/Protus para sincronizar progresso de exercícios e oferece dashboards interativos para acompanhamento do aprendizado.
+- **Custom JWT Authentication** (migrated from NextAuth)
+- **External API Integration** for exercise tracking
+- **Interactive Dashboard** with progress charts
+- **Personalized Onboarding** flow
+- **Todo Management** system
+- **Metacognitive Reflection System** (Regula)
+- **Leaderboard** for gamification
 
-### Principais Características:
+## 🛠 Tech Stack
 
-- **Autenticação JWT personalizada** (migrado do NextAuth)
-- **Integração com API externa** para tracking de exercícios
-- **Dashboard interativo** com gráficos de progresso
-- **Sistema de onboarding** personalizado
-- **Gestão de tarefas (ToDo)** integrada
-- **Sistema de reflexão metacognitiva (Regula)**
-- **Leaderboard** para gamificação
+- **Frontend**: Next.js 12, TypeScript, TailwindCSS, Chart.js
+- **Backend**: tRPC, Prisma ORM, PostgreSQL, JWT
+- **Deploy**: Vercel + Supabase
+- **External API**: Adapt/Protus Learning Analytics
 
-## ✨ Funcionalidades
-
-### 🔐 Sistema de Autenticação
-
-- Registro e login com email/senha
-- Tokens JWT armazenados no localStorage
-- Middleware de proteção de rotas
-- Redirecionamento automático para onboarding
-
-### 📚 Gestão de Cursos
-
-- Módulos organizados por curso (Java)
-- Exercícios categorizados (Examples, Challenges, Coding)
-- Tracking automático de progresso
-- Histórico de atividades visitadas e completadas
-
-### 📊 Analytics e Dashboards
-
-- Gráfico de atividades ao longo do tempo
-- Estatísticas de progresso
-- Cards de status de curso
-- Timeline de atividades recentes
-
-### 🎯 Sistema Regula (Metacognição)
-
-- Criação de planos de estudo
-- Sub-planos com estratégias personalizadas
-- Sistema de reflexões metacognitivas
-- Tracking de domínio por tópico
-
-### ✅ Gestão de Tarefas
-
-- Sistema de ToDo integrado
-- Datas de vencimento
-- Marcação de conclusão
-- Ordenação automática por prioridade
-
-## 🛠 Stack Tecnológica
-
-### Frontend
-
-- **Next.js 12.3.1** - Framework React
-- **TypeScript** - Tipagem estática
-- **TailwindCSS** - Estilização
-- **React Hook Form** - Gestão de formulários
-- **Chart.js** - Gráficos interativos
-- **Lucide React** - Ícones
-
-### Backend
-
-- **tRPC** - API type-safe
-- **Prisma ORM** - Database toolkit
-- **PostgreSQL** - Banco de dados
-- **JWT** - Autenticação
-- **bcryptjs** - Hash de senhas
-- **Zod** - Validação de schemas
-
-### Deploy e Infraestrutura
-
-- **Vercel** - Deploy e hosting
-- **Supabase** - PostgreSQL gerenciado
-- **GitHub** - Versionamento
-
-## ⚙️ Configuração do Ambiente
-
-### Variáveis de Ambiente Necessárias
-
-Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
-
-```env
-# Database URLs (Supabase)
-DATABASE_URL="postgresql://postgres.ybdezzbkmikwkgrowwax:SUA_SENHA@aws-0-us-east-2.pooler.supabase.com:6543/postgres?pgbouncer=true"
-DIRECT_URL="postgresql://postgres.ybdezzbkmikwkgrowwax:SUA_SENHA@aws-0-us-east-2.pooler.supabase.com:5432/postgres"
-
-# JWT Secret para autenticação
-JWT_SECRET="seu-jwt-secret-super-seguro-aqui"
-
-# NextAuth Secret (legacy)
-NEXTAUTH_SECRET="seu-nextauth-secret-aqui"
-NEXTAUTH_URL="http://localhost:3000"
-```
-
-### 📝 Descrição das Variáveis
-
-| Variável          | Descrição                                      | Exemplo                                                              |
-| ----------------- | ---------------------------------------------- | -------------------------------------------------------------------- |
-| `DATABASE_URL`    | URL de conexão pooled do Supabase (porta 6543) | postgresql://user:pass@host:6543/db?pgbouncer=true                   |
-| `DIRECT_URL`      | URL de conexão direta do Supabase (porta 5432) | postgresql://user:pass@host:5432/db                                  |
-| `JWT_SECRET`      | Chave secreta para assinar tokens JWT          | uma-string-aleatoria-muito-segura                                    |
-| `NEXTAUTH_SECRET` | Chave para NextAuth (legacy, ainda necessária) | outra-string-aleatoria-segura                                        |
-| `NEXTAUTH_URL`    | URL da aplicação                               | http://localhost:3000 (dev) ou https://seu-dominio.vercel.app (prod) |
-
-## 🗄️ Configuração do Banco de Dados
-
-### 1. Criação do Projeto no Supabase
-
-```bash
-# 1. Acesse https://supabase.com
-# 2. Crie uma nova organização
-# 3. Crie um novo projeto
-# 4. Defina uma senha para o banco
-# 5. Escolha a região (recomendado: us-east-1)
-```
-
-### 2. Configuração das URLs de Conexão
-
-O Supabase fornece duas URLs importantes:
-
-- **Pooled Connection (DATABASE_URL)**: Porta 6543 com pgbouncer
-- **Direct Connection (DIRECT_URL)**: Porta 5432 para migrações
-
-### 3. Comandos para Configurar o Banco
-
-```bash
-# Gerar o cliente Prisma
-npx prisma generate
-
-# Sincronizar schema com o banco (cria as tabelas)
-npx prisma db push
-
-# Popular o banco com dados iniciais
-npm run db:seed
-
-# Visualizar dados no Prisma Studio
-npx prisma studio
-```
-
-### 4. Estrutura do Banco Criada
-
-O comando `prisma db push` criará as seguintes tabelas:
-
-- **User** - Usuários do sistema
-- **UserPreference** - Preferências de usuário
-- **ExerciseHistory** - Histórico de exercícios
-- **ToDo** - Tarefas dos usuários
-- **GeneralPlan** - Planos gerais de estudo
-- **SubPlan** - Sub-planos específicos
-- **Reflection** - Reflexões metacognitivas
-- **Course** - Cursos disponíveis
-- **Module** - Módulos dos cursos
-- **ActivityResource** - Recursos/exercícios
-
-### 5. População Inicial (Seed)
-
-O comando `npm run db:seed` irá:
-
-```bash
-# Popular com dados do curso Java
-- Criar curso "Java Programming"
-- Criar 14 módulos (arrays, loops, conditionals, etc.)
-- Criar 850+ atividades de exemplo, desafios e coding
-- Mapear IDs compatíveis com a API externa
-```
-
-## 🚀 Instalação e Execução
-
-### 1. Clone o Repositório
-
-```bash
-git clone https://github.com/S1lasAugusto/bug-free-adventure.git
-cd bug-free-adventure
-```
-
-### 2. Instale as Dependências
-
-```bash
-npm install
-```
-
-### 3. Configure o Ambiente
-
-```bash
-# Copie o arquivo de exemplo
-cp .env.example .env
-
-# Edite com suas configurações
-nano .env
-```
-
-### 4. Configure o Banco de Dados
-
-```bash
-# Gere o cliente Prisma
-npx prisma generate
-
-# Sincronize o schema
-npx prisma db push
-
-# Popule com dados iniciais
-npm run db:seed
-```
-
-### 5. Execute em Desenvolvimento
-
-```bash
-npm run dev
-```
-
-A aplicação estará disponível em `http://localhost:3000`
-
-### 6. Build para Produção
-
-```bash
-npm run build
-npm start
-```
-
-## 🌐 Deploy no Vercel
-
-### 1. Configuração no Vercel
-
-```bash
-# 1. Faça push do código para GitHub
-git add .
-git commit -m "Deploy setup"
-git push origin main
-
-# 2. Acesse https://vercel.com
-# 3. Importe o repositório do GitHub
-# 4. Configure as variáveis de ambiente
-```
-
-### 2. Variáveis de Ambiente no Vercel
-
-No painel do Vercel, adicione:
-
-```env
-DATABASE_URL=postgresql://postgres.ybdezzbkmikwkgrowwax:SENHA@aws-0-us-east-2.pooler.supabase.com:6543/postgres?pgbouncer=true
-DIRECT_URL=postgresql://postgres.ybdezzbkmikwkgrowwax:SENHA@aws-0-us-east-2.pooler.supabase.com:5432/postgres
-JWT_SECRET=seu-jwt-secret
-NEXTAUTH_SECRET=seu-nextauth-secret
-NEXTAUTH_URL=https://seu-projeto.vercel.app
-```
-
-### 3. Build Settings
-
-O Vercel detectará automaticamente:
-
-- **Framework**: Next.js
-- **Build Command**: `npm run build`
-- **Install Command**: `npm install`
-- **Output Directory**: `.next`
-
-### 4. Deploy Automático
-
-Após a configuração, cada push para `main` fará deploy automático.
-
-## 📁 Estrutura do Projeto
+## 📁 Project Structure
 
 ```
 bug-free-adventure/
 ├── prisma/
-│   ├── schema.prisma          # Schema do banco
-│   └── seed.ts               # Dados iniciais
+│   ├── schema.prisma          # Database schema
+│   └── seed.ts               # Initial data population
 ├── src/
-│   ├── components/           # Componentes React
-│   │   ├── regula/          # Sistema Regula
-│   │   └── ...
-│   ├── contexts/            # Contextos React
-│   │   └── AuthContext.tsx  # Contexto de autenticação
-│   ├── pages/               # Páginas Next.js
-│   │   ├── api/             # API routes
-│   │   ├── auth/            # Páginas de autenticação
-│   │   └── ...
-│   ├── server/              # Configuração do servidor
-│   │   ├── api/             # Routers tRPC
-│   │   └── schema/          # Schemas Zod
-│   ├── styles/              # Estilos CSS
-│   └── utils/               # Utilitários
-├── .env                     # Variáveis de ambiente
-├── package.json            # Dependências
-└── README.md              # Este arquivo
+│   ├── components/           # React components
+│   │   ├── regula/          # Metacognitive system
+│   │   └── auth/            # Authentication components
+│   ├── contexts/
+│   │   └── AuthContext.tsx  # JWT authentication context
+│   ├── pages/               # Next.js pages
+│   │   ├── api/trpc/        # tRPC API routes
+│   │   ├── auth/            # Auth pages (login/register)
+│   │   ├── courses/         # Course modules
+│   │   └── onboarding/      # User onboarding
+│   ├── server/
+│   │   ├── api/routers/     # tRPC routers
+│   │   └── schema/          # Zod validation schemas
+│   └── utils/               # Utilities and API client
 ```
 
-## 🔌 API Externa
+## 🗄️ Supabase Database Setup
 
-### Integração com Adapt/Protus
+### 1. Initial Supabase Configuration
 
-O sistema integra com a API externa para sincronizar progresso:
+```bash
+# 1. Create project at https://supabase.com
+# 2. Get connection strings from Settings > Database
+# 3. Add to .env file:
+
+DATABASE_URL="postgresql://postgres.[ref]:[password]@aws-0-us-east-2.pooler.supabase.com:6543/postgres?pgbouncer=true"
+DIRECT_URL="postgresql://postgres.[ref]:[password]@aws-0-us-east-2.pooler.supabase.com:5432/postgres"
+```
+
+### 2. Database Schema Setup
+
+```bash
+# Generate Prisma client
+npx prisma generate
+
+# Push schema to Supabase (creates all tables)
+npx prisma db push
+
+# Populate with initial data (Java course + 850+ activities)
+npm run db:seed
+```
+
+### 3. Database Tables Created
+
+The `prisma db push` command creates these tables:
+
+- **User** - User accounts and preferences
+- **ExerciseHistory** - Activity tracking (visitedAt, completedAt, attempts)
+- **ActivityResource** - Course exercises (Examples, Challenges, Coding)
+- **Module** - Course modules (arrays, loops, conditionals, etc.)
+- **Course** - Course structure
+- **ToDo** - User task management
+- **SubPlan/GeneralPlan** - Study planning
+- **Reflection** - Metacognitive reflections
+
+## ⚙️ Environment Variables
+
+```env
+# Supabase Database
+DATABASE_URL="your-pooled-connection-string"
+DIRECT_URL="your-direct-connection-string"
+
+# JWT Authentication
+JWT_SECRET="your-jwt-secret"
+NEXTAUTH_SECRET="your-nextauth-secret"
+NEXTAUTH_URL="http://localhost:3000"
+```
+
+## 🚀 Quick Start
+
+```bash
+# Clone and install
+git clone https://github.com/S1lasAugusto/bug-free-adventure.git
+cd bug-free-adventure
+npm install
+
+# Setup database
+npx prisma db push
+npm run db:seed
+
+# Run development server
+npm run dev
+```
+
+## 🌐 Deployment (Vercel)
+
+1. Push to GitHub
+2. Import to Vercel
+3. Add environment variables
+4. Deploy automatically
+
+## 🔌 External API Integration
+
+Integrates with Adapt/Protus API for progress tracking:
 
 ```typescript
-// URL da API
+// API endpoint
 const API_URL = "http://adapt2.sis.pitt.edu/aggregate2/GetContentLevels";
 
-// Parâmetros
-const params = {
-  usr: user.protusId, // ID do usuário no sistema externo
-  grp: "NorwaySpring2025A", // Grupo do curso
-  mod: "user", // Modo de operação
-  sid: "TEST", // Session ID
-  cid: "352", // Course ID
-  lastActivityId: "while_loops.j_digits",
-  res: "-1",
-};
+// Syncs user progress data
+// Maps to Examples, Challenges, Coding categories
+// Tracks visitedAt, completedAt, attempts
 ```
 
-### Mapeamento de Dados
+## 📊 Key Commands Used
 
-A API retorna progresso que é mapeado para:
+```bash
+# Database setup
+npx prisma generate        # Generate client
+npx prisma db push         # Create tables in Supabase
+npm run db:seed           # Populate initial data
+npx prisma studio         # View data
 
-- **Examples** - Exercícios de exemplo
-- **Challenges** - Desafios de programação
-- **Coding** - Exercícios de código
+# Development
+npm run dev               # Start dev server
+npm run build             # Build for production
 
-### Tracking Automático
-
-- **visitedAt**: Definido quando usuário clica em exercício
-- **completedAt**: Sincronizado da API externa quando exercício é concluído
-- **attempts**: Número de tentativas do usuário
-
-## 🤝 Contribuição
-
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
-
-## 🆘 Suporte
-
-Para suporte, envie um email para `seu-email@exemplo.com` ou abra uma issue no GitHub.
+# Database management
+npx prisma migrate dev    # Create new migration
+npx prisma db pull        # Pull schema from database
+```
 
 ---
 
-**Desenvolvido com ❤️ usando T3 Stack**
+**Built with T3 Stack** - Next.js, TypeScript, tRPC, Prisma, TailwindCSS

@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { useAuth } from "../../contexts/AuthContext";
 import toast from "react-hot-toast";
-import { Eye, EyeOff, Mail, Lock, ArrowRight, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -43,11 +43,15 @@ export default function Login() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="mb-8 text-center">
-          <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600">
-            <Sparkles className="h-8 w-8 text-white" />
+          <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-blue-200 bg-white p-2 shadow-lg">
+            <img
+              src="/logo.svg"
+              alt="Progressor Logo"
+              className="h-full w-auto"
+            />
           </div>
           <h1 className="mb-2 text-3xl font-bold text-gray-900">
-            Welcome Back
+            Welcome to Progresso
           </h1>
           <p className="text-gray-600">Sign in to your account to continue</p>
         </div>
@@ -177,26 +181,10 @@ export default function Login() {
               className="group flex w-full items-center justify-center rounded-xl border-2 border-gray-200 bg-white px-4 py-3 font-medium text-gray-700 shadow-sm transition-all duration-200 hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               <div className="flex items-center">
-                <Sparkles className="mr-2 h-4 w-4 text-blue-600 group-hover:text-blue-700" />
                 Create New Account
                 <ArrowRight className="ml-2 h-4 w-4 text-blue-600 transition-transform duration-200 group-hover:translate-x-1" />
               </div>
             </Link>
-          </div>
-        </div>
-
-        {/* Demo Credentials */}
-        <div className="mt-6 rounded-xl border border-gray-200 bg-gray-50 p-4">
-          <p className="mb-2 text-center text-xs font-medium text-gray-600">
-            Demo Credentials:
-          </p>
-          <div className="space-y-1 text-center text-xs text-gray-500">
-            <p>
-              <span className="font-medium">Email:</span> tester1@test.com
-            </p>
-            <p>
-              <span className="font-medium">Password:</span> test123
-            </p>
           </div>
         </div>
       </div>

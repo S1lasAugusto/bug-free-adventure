@@ -19,7 +19,7 @@ const handler = createNextApiHandler({
           console.error("[API] Contexto do erro:", {
             code: error.code,
             message: error.message,
-            data: error.data,
+            cause: error.cause,
           });
         }
       : undefined,

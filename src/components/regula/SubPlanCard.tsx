@@ -120,10 +120,9 @@ export function SubPlanCard({
       />
 
       <CompleteReflectionDialog
-        isOpen={isCompleteDialogOpen}
+        open={isCompleteDialogOpen}
         onClose={() => setIsCompleteDialogOpen(false)}
-        reflection={reflection}
-        onComplete={onComplete}
+        subPlanId={subPlan.id}
       />
     </div>
   );

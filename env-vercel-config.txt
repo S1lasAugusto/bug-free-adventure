@@ -1,0 +1,43 @@
+# ========================================
+# VARIÁVEIS DE AMBIENTE PARA O VERCEL
+# ========================================
+# Copie e cole essas variáveis no Vercel → Settings → Environment Variables
+
+# 1. DATABASE_URL
+DATABASE_URL=postgresql://postgres.ybdezzbkmikwkgrowwax:xHPyYAxtNSi6eC22@aws-0-us-east-2.pooler.supabase.com:6543/postgres?pgbouncer=true
+
+# 2. DIRECT_URL  
+DIRECT_URL=postgresql://postgres.ybdezzbkmikwkgrowwax:xHPyYAxtNSi6eC22@aws-0-us-east-2.pooler.supabase.com:5432/postgres
+
+# 3. JWT_SECRET
+JWT_SECRET=minha-chave-super-secreta-jwt-production-2025-bug-free-adventure
+
+# 4. NEXTAUTH_SECRET
+NEXTAUTH_SECRET=outra-chave-diferente-nextauth-production-2025-vercel-deploy
+
+# ========================================
+# OPCIONAL: Variáveis do Supabase (caso precise no frontend)
+# ========================================
+
+# 5. NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_URL=https://ybdezzbkmikwkgrowwax.supabase.co
+
+# 6. NEXT_PUBLIC_SUPABASE_ANON_KEY
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InliZGV6emJrbWlrd2tncm93d2F4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3MjU4ODIsImV4cCI6MjA2NTMwMTg4Mn0.irKb2nma--n38CXLT_IOK8ANRN41N53nSYurOSicnf8
+
+# ========================================
+# APÓS O PRIMEIRO DEPLOY:
+# ========================================
+# Adicione esta variável com o domínio que o Vercel criar:
+# NEXTAUTH_URL=https://seu-projeto.vercel.app
+
+# ========================================
+# INSTRUÇÕES:
+# ========================================
+# 1. Copie TODAS as variáveis acima
+# 2. No Vercel → seu projeto → Settings → Environment Variables
+# 3. Cole uma por uma (Name = KEY, Value = VALOR)
+# 4. Clique em "Add" para cada uma
+# 5. Faça o deploy
+# 6. Depois adicione NEXTAUTH_URL com o domínio gerado
+# 7. Redeploy 

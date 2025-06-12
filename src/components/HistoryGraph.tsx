@@ -1,4 +1,4 @@
-import { ActivityResource, ExerciseHistory } from ".prisma/client";
+import { ActivityResource, ExerciseHistory } from "@prisma/client";
 import {
   CategoryScale,
   Chart as ChartJS,

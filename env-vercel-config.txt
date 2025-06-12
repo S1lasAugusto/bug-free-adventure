@@ -34,10 +34,11 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzd
 # ========================================
 # INSTRUÇÕES:
 # ========================================
-# 1. Copie TODAS as variáveis acima
-# 2. No Vercel → seu projeto → Settings → Environment Variables
-# 3. Cole uma por uma (Name = KEY, Value = VALOR)
-# 4. Clique em "Add" para cada uma
-# 5. Faça o deploy
-# 6. Depois adicione NEXTAUTH_URL com o domínio gerado
-# 7. Redeploy 
+# 1. IMPORTANTE: O schema.prisma foi atualizado para suportar DIRECT_URL
+# 2. Copie TODAS as variáveis acima (especialmente DATABASE_URL e DIRECT_URL)
+# 3. No Vercel → seu projeto → Settings → Environment Variables
+# 4. Cole uma por uma (Name = KEY, Value = VALOR)
+# 5. Clique em "Add" para cada uma
+# 6. Faça o deploy
+# 7. Depois adicione NEXTAUTH_URL com o domínio gerado
+# 8. Redeploy 

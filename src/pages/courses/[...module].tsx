@@ -167,8 +167,8 @@ const ModuleStatistics = () => {
         currentPage={module ? module[1] : "404"}
         currentType={type as string}
       />
-      <div className=" background-color absolute mt-6 grid w-full  overflow-x-auto rounded-lg">
-        <div className="flex flex-row items-center space-x-2 justify-self-end pb-4 pr-12 pt-6">
+      <div className="background-color mx-auto mt-6 w-full max-w-7xl overflow-x-auto rounded-lg p-4">
+        <div className="flex flex-row flex-wrap items-center justify-end space-x-2 pb-4 pr-4 pt-6">
           <div className="h-4 w-4 items-center rounded-md bg-green-400 dark:bg-green-400"></div>
           <p className="text-sm">Finished</p>
           <div className="h-4 w-4 items-center rounded-md bg-[#fecd66]"></div>
@@ -176,11 +176,10 @@ const ModuleStatistics = () => {
           <div className="course-card h-4 w-4 items-center rounded-md"></div>
           <p className="text-sm">To do</p>
         </div>
-        <div className="mx-12 my-16 mt-4 grid grid-cols-4 gap-8">
+        <div className="mx-auto my-8 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {module
             ? typeofActivity()
                 .filter((activity) => activity.relatedTopic == module[1])
-
                 .map((activity) => {
                   return (
                     <a
@@ -190,7 +189,7 @@ const ModuleStatistics = () => {
                         activity.url +
                         "&usr=" +
                         user?.protusId +
-                        "&grp=NorwayFall2022B&sid=TEST&cid=352"
+                        "&grp=NorwaySpring2025A&sid=TEST&cid=352"
                       }
                       onClick={() => {
                         setSelectedActivity(activity.activityId);

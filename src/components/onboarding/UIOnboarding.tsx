@@ -217,8 +217,8 @@ const UIOnboarding = () => {
                       Student ID
                     </label>
                     <p className="mb-3 text-sm text-gray-500">
-                      Your 5-digit student ID starting with 22 (e.g., 22170).
-                      Check your email for this information.
+                      Your 5-digit student ID starting with 25 (e.g., 25001).
+                      For development/testing, use 25001.
                     </p>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 flex items-center pl-4">
@@ -232,7 +232,7 @@ const UIOnboarding = () => {
                             ? "border-red-300 bg-red-50"
                             : "border-gray-300 bg-white focus:border-blue-300"
                         }`}
-                        placeholder="22170"
+                        placeholder="25001"
                       />
                     </div>
                   </div>

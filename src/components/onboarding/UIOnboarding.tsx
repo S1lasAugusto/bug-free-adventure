@@ -33,6 +33,8 @@ const UIOnboarding = () => {
     handleSubmit,
     trigger,
     watch,
+    setValue,
+    getValues,
     formState: { errors },
   } = useForm<OnboardingForm>({
     resolver: zodResolver(onboardingSchema),
@@ -44,8 +46,23 @@ const UIOnboarding = () => {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const showNameField = watch("leaderboard");
+  const selectedComponents = watch("selectedComponents");
   const ctx = api.useContext();
   const mutation = api.userRouter.submitOnboarding.useMutation();
+
+  const handleComponentToggle = (componentId: string) => {
+    const currentSelected = getValues("selectedComponents") || [];
+    const isSelected = currentSelected.includes(componentId);
+
+    if (isSelected) {
+      // Remove o componente
+      const newSelected = currentSelected.filter((id) => id !== componentId);
+      setValue("selectedComponents", newSelected);
+    } else {
+      // Adiciona o componente
+      setValue("selectedComponents", [...currentSelected, componentId]);
+    }
+  };
 
   const validateAndNextStep = async () => {
     const valid = await trigger(["USNEmail", "protusId"]);
@@ -73,14 +90,6 @@ const UIOnboarding = () => {
       color: "from-blue-500 to-cyan-500",
     },
     {
-      id: SelectedEnum.HISTORYGRAPH,
-      title: "Activity Graph",
-      description:
-        "Visualize your daily activity with interactive charts and graphs.",
-      preview: <HistoryGraphPreview />,
-      color: "from-green-500 to-emerald-500",
-    },
-    {
       id: SelectedEnum.TODO,
       title: "Task Planner",
       description:
@@ -104,10 +113,18 @@ const UIOnboarding = () => {
       preview: <RegulaPreview />,
       color: "from-pink-500 to-rose-500",
     },
+    {
+      id: SelectedEnum.HISTORYGRAPH,
+      title: "Activity Graph",
+      description:
+        "Visualize your daily activity with interactive charts and graphs.",
+      preview: <HistoryGraphPreview />,
+      color: "from-green-500 to-emerald-500",
+    },
   ];
 
   return (
-    <div className="max-h-screen min-h-screen overflow-y-auto bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       <div className="mx-auto max-w-6xl px-4 py-8">
         {/* Header com progresso */}
         <div className="mb-8 text-center">
@@ -247,49 +264,55 @@ const UIOnboarding = () => {
                 </p>
               </div>
 
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {components.map((component) => (
-                  <div key={component.id} className="group relative">
-                    <input
-                      {...register("selectedComponents")}
-                      type="checkbox"
-                      value={component.id}
-                      id={component.id}
-                      className="peer sr-only"
-                    />
-                    <label
-                      htmlFor={component.id}
-                      className="block cursor-pointer rounded-2xl border-2 border-gray-200 bg-white p-6 transition-all hover:border-blue-300 hover:shadow-lg peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:shadow-lg"
-                    >
-                      {/* Header */}
-                      <div className="mb-4 flex items-center justify-between">
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          {component.title}
-                        </h3>
-                        <div className="h-6 w-6 rounded-full border-2 border-gray-300 transition-colors group-hover:border-blue-300 peer-checked:border-blue-500 peer-checked:bg-blue-500">
-                          <CheckCircle2 className="h-full w-full text-white opacity-0 transition-opacity peer-checked:opacity-100" />
-                        </div>
-                      </div>
-
-                      {/* Description */}
-                      <p className="mb-4 text-sm text-gray-600">
-                        {component.description}
-                      </p>
-
-                      {/* Preview */}
-                      <div className="overflow-hidden rounded-lg">
-                        <div className="origin-top-left scale-75 transform">
-                          {component.preview}
-                        </div>
-                      </div>
-
-                      {/* Gradient accent */}
+              <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+                {components.map((component) => {
+                  const isSelected =
+                    selectedComponents?.includes(component.id) || false;
+                  return (
+                    <div key={component.id} className="group relative">
                       <div
-                        className={`absolute bottom-0 left-0 right-0 h-1 rounded-b-2xl bg-gradient-to-r opacity-0 transition-opacity peer-checked:opacity-100 ${component.color}`}
-                      />
-                    </label>
-                  </div>
-                ))}
+                        onClick={() => handleComponentToggle(component.id)}
+                        className={`block cursor-pointer rounded-2xl border-2 p-6 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg ${
+                          isSelected
+                            ? "scale-[1.02] border-blue-500 bg-blue-50 shadow-lg"
+                            : "border-gray-200 bg-white hover:border-blue-300"
+                        }`}
+                      >
+                        {/* Header */}
+                        <div className="mb-4 flex items-center justify-between">
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            {component.title}
+                          </h3>
+                          <div
+                            className={`relative h-6 w-6 rounded-full border-2 transition-colors ${
+                              isSelected
+                                ? "border-blue-500 bg-blue-500"
+                                : "border-gray-300 group-hover:border-blue-300"
+                            }`}
+                          >
+                            <CheckCircle2
+                              className={`absolute inset-0 h-full w-full text-white transition-opacity ${
+                                isSelected ? "opacity-100" : "opacity-0"
+                              }`}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Description */}
+                        <p className="mb-4 text-sm text-gray-600">
+                          {component.description}
+                        </p>
+
+                        {/* Preview */}
+                        <div className="overflow-hidden rounded-lg bg-gray-50 p-3">
+                          <div className="origin-top-left scale-90 transform">
+                            {component.preview}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="mt-8 flex justify-between">

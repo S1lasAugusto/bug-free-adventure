@@ -220,7 +220,9 @@ const Sidebar = ({ children }: { children: React.ReactElement }) => {
             </div>
           </div>
         ) : (
-          <UIOnboarding />
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <UIOnboarding />
+          </div>
         )}
       </div>
     </ProtectedRoute>

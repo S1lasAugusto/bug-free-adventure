@@ -43,13 +43,6 @@ export default function Login() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="mb-8 text-center">
-          <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-blue-200 bg-white p-2 shadow-lg">
-            <img
-              src="/logo.svg"
-              alt="Progressor Logo"
-              className="h-full w-auto"
-            />
-          </div>
           <h1 className="mb-2 text-3xl font-bold text-gray-900">
             Welcome to Progresso
           </h1>

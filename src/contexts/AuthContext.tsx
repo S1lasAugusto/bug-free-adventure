@@ -14,6 +14,7 @@ interface User {
   email: string | null;
   onBoarded: boolean;
   protusId?: string | null;
+  USNEmail?: string | null;
 }
 
 interface AuthContextType {

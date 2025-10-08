@@ -8,6 +8,7 @@ import {
 } from "../../server/schema/UserSchema";
 import { api } from "../../utils/api";
 import { useRouter } from "next/router";
+import Link from "next/link";
 import {
   ArrowRight,
   ArrowLeft,
@@ -117,6 +118,17 @@ const UIOnboarding = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       <div className="mx-auto max-w-6xl px-4 py-8">
+        <div className="mb-4 flex justify-end">
+          <Link
+            href="/auth/login"
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            <div className="flex items-center gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back to Sign In</span>
+            </div>
+          </Link>
+        </div>
         {/* Header com progresso */}
         <div className="mb-8 text-center">
           <h1 className="mb-2 text-4xl font-bold text-gray-900">

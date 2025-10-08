@@ -1,11 +1,18 @@
 import { EyeSlashIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/solid";
-import { ToDo } from "@prisma/client";
 
 const ExercisePlannerPreview = () => {
   function classNames(...classes: string[]) {
     return classes.filter(Boolean).join(" ");
   }
-  const todo: ToDo[] = [
+  const todo: Array<{
+    todoId: string;
+    dueDate: Date;
+    completed: boolean;
+    name: string;
+    completedAt: Date | null;
+    createdAt: Date;
+    userId: string;
+  }> = [
     {
       todoId: "abc123",
       dueDate: new Date("2022-03-01"),

@@ -70,6 +70,16 @@ const Sidebar = ({ children }: { children: React.ReactElement }) => {
     },
   ];
 
+  if (user?.role === "ADMIN") {
+    navigation.push({
+      name: "Admin",
+      href: "/admin",
+      icon: Cog6ToothIcon,
+      iconSolid: Cog6ToothIconSolid,
+      current: router.asPath.startsWith("/admin"),
+    } as any);
+  }
+
   if (isLoading) {
     return (
       <div className="flex h-screen bg-gray-50 dark:bg-gray-900">

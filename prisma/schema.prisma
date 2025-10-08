@@ -28,6 +28,7 @@ model User {
   USNEmail      String?
   leaderboard   Boolean?
   role          Role              @default(USER)
+  group         String?
 
   history       ExerciseHistory[]
   preferences   UserPreference[]
@@ -144,6 +145,13 @@ enum type {
   EXAMPLE
   CHALLENGE
   CODING
+}
+
+model Setting {
+  key       String   @id
+  value     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum Role {

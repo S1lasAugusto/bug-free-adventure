@@ -20,7 +20,6 @@ import {
 
 // Import dos componentes preview
 import LeaderboardPreview from "../previews/LeaderboardPreview";
-import ExercisePlannerPreview from "../previews/ExercisePlannerPreview";
 import HistoryGraphPreview from "../previews/HistoryGraphPreview";
 import ExerciseHistoryPreview from "../previews/ExerciseHistoryPreview";
 import StatsPreview from "../previews/StatsPreview";
@@ -88,14 +87,7 @@ const UIOnboarding = () => {
       preview: <StatsPreview />,
       color: "from-blue-500 to-cyan-500",
     },
-    {
-      id: SelectedEnum.TODO,
-      title: "Task Planner",
-      description:
-        "Organize your assignments and deadlines with our smart planner.",
-      preview: <ExercisePlannerPreview />,
-      color: "from-purple-500 to-indigo-500",
-    },
+
     {
       id: SelectedEnum.EXERCISEHISTORY,
       title: "Exercise History",
@@ -128,7 +120,7 @@ const UIOnboarding = () => {
         {/* Header com progresso */}
         <div className="mb-8 text-center">
           <h1 className="mb-2 text-4xl font-bold text-gray-900">
-            Welcome to Progressor!
+            Welcome to ProTuS - Programming tutoring system
           </h1>
           <p className="text-lg text-gray-600">
             Let&apos;s set up your personalized learning dashboard

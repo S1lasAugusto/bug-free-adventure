@@ -1,7 +1,7 @@
 # 🚀 HOSTING COSTS & LIMITATIONS - VERCEL + SUPABASE
 
 **Updated:** December 2024  
-**Project:** Bug Free Adventure (Progressor)
+**Project:** Bug Free Adventure (ProTuS - Programming tutoring system)
 
 ## 📊 EXECUTIVE SUMMARY
 

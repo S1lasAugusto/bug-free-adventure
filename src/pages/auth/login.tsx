@@ -44,7 +44,7 @@ export default function Login() {
         {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="mb-2 text-3xl font-bold text-gray-900">
-            Welcome to Progresso
+            Welcome to ProTuS
           </h1>
           <p className="text-gray-600">Sign in to your account to continue</p>
         </div>

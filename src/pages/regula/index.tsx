@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { StudySidebar } from "@/components/regula/StudySidebar";
 import { StudyDashboard } from "@/components/regula/StudyDashboard";
 import { GradeDialog } from "@/components/regula/GradeDialog";
 import { api } from "@/utils/api";
@@ -14,12 +13,5 @@ export default function RegulaPage() {
     }
   }, [generalPlan, isLoading]);
 
-  return (
-    <div className="flex min-h-screen bg-gray-50">
-      <StudySidebar />
-      <div className="flex-1">
-        <StudyDashboard />
-      </div>
-    </div>
-  );
+  return <StudyDashboard />;
 }

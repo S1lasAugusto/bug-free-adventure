@@ -7,6 +7,8 @@ import {
   CommandLineIcon,
   ChevronRightIcon,
   ArrowRightOnRectangleIcon,
+  RectangleStackIcon,
+  ClipboardDocumentListIcon,
 } from "@heroicons/react/24/outline";
 import {
   HomeIcon as HomeIconSolid,
@@ -15,7 +17,6 @@ import {
 } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import Image from "next/image";
 import { useAuth } from "../contexts/AuthContext";
 import ProtectedRoute from "./ProtectedRoute";
 import ToggleTheme from "./ToggleTheme";
@@ -44,6 +45,20 @@ const Sidebar = ({ children }: { children: React.ReactElement }) => {
       current: router.asPath.startsWith("/courses"),
       children: [
         { name: "Java", href: "/courses/Java", icon: CommandLineIcon },
+      ],
+    },
+    {
+      name: "Planner",
+      href: "/regula",
+      icon: RectangleStackIcon,
+      iconSolid: RectangleStackIcon,
+      current: router.asPath.startsWith("/regula"),
+      children: [
+        {
+          name: "My plan",
+          href: "/regula/my-plan",
+          icon: ClipboardDocumentListIcon,
+        },
       ],
     },
     {
@@ -92,13 +107,9 @@ const Sidebar = ({ children }: { children: React.ReactElement }) => {
               <div className="flex h-full flex-col">
                 {/* Logo */}
                 <div className="flex h-20 items-center justify-center border-b border-gray-200 px-6 dark:border-gray-700">
-                  <Image
-                    src="/logo.svg"
-                    alt="Logo"
-                    width={80}
-                    height={80}
-                    className="h-20 w-auto"
-                  />
+                  <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                    ProTuS
+                  </span>
                 </div>
 
                 {/* Navigation */}
@@ -130,27 +141,33 @@ const Sidebar = ({ children }: { children: React.ReactElement }) => {
                       >
                         {({ open }) => (
                           <>
-                            <Disclosure.Button
+                            <div
                               className={classNames(
                                 item.current
                                   ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300"
                                   : "text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white",
-                                "group flex w-full items-center rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+                                "group flex w-full items-center rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-all duration-200"
                               )}
                             >
-                              {item.current ? (
-                                <item.iconSolid className="mr-3 h-5 w-5 flex-shrink-0" />
-                              ) : (
-                                <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
-                              )}
-                              <span className="flex-1">{item.name}</span>
-                              <ChevronRightIcon
-                                className={classNames(
-                                  open ? "rotate-90" : "",
-                                  "ml-3 h-4 w-4 flex-shrink-0 transform transition-transform duration-200"
-                                )}
-                              />
-                            </Disclosure.Button>
+                              <Link href={item.href || "#"}>
+                                <a className="flex flex-1 items-center">
+                                  {item.current ? (
+                                    <item.iconSolid className="mr-3 h-5 w-5 flex-shrink-0" />
+                                  ) : (
+                                    <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                                  )}
+                                  <span>{item.name}</span>
+                                </a>
+                              </Link>
+                              <Disclosure.Button className="ml-2 rounded p-1 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:hover:bg-gray-700 dark:focus:ring-offset-gray-800">
+                                <ChevronRightIcon
+                                  className={classNames(
+                                    open ? "rotate-90" : "",
+                                    "h-4 w-4 flex-shrink-0 transform transition-transform duration-200"
+                                  )}
+                                />
+                              </Disclosure.Button>
+                            </div>
                             <Disclosure.Panel className="space-y-1">
                               {item.children.map((subItem) => (
                                 <Link key={subItem.name} href={subItem.href}>

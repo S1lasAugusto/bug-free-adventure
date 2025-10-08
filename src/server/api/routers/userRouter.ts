@@ -7,7 +7,6 @@ import {
   onboardingSchema,
   selectedComps,
   selectedCompsEnum,
-  toDoSchema,
   userPreferenceSchema,
 } from "../../schema/UserSchema";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
@@ -220,70 +219,6 @@ export const userRouter = createTRPCRouter({
         data: {
           completedAt: new Date(),
           attempts: attempts,
-        },
-      });
-    }),
-  getToDosOnUser: protectedProcedure
-    .input(z.object({ userId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const todo = await ctx.prisma.toDo.findMany({
-        where: {
-          userId: input.userId,
-        },
-        select: {
-          todoId: true,
-          dueDate: true,
-          completed: true,
-          name: true,
-          userId: true,
-        },
-      });
-
-      if (todo.length > 0) {
-        return todo
-          .sort(
-            (a, b) =>
-              new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
-          )
-          .sort((a, b) =>
-            a.completed === b.completed ? 0 : b.completed ? -1 : 1
-          );
-      }
-
-      return [];
-    }),
-  addToDoToUser: protectedProcedure
-    .input(z.object({ toDo: toDoSchema }))
-    .mutation(async ({ ctx, input }) => {
-      return await ctx.prisma.toDo.create({
-        data: {
-          userId: input.toDo.userId,
-          dueDate: input.toDo.dueDate,
-          completed: false,
-          completedAt: new Date(),
-          name: input.toDo.name,
-        },
-      });
-    }),
-  setToDoCompleted: protectedProcedure
-    .input(z.object({ todoId: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      return await ctx.prisma.toDo.update({
-        where: {
-          todoId: input.todoId,
-        },
-        data: {
-          completed: true,
-          completedAt: new Date(),
-        },
-      });
-    }),
-  deleteTodo: protectedProcedure
-    .input(z.object({ todoId: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      return await ctx.prisma.toDo.delete({
-        where: {
-          todoId: input.todoId,
         },
       });
     }),

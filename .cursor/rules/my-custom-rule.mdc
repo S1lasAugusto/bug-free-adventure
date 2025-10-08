@@ -1,0 +1,183 @@
+---
+alwaysApply: true
+---
+## Regras de Engenharia – T3 Stack (Next.js + tRPC + Prisma + Supabase + Vercel)
+
+### 1) Objetivo e Escopo
+- **Propósito**: padronizar arquitetura, qualidade, segurança e operação do projeto em produção.
+- **Aplicação**: obrigatório para todo código de produto; exceções exigem justificativa no PR.
+- **Princípios**: simplicidade, segurança por padrão, tipagem estrita, automação e observabilidade.
+
+### 2) Arquitetura e Limites
+- **Frontend**: Next.js Pages Router (Next 12). Componentes em `src/components` e páginas em `src/pages`.
+- **Backend**: API via tRPC em `src/pages/api/trpc/[trpc].ts` usando routers de `src/server/api`.
+- **Acesso a dados**: Prisma em `src/server/db.ts` e modelos em `prisma/schema.prisma`.
+- **Chamadas cliente-servidor**: usar tRPC exclusivamente; evitar `fetch` ad-hoc para rotas internas.
+- **Separação de responsabilidades**: React renderiza e orquestra UI; tRPC expõe casos de uso; Prisma persiste; Supabase fornece Postgres, pooling e políticas.
+
+### 3) Next.js (Pages Router)
+- **Renderização**: priorizar SSR quando dados são sensíveis; SSG/ISR para conteúdo público e estável.
+- **Data fetching**: usar `getServerSideProps` para dados sensíveis/por usuário; `getStaticProps`/`revalidate` para catálogos.
+- **Imagens e assets**: utilizar `next/image` e `public/`.
+- **Runtime**: Node.js para qualquer rota que usa Prisma; não usar Edge com Prisma.
+- **Erros**: páginas de erro personalizadas devem esconder detalhes sensíveis em produção.
+
+### 4) tRPC
+- **Estrutura**: routers em `src/server/api/routers/*` e raiz em `src/server/api/root.ts`.
+- **Procedures**: `publicProcedure` para acesso público; `protectedProcedure` para autenticado com verificação de token.
+- **Validação**: Zod obrigatório para input/output. Reutilizar esquemas quando possível.
+- **Contexto**: `createTRPCContext` injeta `prisma` e usuário autenticado quando disponível.
+- **Erros**: lançar `TRPCError` com códigos adequados; mensagens amigáveis, sem vazar detalhes internos.
+- **Nomenclatura**: `get*`/`list*` para queries; `create*`/`update*`/`delete*` para mutations.
+- **Compatibilidade**: mudanças breaking exigem migração coordenada do frontend.
+
+### 5) Prisma e Banco
+- **Migrações**: desenvolvimento com `prisma migrate dev`; produção com `prisma migrate deploy`.
+- **Proibido**: `prisma db push` em produção.
+- **Schema**: nomes claros e consistentes; índices e `@@unique` para invariantes; preferir `enum` para domínios finitos.
+- **Seeds**: `npm run db:seed` para dados locais; nunca popular dados sensíveis em produção.
+- **Pooling/Conexão**: usar `DATABASE_URL` e `DIRECT_URL` do Supabase; runtime Node no Vercel.
+- **Consultas**: evitar N+1; usar `include`/`select` específicos; paginar resultados grandes.
+
+### 6) Supabase
+- **RLS**: políticas com negação por padrão; revisar e testar antes de ativar em produção.
+- **Chaves**: nunca expor Service Role ao cliente; gerenciar segredos no Vercel.
+- **Storage**: usar URLs assinadas para conteúdo privado; definir ACLs explícitas.
+
+### 7) Variáveis de Ambiente
+- **Fonte de verdade**: `src/env/schema.mjs` com Zod (server e client).
+- **Separação**: `NEXT_PUBLIC_*` apenas para cliente; segredos ficam apenas no server.
+- **Validação**: build falha se env inválida; nunca contornar.
+- **Gerência**: usar `vercel env pull` para sincronizar local; nunca versionar `.env` com segredos.
+
+### 8) Segurança
+- **Auth**: token via header `Authorization: Bearer`; verificação no middleware `protectedProcedure`.
+- **Validação**: Zod em toda borda (tRPC e env). Sanitizar inputs para evitar XSS/Injection.
+- **CSRF/XSS**: preferir cookies `HttpOnly` quando aplicável; escapar saídas dinâmicas no HTML.
+- **Logs**: não registrar segredos ou PII; mascarar identificadores quando necessário.
+- **Dependências**: manter atualizadas; rodar scanners de vulnerabilidade em CI.
+
+### 9) Performance
+- **Orçamento**: monitorar LCP/TTI; evitar hidratação desnecessária.
+- **Caching**: usar SSG/ISR para conteúdo estático; cache HTTP onde viável.
+- **Bundle**: dividir por rota; eliminar código morto; importar dinâmico quando apropriado.
+- **Banco**: índices adequados; limitar colunas retornadas; usar paginação.
+
+### 10) Acessibilidade e UX
+- **A11y**: foco navegável por teclado; labels associadas; contraste mínimo.
+- **Componentes**: padronizar UI em `src/components/ui`; evitar duplicidade de padrões.
+
+### 11) Código e Estilo
+- **TypeScript**: estrito; evitar `any` não justificado.
+- **ESLint/Prettier**: obrigatório em PRs; corrigir avisos relevantes.
+- **Imports**: ordem consistente; caminhos relativos curtos quando possível.
+- **Nomes**: descritivos, sem abreviações obscuras.
+- **Comentários**: não adicionar comentários no código de produção.
+
+### 12) Testes
+- **Tipos**: unitários (utils e lógica pura), integração (tRPC) e e2e (rotas principais).
+- **Banco de testes**: schema isolado ou container dedicado; limpar entre execuções.
+- **Cobertura**: mínimo acordado para módulos críticos; testes rodam no CI.
+
+### 13) Observabilidade
+- **Logs**: estruturados; níveis coerentes; sem dados sensíveis.
+- **Métricas/Tracing**: integrar quando disponível; ativar Vercel Analytics conforme necessidade.
+- **Alertas**: configurar para erros críticos e anomalias de performance.
+
+### 14) CI/CD (Vercel)
+- **Pré-commit**: formatar e lintar via `lint-staged`.
+- **Pré-merge**: typecheck, lint e build de preview.
+- **Produção**: `prisma migrate deploy` automatizado; health-check pós-deploy; plano de rollback documentado.
+- **Feature flags**: preferir no server; fallback seguro por padrão.
+
+### 15) Git e Versionamento
+- **Conventional Commits**: `feat`, `fix`, `chore`, `refactor`, `docs`, `perf`, `test`.
+- **Idioma**: mensagens em inglês. Ex.: `feat: add subplan CRUD`.
+- **Fluxo**: `main` protegida; PRs com squash & merge.
+
+### 16) Padrões de Pastas
+- **Páginas**: `src/pages/*`.
+- **Componentes**: `src/components/*` e `src/components/ui/*`.
+- **API**: `src/server/api/routers/*`, raiz em `src/server/api/root.ts`, handler em `src/pages/api/trpc/[trpc].ts`.
+- **Lib/Utils**: `src/lib/*`, `src/utils/*`.
+- **Schemas**: `prisma/schema.prisma`, migrações em `prisma/migrations/*`.
+
+### 17) Isomorfismo (SSR/CSR)
+- **Ambiente**: evitar uso direto de `window`/`document` no server; proteger com guards.
+- **Separação**: manter código específico de servidor fora de bundles do cliente.
+
+### 18) Automação e Scaffolding
+- **Makefile**: usar alvos para instalar, subir/derrubar DB local, `db push` e seed local.
+- **Geradores**: adotar templates para novo router tRPC, modelo Prisma e componente React.
+- **Scripts NPM**: centralizar tarefas comuns.
+
+### 19) Privacidade e Dados
+- **Classificação**: identificar PII; minimizar coleta e retenção.
+- **Direitos**: prever exclusão e retificação conforme legislação aplicável.
+
+### 20) Processo de Mudança
+- **PR Checklist**:
+  - Validação de env com Zod passa.
+  - Lint e typecheck sem erros.
+  - Migrações revisadas (índices/constraints/zero-downtime) e plano de rollback.
+  - Segurança revisada (auth, RLS, vazamento de dados).
+  - Performance e acessibilidade consideradas.
+
+### Comandos úteis
+```bash
+npm run dev
+npm run build
+npm run start
+npm run lint
+npx prisma migrate dev
+npx prisma migrate deploy
+npx prisma generate
+npx prisma studio
+npm run db:seed
+vercel env pull .env.local
+```
+
+### Exemplos mínimos
+- **tRPC router**
+```ts
+import { z } from "zod";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../../trpc";
+
+export const exampleRouter = createTRPCRouter({
+  getOne: publicProcedure.input(z.object({ id: z.string().cuid() })).query(async ({ ctx, input }) => {
+    return ctx.prisma.example.findUnique({ where: { id: input.id } });
+  }),
+  create: protectedProcedure.input(z.object({ name: z.string().min(1) })).mutation(async ({ ctx, input }) => {
+    return ctx.prisma.example.create({ data: { id: undefined, name: input.name } });
+  }),
+});
+```
+
+- **Prisma query com paginação**
+```ts
+const page = Math.max(1, input.page);
+const pageSize = Math.min(100, Math.max(1, input.pageSize));
+const [items, total] = await Promise.all([
+  ctx.prisma.user.findMany({
+    skip: (page - 1) * pageSize,
+    take: pageSize,
+    select: { id: true, name: true, email: true },
+    orderBy: { createdAt: "desc" },
+  }),
+  ctx.prisma.user.count(),
+]);
+return { items, page, pageSize, total };
+```
+
+- **Env (server)**
+```ts
+import { env } from "~/env/server.mjs";
+const dbUrl = env.DATABASE_URL;
+```
+
+### Notas finais
+- Não adicionar comentários durante o código de produção.
+- Evitar dependências não essenciais; remover código morto.
+- Garantir que mudanças sensíveis tenham rollback claro.
+
+

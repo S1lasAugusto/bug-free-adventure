@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { useForm, SubmitHandler, get } from "react-hook-form";
 import { HiUser } from "react-icons/hi";
 import ExerciseHistoryPreview from "../../components/previews/ExerciseHistoryPreview";
-import ExercisePlannerPreview from "../../components/previews/ExercisePlannerPreview";
 import HistoryGraphPreview from "../../components/previews/HistoryGraphPreview";
 import LeaderboardPreview from "../../components/previews/LeaderboardPreview";
 import StatsPreview from "../../components/previews/StatsPreview";
@@ -82,51 +81,6 @@ const Settings: NextPage = () => {
       </h1>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="mt-5 grid select-none grid-cols-2 gap-x-8 gap-y-4 ">
-          <div
-            className={classNames(
-              checkboxIndexes.includes(SelectedEnum.TODO)
-                ? "border-[#0de890] dark:border-[#0de890]"
-                : "border-zinc-400 dark:border-zinc-600",
-              " course-card relative h-auto grid-cols-1 rounded-2xl border border-2  px-6 pt-6"
-            )}
-          >
-            <p className="mb-2 text-2xl font-bold tracking-tight">
-              Exercise Planner
-            </p>
-
-            <p className="text-sm text-gray-700 dark:text-gray-400">
-              This component enables you to keep track of your assignments with
-              due dates.
-            </p>
-            <div className="mb-6 scale-90">
-              <ExercisePlannerPreview />
-            </div>
-            <div className="absolute bottom-1 my-6 ml-4 flex items-center gap-2">
-              <Checkbox
-                onClick={() =>
-                  checkboxIndexes?.includes(SelectedEnum.TODO)
-                    ? setCheckboxIndexes(
-                        checkboxIndexes.filter((e) => e !== SelectedEnum.TODO)
-                      )
-                    : setCheckboxIndexes([
-                        ...checkboxIndexes,
-                        SelectedEnum.TODO,
-                      ])
-                }
-                {...register("newSelectedComponents")}
-                id="select"
-                defaultChecked={userPreferences?.selectedComponents?.includes(
-                  SelectedEnum.TODO
-                )}
-                value={SelectedEnum.TODO}
-                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                required={false}
-              />
-
-              <label htmlFor="select">Select</label>
-            </div>
-          </div>
-
           <div
             className={classNames(
               checkboxIndexes.includes(SelectedEnum.HISTORYGRAPH)

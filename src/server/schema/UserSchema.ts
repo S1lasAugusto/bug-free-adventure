@@ -71,12 +71,5 @@ export const userPreferenceSchema = z
     }
   );
 
-export const toDoSchema = z.object({
-  dueDate: z.date(),
-  name: z.string(),
-  userId: z.string(),
-});
-
-export type ToDoForm = z.infer<typeof toDoSchema>;
 export type OnboardingForm = z.infer<typeof onboardingSchema>;
 export type UserPreferenceForm = z.infer<typeof userPreferenceSchema>;

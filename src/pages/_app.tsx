@@ -12,10 +12,6 @@ import { AuthProvider } from "../contexts/AuthContext";
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   const router = useRouter();
-  const isRegula =
-    router.pathname.startsWith("/regula") ||
-    router.pathname.startsWith("/plan/");
-
   const isAuthPage = router.pathname.startsWith("/auth/");
 
   return (
@@ -29,8 +25,6 @@ const MyApp: AppType = ({ Component, pageProps }) => {
       <AuthProvider>
         <div className="fixed w-full">
           {isAuthPage ? (
-            <Component {...pageProps} />
-          ) : isRegula ? (
             <Component {...pageProps} />
           ) : (
             <Sidebar>

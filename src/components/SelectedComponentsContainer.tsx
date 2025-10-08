@@ -2,7 +2,6 @@ import HistoryGraph from "./HistoryGraph";
 import ExerciseHistory from "./home/ExerciseHistory";
 import Leaderboard from "./Leaderboard";
 import { SelectedEnum } from "@prisma/client";
-import ToDoComp from "./todo/ToDoComp";
 import CourseCard from "./CourseCard";
 import Stats from "./Stats";
 import Regula from "./Regula";
@@ -31,8 +30,8 @@ const SelectedComponentsContainer = (props: ISelectedComponentsProps) => {
       component: <Leaderboard />,
     },
     TODO: {
-      title: "Exercise Planner",
-      component: <ToDoComp />,
+      title: "Regula",
+      component: <Regula />,
     },
     EXERCISEHISTORY: {
       title: "History",
@@ -71,7 +70,13 @@ const SelectedComponentsContainer = (props: ISelectedComponentsProps) => {
         )}
 
         {/* Componentes selecionados */}
-        {selected.map((compEnum: string) => {
+        {Array.from(
+          new Set(
+            selected.map((compEnum: string) =>
+              compEnum === "TODO" ? "REGULA" : compEnum
+            )
+          )
+        ).map((compEnum: string) => {
           const componentData = components[compEnum];
           if (!componentData) {
             return (

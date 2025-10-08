@@ -1,4 +1,4 @@
-.PHONY: install start stop dev setup db-push seed clean help
+.PHONY: install start stop dev setup db-push seed clean help migrate-deploy
 
 # Cores para output
 YELLOW=\033[1;33m
@@ -36,6 +36,10 @@ setup: install ## Configura o projeto do zero (instala dependências e configura
 db-push: ## Atualiza o banco de dados com o schema do Prisma
 	@echo "$(GREEN)Atualizando o banco de dados...$(NC)"
 	npx prisma db push
+
+migrate-deploy: ## Aplica migrações em produção
+	@echo "$(GREEN)Aplicando migrações...$(NC)"
+	npx prisma migrate deploy
 
 seed: ## Executa o seed para popular o banco de dados
 	@echo "$(GREEN)Populando o banco de dados...$(NC)"

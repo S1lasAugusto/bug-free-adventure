@@ -122,11 +122,27 @@ export const subplanRouter = createTRPCRouter({
 
         console.log("[SERVER] create - Dados processados:", processedInput);
 
-        // Criação do subplan com os dados do input
+        // Garantir que existe um GeneralPlan para o usuário e obter seu id
+        let generalPlan = await ctx.prisma.generalPlan.findFirst({
+          where: { userId: ctx.user.id },
+        });
+
+        if (!generalPlan) {
+          generalPlan = await ctx.prisma.generalPlan.create({
+            data: {
+              userId: ctx.user.id,
+              name: "My General Plan",
+              gradeGoal: "Not set",
+            },
+          });
+        }
+
+        // Criação do subplan com os dados do input linkado ao GeneralPlan
         const subplan = await ctx.prisma.subPlan.create({
           data: {
             ...processedInput,
             userId: ctx.user.id,
+            generalPlanId: generalPlan.id,
           },
         });
 

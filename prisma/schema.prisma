@@ -27,10 +27,10 @@ model User {
   onBoarded     Boolean           @default(false)
   USNEmail      String?
   leaderboard   Boolean?
+  role          Role              @default(USER)
 
   history       ExerciseHistory[]
   preferences   UserPreference[]
-  todo          ToDo[]
   subplans      SubPlan[]
   generalPlans  GeneralPlan[]
 }
@@ -60,18 +60,7 @@ model ExerciseHistory {
   @@unique([userId, activityResourceId], name: "userExerciseHistoryOnActivityResource")
 }
 
-model ToDo {
-  todoId String @id @default(cuid())
-
-  dueDate     DateTime
-  completed   Boolean
-  name        String
-  completedAt DateTime?
-  createdAt   DateTime  @default(now())
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
+// Removed old TaskPlanner ToDo model
 
 model GeneralPlan {
   id        String   @id @default(cuid())
@@ -155,6 +144,11 @@ enum type {
   EXAMPLE
   CHALLENGE
   CODING
+}
+
+enum Role {
+  USER
+  ADMIN
 }
 
 enum SelectedEnum {

@@ -54,6 +54,7 @@ export const authRouter = createTRPCRouter({
           email: user.email,
           onBoarded: user.onBoarded,
           protusId: user.protusId,
+          role: user.role,
         },
         token,
       };
@@ -101,6 +102,7 @@ export const authRouter = createTRPCRouter({
           email: user.email,
           onBoarded: user.onBoarded,
           protusId: user.protusId,
+          role: user.role,
         },
         token,
       };
@@ -151,6 +153,7 @@ export const authRouter = createTRPCRouter({
       email: user.email,
       onBoarded: user.onBoarded,
       protusId: user.protusId,
+      role: user.role,
     };
   }),
 });

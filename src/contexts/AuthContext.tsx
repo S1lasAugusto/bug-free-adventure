@@ -15,6 +15,7 @@ interface User {
   onBoarded: boolean;
   protusId?: string | null;
   USNEmail?: string | null;
+  role?: "USER" | "ADMIN";
 }
 
 interface AuthContextType {

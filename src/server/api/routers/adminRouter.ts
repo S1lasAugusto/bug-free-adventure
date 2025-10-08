@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, TRPCError } from "../trpc";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { TRPCError } from "@trpc/server";
 import { prisma } from "@/server/db";
 import { hashPassword } from "@/lib/auth";
 

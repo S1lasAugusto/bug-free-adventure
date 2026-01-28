@@ -19,10 +19,10 @@ export const onboardingSchema = z
     }),
     protusId: z
       .number({
-        invalid_type_error: "Your ID should be between 25001 and 25100",
+        invalid_type_error: "Your ID should be between 25001 and 25300",
       })
       .gt(25000, { message: "Your ID must be greater than 25000" })
-      .lt(25101, { message: "Your ID must be lower than 25101" })
+      .lt(25301, { message: "Your ID must be lower than 25301" })
       .int(),
     selectedComponents: z.array(z.string()),
     leaderboard: z.boolean(),

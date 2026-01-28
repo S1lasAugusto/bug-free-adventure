@@ -16,6 +16,7 @@ interface User {
   protusId?: string | null;
   USNEmail?: string | null;
   role?: "USER" | "ADMIN";
+  group?: string | null;
 }
 
 interface AuthContextType {

@@ -60,6 +60,13 @@ export const userRouter = createTRPCRouter({
     .input(onboardingSchema)
     .mutation(async ({ ctx, input }) => {
       try {
+        const defaultGroup = await ctx.prisma.setting.findUnique({
+          where: { key: "defaultGroup" },
+        });
+
+        // Garantir que o protusId tenha o prefixo 'norway' se for um número mas não adicionar se já for string com prefixo
+        const formattedProtusId = `norway${input.protusId}`;
+
         const user = await ctx.prisma.user.update({
           where: {
             id: ctx.user.id,
@@ -70,7 +77,8 @@ export const userRouter = createTRPCRouter({
           data: {
             name: input.name,
             USNEmail: input.USNEmail,
-            protusId: "norway" + input.protusId,
+            protusId: formattedProtusId,
+            group: defaultGroup?.value || "norwaySpring2026",
             leaderboard: input.leaderboard,
             onBoarded: true,
             preferences: {

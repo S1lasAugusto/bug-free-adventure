@@ -149,6 +149,7 @@ const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
         onBoarded: user.onBoarded,
         protusId: user.protusId,
         role: user.role,
+        group: user.group,
       },
     },
   });

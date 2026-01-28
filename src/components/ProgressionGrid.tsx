@@ -62,9 +62,9 @@ const ProgressionGrid = (props: ProgressionGridInterface) => {
                 target="_blank"
                 href={
                   item.url +
-                  "&usr=" +
+                  "&usr=norway" +
                   user?.protusId +
-                  "&grp=NorwaySpring2025A&sid=TEST&cid=352"
+                  "&grp=norwaySpring2026&sid=TEST&cid=352"
                 }
                 onClick={() => {
                   setSelectedActivity(item.activityId);
@@ -112,9 +112,9 @@ const ProgressionGrid = (props: ProgressionGridInterface) => {
                 target="_blank"
                 href={
                   item.url +
-                  "&usr=" +
+                  "&usr=norway" +
                   user?.protusId +
-                  "&grp=NorwaySpring2025A&sid=TEST&cid=352"
+                  "&grp=norwaySpring2026&sid=TEST&cid=352"
                 }
                 onClick={() => {
                   setSelectedActivity(item.activityId);
@@ -162,9 +162,9 @@ const ProgressionGrid = (props: ProgressionGridInterface) => {
                 target="_blank"
                 href={
                   item.url +
-                  "&usr=" +
+                  "&usr=norway" +
                   user?.protusId +
-                  "&grp=NorwaySpring2025A&sid=TEST&cid=352"
+                  "&grp=norwaySpring2026&sid=TEST&cid=352"
                 }
                 onClick={() => {
                   setSelectedActivity(item.activityId);

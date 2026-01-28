@@ -26,7 +26,7 @@ export const learnerActivity = async (prisma: PrismaClient, user: User) => {
     };
   }
 
-  const externalAPIURL = `http://adapt2.sis.pitt.edu/aggregate2/GetContentLevels?usr=${user.protusId}&grp=NorwaySpring2025A&mod=user&sid=TEST&cid=352&lastActivityId=while_loops.j_digits&res=-1`;
+  const externalAPIURL = `http://adapt2.sis.pitt.edu/aggregate2/GetContentLevels?usr=norway${user.protusId}&grp=norwaySpring2026&mod=user&sid=TEST&cid=352&lastActivityId=while_loops.j_digits&res=-1`;
 
   try {
     const unfilteredAPI = await fetch(externalAPIURL)
@@ -93,7 +93,7 @@ export const learnerActivityRouter = createTRPCRouter({
       };
     }
 
-    const externalAPIURL = `http://adapt2.sis.pitt.edu/aggregate2/GetContentLevels?usr=${ctx.user.protusId}&grp=NorwaySpring2025A&mod=user&sid=TEST&cid=352&lastActivityId=while_loops.j_digits&res=-1`;
+    const externalAPIURL = `http://adapt2.sis.pitt.edu/aggregate2/GetContentLevels?usr=norway${ctx.user.protusId}&grp=norwaySpring2026&mod=user&sid=TEST&cid=352&lastActivityId=while_loops.j_digits&res=-1`;
 
     try {
       const unfilteredAPI = await fetch(externalAPIURL)

@@ -64,9 +64,9 @@ const ContinueCard = () => {
             target="_blank"
             href={
               lastUnfinishedActivity.ActivityResource.url +
-              "&usr=" +
+              "&usr=norway" +
               lastUnfinishedActivity?.user.protusId +
-              "&grp=NorwaySpring2025A&sid=TEST&cid=352"
+              "&grp=norwaySpring2026&sid=TEST&cid=352"
             }
             rel="noreferrer"
             className="justify-self-center"

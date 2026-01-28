@@ -43,9 +43,9 @@ const TimelineWrapper = (props: {
             target="_blank"
             href={
               activity.url +
-              "&usr=" +
+              "&usr=norway" +
               user?.protusId +
-              "&grp=NorwaySpring2025A&sid=TEST&cid=352"
+              "&grp=norwaySpring2026&sid=TEST&cid=352"
             }
             onClick={() => {
               setSelectedActivity(activity.activityId);

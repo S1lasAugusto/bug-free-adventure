@@ -208,13 +208,14 @@ export const subplanRouter = createTRPCRouter({
             },
           });
         }
+        const generalPlanId = generalPlan.id;
 
         const subplan = await ctx.prisma.$transaction(async (tx) => {
           const createdSubplan = await tx.subPlan.create({
             data: {
               ...processedInput,
               userId: ctx.user.id,
-              generalPlanId: generalPlan.id,
+              generalPlanId,
             },
           });
 

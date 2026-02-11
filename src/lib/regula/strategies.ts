@@ -118,59 +118,72 @@ export const normalizeCustomStrategies = (
   if (!customStrategies) return [];
 
   if (Array.isArray(customStrategies)) {
-    return customStrategies
-      .map((item, index) => {
-        if (!item) return null;
+    return customStrategies.reduce<CustomStrategyDefinition[]>(
+      (acc, item, index) => {
+        if (!item) return acc;
+
         if (typeof item === "string") {
           const slug = toSlug(item) || `custom_${index}`;
-          return { id: `custom_${slug}`, name: item };
+          acc.push({ id: `custom_${slug}`, name: item });
+          return acc;
         }
+
         if (typeof item === "object" && "name" in item) {
           const name = String(item.name ?? "").trim();
-          if (!name) return null;
-          const description =
-            "description" in item && item.description != null
-              ? String(item.description)
-              : undefined;
+          if (!name) return acc;
+
           const customId =
             "id" in item && item.id != null
               ? String(item.id)
               : `custom_${toSlug(name)}`;
-          return { id: customId, name, description };
+          const strategy: CustomStrategyDefinition = { id: customId, name };
+          if ("description" in item && item.description != null) {
+            strategy.description = String(item.description);
+          }
+          acc.push(strategy);
         }
-        return null;
-      })
-      .filter((item): item is CustomStrategyDefinition => Boolean(item));
+
+        return acc;
+      },
+      []
+    );
   }
 
   if (typeof customStrategies === "object") {
-    return Object.entries(customStrategies as Record<string, unknown>)
-      .map(([key, value], index) => {
-        if (typeof value === "string") {
-          const id = key.startsWith("custom_")
-            ? key
-            : `custom_${toSlug(key) || index}`;
-          return { id, name: key, description: value };
+    return Object.entries(customStrategies as Record<string, unknown>).reduce<
+      CustomStrategyDefinition[]
+    >((acc, [key, value], index) => {
+      if (typeof value === "string") {
+        const id = key.startsWith("custom_")
+          ? key
+          : `custom_${toSlug(key) || index}`;
+        acc.push({ id, name: key, description: value });
+        return acc;
+      }
+
+      if (value && typeof value === "object") {
+        const name =
+          "name" in (value as Record<string, unknown>) &&
+          (value as Record<string, unknown>).name
+            ? String((value as Record<string, unknown>).name)
+            : key;
+        const id = key.startsWith("custom_")
+          ? key
+          : `custom_${toSlug(name) || index}`;
+        const strategy: CustomStrategyDefinition = { id, name };
+        if (
+          "description" in (value as Record<string, unknown>) &&
+          (value as Record<string, unknown>).description != null
+        ) {
+          strategy.description = String(
+            (value as Record<string, unknown>).description
+          );
         }
-        if (value && typeof value === "object") {
-          const name =
-            "name" in (value as Record<string, unknown>) &&
-            (value as Record<string, unknown>).name
-              ? String((value as Record<string, unknown>).name)
-              : key;
-          const description =
-            "description" in (value as Record<string, unknown>) &&
-            (value as Record<string, unknown>).description != null
-              ? String((value as Record<string, unknown>).description)
-              : undefined;
-          const id = key.startsWith("custom_")
-            ? key
-            : `custom_${toSlug(name) || index}`;
-          return { id, name, description };
-        }
-        return null;
-      })
-      .filter((item): item is CustomStrategyDefinition => Boolean(item));
+        acc.push(strategy);
+      }
+
+      return acc;
+    }, []);
   }
 
   return [];

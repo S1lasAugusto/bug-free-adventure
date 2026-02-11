@@ -6,6 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/utils/api";
@@ -63,6 +64,7 @@ export function EditReflectionDialog({
   subPlan,
 }: EditReflectionDialogProps) {
   const [currentStep, setCurrentStep] = useState(1);
+  const [isInitialized, setIsInitialized] = useState(false);
   const [formData, setFormData] = useState({
     type: reflection.type,
     control: reflection.control,
@@ -81,6 +83,9 @@ export function EditReflectionDialog({
   const [customStrategies, setCustomStrategies] = useState(
     normalizeCustomStrategies(subPlan?.customStrategies)
   );
+  const [customStrategyName, setCustomStrategyName] = useState("");
+  const [customStrategyDescription, setCustomStrategyDescription] =
+    useState("");
 
   const utils = api.useUtils();
   const createReflection = api.reflectionRouter.create.useMutation({
@@ -115,9 +120,13 @@ export function EditReflectionDialog({
     },
   });
 
-  // Sempre que abrir o dialog ou mudar o subPlan/reflection, sincroniza o formData
   useEffect(() => {
-    if (isOpen && subPlan) {
+    if (!isOpen) {
+      setIsInitialized(false);
+      return;
+    }
+
+    if (!isInitialized && subPlan) {
       setFormData({
         type: reflection.type,
         control: reflection.control,
@@ -133,9 +142,12 @@ export function EditReflectionDialog({
         selectedDays: subPlan.selectedDays,
       });
       setCustomStrategies(normalizeCustomStrategies(subPlan.customStrategies));
+      setCustomStrategyName("");
+      setCustomStrategyDescription("");
       setCurrentStep(1);
+      setIsInitialized(true);
     }
-  }, [isOpen, subPlan, reflection]);
+  }, [isOpen, isInitialized, subPlan, reflection]);
 
   const isReflectionStepValid =
     formData.control >= 1 &&
@@ -211,23 +223,25 @@ export function EditReflectionDialog({
   };
 
   const handleCustomStrategyAdd = () => {
-    const name = prompt("Enter strategy name:");
-    if (name) {
-      const description = prompt("Enter strategy description:");
-      const customId = `custom_${name
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9]+/g, "_")
-        .replace(/^_+|_+$/g, "")}`;
-      setCustomStrategies((prev) => [
-        ...prev.filter((strategy) => strategy.id !== customId),
-        {
-          id: customId,
-          name: name.trim(),
-          description: description || undefined,
-        },
-      ]);
-    }
+    const name = customStrategyName.trim();
+    if (!name) return;
+
+    const customId = `custom_${name
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "")}`;
+
+    setCustomStrategies((prev) => [
+      ...prev.filter((strategy) => strategy.id !== customId),
+      {
+        id: customId,
+        name,
+        description: customStrategyDescription.trim() || undefined,
+      },
+    ]);
+    setCustomStrategyName("");
+    setCustomStrategyDescription("");
   };
 
   const handleCustomStrategyRemove = (id: string) => {
@@ -338,9 +352,26 @@ export function EditReflectionDialog({
                   variant="outline"
                   size="sm"
                   onClick={handleCustomStrategyAdd}
+                  disabled={!customStrategyName.trim()}
                 >
                   Add Custom Strategy
                 </Button>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Input
+                  value={customStrategyName}
+                  onChange={(event) =>
+                    setCustomStrategyName(event.target.value)
+                  }
+                  placeholder="Custom strategy name"
+                />
+                <Input
+                  value={customStrategyDescription}
+                  onChange={(event) =>
+                    setCustomStrategyDescription(event.target.value)
+                  }
+                  placeholder="Custom strategy description (optional)"
+                />
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 {DEFAULT_STRATEGIES.map((strategy) => (
@@ -492,7 +523,12 @@ export function EditReflectionDialog({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
       <DialogContent className="max-h-[90vh] overflow-y-auto bg-white">
         <DialogHeader className="border-b border-gray-200 pb-4">
           <DialogTitle className="text-xl font-semibold text-gray-900">

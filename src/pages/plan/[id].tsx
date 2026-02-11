@@ -18,6 +18,10 @@ import {
   BarChart3,
 } from "lucide-react";
 import { api } from "@/utils/api";
+import {
+  normalizeCustomStrategies,
+  resolveStrategyDisplay,
+} from "@/lib/regula/strategies";
 
 export default function PlanDetailPage() {
   const router = useRouter();
@@ -30,72 +34,10 @@ export default function PlanDetailPage() {
     { enabled: !!id }
   );
 
-  const formatStrategyName = (strategy: string) => {
-    return strategy.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
-  };
-
-  // Importar as estratégias padrão para usar as descrições
-  const defaultStrategies = [
-    {
-      id: "pomodoro",
-      name: "Pomodoro Technique",
-      description: "Work for 25 minutes, then take a 5-minute break",
-    },
-    {
-      id: "spaced_repetition",
-      name: "Spaced Repetition",
-      description: "Review material at increasing intervals",
-    },
-    {
-      id: "active_recall",
-      name: "Active Recall",
-      description: "Test yourself on the material",
-    },
-    {
-      id: "mind_mapping",
-      name: "Mind Mapping",
-      description: "Visualize concepts and connections",
-    },
-    {
-      id: "feynman",
-      name: "Feynman Technique",
-      description: "Explain concepts in simple terms",
-    },
-    {
-      id: "cornell",
-      name: "Cornell Note-Taking",
-      description: "Structured note-taking method",
-    },
-    {
-      id: "group_study",
-      name: "Group Study",
-      description: "Study with peers for discussion",
-    },
-    {
-      id: "practice_tests",
-      name: "Practice Tests",
-      description: "Take mock exams to practice",
-    },
-    // Estratégias extras
-    {
-      id: "practice_by_teaching",
-      name: "Practice by Teaching",
-      description:
-        "Reinforce your understanding by teaching the material to someone else.",
-    },
-    {
-      id: "self_explanation",
-      name: "Self Explanation",
-      description:
-        "Explain concepts to yourself in your own words to deepen understanding.",
-    },
-    {
-      id: "concrete_examples",
-      name: "Concrete Examples",
-      description:
-        "Use specific examples to make abstract concepts more tangible.",
-    },
-  ];
+  const { data: reflections = [] } = api.reflectionRouter.getBySubPlan.useQuery(
+    { subPlanId: id as string },
+    { enabled: !!id }
+  );
 
   if (isLoading) {
     return (
@@ -114,6 +56,10 @@ export default function PlanDetailPage() {
   }
 
   const weeklyStudyTime = subPlan.hoursPerDay * subPlan.selectedDays.length;
+  const customStrategies = normalizeCustomStrategies(subPlan.customStrategies);
+  const latestEditReflection = reflections.find(
+    (reflection) => reflection.type === "edit_reflection"
+  );
 
   return (
     <div className="min-h-screen overflow-y-auto bg-gray-50">
@@ -250,45 +196,42 @@ export default function PlanDetailPage() {
             </Card>
 
             {/* Custom Strategies Card */}
-            {subPlan.customStrategies &&
-              Object.keys(subPlan.customStrategies).length > 0 && (
-                <Card className="group border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-lg">
-                  <CardHeader className="border-b border-gray-200 bg-gradient-to-r from-amber-50 via-amber-50/80 to-amber-50/50">
-                    <div className="flex items-center gap-3">
-                      <div className="rounded-xl bg-amber-100 p-2 shadow-sm transition-all duration-300 group-hover:bg-amber-200">
-                        <Lightbulb className="h-5 w-5 text-amber-600" />
-                      </div>
-                      <span className="text-lg font-semibold text-gray-900">
-                        Custom Strategies
-                      </span>
+            {customStrategies.length > 0 && (
+              <Card className="group border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-lg">
+                <CardHeader className="border-b border-gray-200 bg-gradient-to-r from-amber-50 via-amber-50/80 to-amber-50/50">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-xl bg-amber-100 p-2 shadow-sm transition-all duration-300 group-hover:bg-amber-200">
+                      <Lightbulb className="h-5 w-5 text-amber-600" />
                     </div>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      {Object.entries(subPlan.customStrategies).map(
-                        ([name, description], i) => (
-                          <div
-                            key={i}
-                            className="flex items-start gap-3 rounded-xl border border-gray-100 bg-gray-50/50 p-4 transition-all duration-300 hover:bg-gray-50 hover:shadow-sm"
-                          >
-                            <div className="rounded-xl bg-amber-100 p-2 shadow-sm">
-                              <CheckCircle2 className="h-4 w-4 text-amber-600" />
-                            </div>
-                            <div>
-                              <span className="font-medium text-gray-900">
-                                {name}
-                              </span>
-                              <div className="mt-1 text-sm text-gray-600">
-                                {description as string}
-                              </div>
-                            </div>
+                    <span className="text-lg font-semibold text-gray-900">
+                      Custom Strategies
+                    </span>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {customStrategies.map((strategy, i) => (
+                      <div
+                        key={i}
+                        className="flex items-start gap-3 rounded-xl border border-gray-100 bg-gray-50/50 p-4 transition-all duration-300 hover:bg-gray-50 hover:shadow-sm"
+                      >
+                        <div className="rounded-xl bg-amber-100 p-2 shadow-sm">
+                          <CheckCircle2 className="h-4 w-4 text-amber-600" />
+                        </div>
+                        <div>
+                          <span className="font-medium text-gray-900">
+                            {strategy.name}
+                          </span>
+                          <div className="mt-1 text-sm text-gray-600">
+                            {strategy.description || "No description available"}
                           </div>
-                        )
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Right Column - Actions and Learning Strategies */}
@@ -340,8 +283,9 @@ export default function PlanDetailPage() {
               <CardContent className="p-6">
                 <div className="space-y-3">
                   {subPlan.selectedStrategies.map((strategy, i) => {
-                    const found = defaultStrategies.find(
-                      (s) => s.id === strategy || s.name === strategy
+                    const resolvedStrategy = resolveStrategyDisplay(
+                      strategy,
+                      customStrategies
                     );
                     return (
                       <div
@@ -353,18 +297,12 @@ export default function PlanDetailPage() {
                             <CheckCircle2 className="h-4 w-4 text-amber-600" />
                           </div>
                           <span className="font-medium text-gray-900">
-                            {found ? found.name : formatStrategyName(strategy)}
+                            {resolvedStrategy.name}
                           </span>
                         </div>
-                        {found ? (
-                          <div className="ml-10 text-sm text-gray-600">
-                            {found.description}
-                          </div>
-                        ) : (
-                          <div className="ml-10 text-sm italic text-gray-400">
-                            No description available yet.
-                          </div>
-                        )}
+                        <div className="ml-10 text-sm text-gray-600">
+                          {resolvedStrategy.description}
+                        </div>
                       </div>
                     );
                   })}
@@ -386,23 +324,26 @@ export default function PlanDetailPage() {
         isOpen={isEditDialogOpen}
         onClose={() => setIsEditDialogOpen(false)}
         reflection={{
+          id: latestEditReflection?.id,
           type: "edit_reflection",
-          control: 0,
-          awareness: 0,
-          strengths: 0,
-          planning: 0,
+          control: latestEditReflection?.control ?? 0,
+          awareness: latestEditReflection?.awareness ?? 0,
+          strengths: latestEditReflection?.strengths ?? 0,
+          planning: latestEditReflection?.planning ?? 0,
           alternatives: 0,
           summary: 0,
           diagrams: 0,
           adaptation: 0,
-          comment: "",
-          selectedStrategies: subPlan.selectedStrategies || [],
+          comment: latestEditReflection?.comment ?? "",
+          selectedStrategies: subPlan.selectedStrategies ?? [],
         }}
         subPlan={{
           id: subPlan.id,
           mastery: subPlan.mastery,
           hoursPerDay: subPlan.hoursPerDay,
           selectedDays: subPlan.selectedDays,
+          selectedStrategies: subPlan.selectedStrategies,
+          customStrategies: subPlan.customStrategies,
         }}
       />
     </div>

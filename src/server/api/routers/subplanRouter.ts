@@ -4,8 +4,8 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 // Schema para validação dos inputs do SubPlan
 const subPlanSchema = z.object({
-  name: z.string().min(1, "Nome é obrigatório"),
-  topic: z.string().min(1, "Tópico é obrigatório"),
+  name: z.string().min(1, "Name is required"),
+  topic: z.string().min(1, "Topic is required"),
   mastery: z.number().min(0).max(100).default(0),
   status: z.string().default("Active"),
   selectedDays: z.array(z.string()),
@@ -16,8 +16,8 @@ const subPlanSchema = z.object({
 
 const subPlanUpdateSchema = z.object({
   id: z.string(),
-  name: z.string().min(1, "Nome é obrigatório").optional(),
-  topic: z.string().min(1, "Tópico é obrigatório").optional(),
+  name: z.string().min(1, "Name is required").optional(),
+  topic: z.string().min(1, "Topic is required").optional(),
   mastery: z.number().min(0).max(100).optional(),
   status: z.string().optional(),
   selectedDays: z.array(z.string()).optional(),
@@ -36,6 +36,78 @@ export const subplanRouter = createTRPCRouter({
       timestamp: new Date().toISOString(),
     };
   }),
+
+  validateLogsIntegrity: protectedProcedure
+    .input(
+      z
+        .object({
+          userIds: z.array(z.string()).optional(),
+        })
+        .optional()
+    )
+    .query(async ({ ctx, input }) => {
+      if (ctx.user.role !== "ADMIN") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only admins can validate activity logs.",
+        });
+      }
+
+      const users = await ctx.prisma.user.findMany({
+        where:
+          input?.userIds && input.userIds.length > 0
+            ? { id: { in: input.userIds } }
+            : undefined,
+        select: {
+          id: true,
+          email: true,
+          subplans: {
+            select: {
+              id: true,
+              reflections: {
+                select: {
+                  id: true,
+                  type: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const integrity = users.map((user) => {
+        let missingCreatedLogCount = 0;
+        for (const subplan of user.subplans) {
+          const hasCreatedLog = subplan.reflections.some(
+            (reflection) => reflection.type === "created_subplan"
+          );
+          if (!hasCreatedLog) {
+            missingCreatedLogCount += 1;
+          }
+        }
+        return {
+          userId: user.id,
+          email: user.email,
+          subPlansCount: user.subplans.length,
+          reflectionsCount: user.subplans.reduce(
+            (sum, subplan) => sum + subplan.reflections.length,
+            0
+          ),
+          missingCreatedLogCount,
+        };
+      });
+
+      const usersWithIssues = integrity.filter(
+        (row) => row.missingCreatedLogCount > 0
+      );
+
+      return {
+        checkedAt: new Date().toISOString(),
+        checkedUsers: integrity.length,
+        usersWithIssues: usersWithIssues.length,
+        integrity,
+      };
+    }),
 
   // Obter todos os subplans do usuário atual
   getAll: protectedProcedure.query(async ({ ctx }) => {
@@ -137,13 +209,24 @@ export const subplanRouter = createTRPCRouter({
           });
         }
 
-        // Criação do subplan com os dados do input linkado ao GeneralPlan
-        const subplan = await ctx.prisma.subPlan.create({
-          data: {
-            ...processedInput,
-            userId: ctx.user.id,
-            generalPlanId: generalPlan.id,
-          },
+        const subplan = await ctx.prisma.$transaction(async (tx) => {
+          const createdSubplan = await tx.subPlan.create({
+            data: {
+              ...processedInput,
+              userId: ctx.user.id,
+              generalPlanId: generalPlan.id,
+            },
+          });
+
+          await tx.reflection.create({
+            data: {
+              subPlanId: createdSubplan.id,
+              type: "created_subplan",
+              comment: "Sub-plan created",
+            },
+          });
+
+          return createdSubplan;
         });
 
         console.log(
@@ -171,14 +254,14 @@ export const subplanRouter = createTRPCRouter({
       if (!existingSubplan) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "SubPlan não encontrado",
+          message: "Sub-plan not found.",
         });
       }
 
       if (existingSubplan.userId !== ctx.user.id) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "Acesso não autorizado a este SubPlan",
+          message: "Unauthorized access to this sub-plan.",
         });
       }
 
@@ -234,14 +317,14 @@ export const subplanRouter = createTRPCRouter({
       if (!existingSubplan) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "SubPlan não encontrado",
+          message: "Sub-plan not found.",
         });
       }
 
       if (existingSubplan.userId !== ctx.user.id) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "Acesso não autorizado a este SubPlan",
+          message: "Unauthorized access to this sub-plan.",
         });
       }
 
@@ -277,14 +360,14 @@ export const subplanRouter = createTRPCRouter({
       if (!existingSubplan) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "SubPlan não encontrado",
+          message: "Sub-plan not found.",
         });
       }
 
       if (existingSubplan.userId !== ctx.user.id) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "Acesso não autorizado a este SubPlan",
+          message: "Unauthorized access to this sub-plan.",
         });
       }
 

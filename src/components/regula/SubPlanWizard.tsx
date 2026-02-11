@@ -3,6 +3,11 @@ import { Dialog } from "@headlessui/react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { api } from "@/utils/api";
+import {
+  DEFAULT_STRATEGIES,
+  buildCustomStrategiesPayload,
+  normalizeStrategyIds,
+} from "@/lib/regula/strategies";
 
 // Remover os tópicos estáticos, agora vamos buscar os módulos do banco
 // const topics = [
@@ -21,49 +26,6 @@ const daysOfWeek = [
   "Friday",
   "Saturday",
   "Sunday",
-];
-
-const defaultStrategies = [
-  {
-    id: "pomodoro",
-    name: "Pomodoro Technique",
-    description: "Work for 25 minutes, then take a 5-minute break",
-  },
-  {
-    id: "spaced_repetition",
-    name: "Spaced Repetition",
-    description: "Review material at increasing intervals",
-  },
-  {
-    id: "active_recall",
-    name: "Active Recall",
-    description: "Test yourself on the material",
-  },
-  {
-    id: "mind_mapping",
-    name: "Mind Mapping",
-    description: "Visualize concepts and connections",
-  },
-  {
-    id: "feynman",
-    name: "Feynman Technique",
-    description: "Explain concepts in simple terms",
-  },
-  {
-    id: "cornell",
-    name: "Cornell Note-Taking",
-    description: "Structured note-taking method",
-  },
-  {
-    id: "group_study",
-    name: "Group Study",
-    description: "Study with peers for discussion",
-  },
-  {
-    id: "practice_tests",
-    name: "Practice Tests",
-    description: "Take mock exams to practice",
-  },
 ];
 
 interface SubPlanWizardProps {
@@ -178,13 +140,29 @@ export function SubPlanWizard({
     }
 
     // Preparar os dados completos para enviar ao componente pai
+    const normalizedSelectedStrategies =
+      normalizeStrategyIds(selectedStrategies);
+    const customStrategiesPayload = buildCustomStrategiesPayload(
+      customStrategies.map((strategy, index) => ({
+        id: `custom_${
+          strategy.name
+            .toLowerCase()
+            .trim()
+            .replace(/[^a-z0-9]+/g, "_")
+            .replace(/^_+|_+$/g, "") || index
+        }`,
+        name: strategy.name,
+        description: strategy.description,
+      }))
+    );
     const completeData = {
       topic,
       mastery,
       selectedDays,
       hoursPerDay,
-      selectedStrategies,
-      customStrategies: customStrategies.length > 0 ? customStrategies : null,
+      selectedStrategies: normalizedSelectedStrategies,
+      customStrategies:
+        customStrategies.length > 0 ? customStrategiesPayload : undefined,
     };
 
     // Verificar se a função onComplete está definida
@@ -193,7 +171,7 @@ export function SubPlanWizard({
         "[CLIENT] SubPlanWizard.handleFinish - ERRO: onComplete não é uma função",
         onComplete
       );
-      alert("Erro: não foi possível enviar os dados. Contate o suporte.");
+      alert("Error: could not submit data. Please contact support.");
       return;
     }
 
@@ -467,7 +445,7 @@ export function SubPlanWizard({
               </div>
               <div className="flex max-h-48 flex-col gap-2 overflow-y-auto">
                 {/* Estratégias padrão */}
-                {defaultStrategies.map((s) => (
+                {DEFAULT_STRATEGIES.map((s) => (
                   <button
                     key={s.id}
                     type="button"
@@ -492,8 +470,12 @@ export function SubPlanWizard({
                 ))}
                 {/* Estratégias customizadas */}
                 {customStrategies.map((s, idx) => {
-                  // Cria um id único para cada custom strategy
-                  const customId = `custom_${idx}`;
+                  const customId =
+                    `custom_${s.name
+                      .toLowerCase()
+                      .trim()
+                      .replace(/[^a-z0-9]+/g, "_")
+                      .replace(/^_+|_+$/g, "")}` || `custom_${idx}`;
                   const isSelected = selectedStrategies.includes(customId);
                   return (
                     <div key={customId} className="relative">
@@ -566,12 +548,18 @@ export function SubPlanWizard({
                 <div>
                   <strong>Strategies:</strong>{" "}
                   {[
-                    ...defaultStrategies
-                      .filter((s) => selectedStrategies.includes(s.id))
-                      .map((s) => s.name),
+                    ...DEFAULT_STRATEGIES.filter((s) =>
+                      selectedStrategies.includes(s.id)
+                    ).map((s) => s.name),
                     ...customStrategies
                       .map((s, idx) =>
-                        selectedStrategies.includes(`custom_${idx}`)
+                        selectedStrategies.includes(
+                          `custom_${s.name
+                            .toLowerCase()
+                            .trim()
+                            .replace(/[^a-z0-9]+/g, "_")
+                            .replace(/^_+|_+$/g, "")}` || `custom_${idx}`
+                        )
                           ? s.name
                           : null
                       )

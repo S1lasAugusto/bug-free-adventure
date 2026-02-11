@@ -32,10 +32,21 @@ export function CompleteReflectionDialog({
   const updateSubPlan = api.subplanRouter.updateStatus.useMutation({
     onSuccess: () => {
       void utils.subplanRouter.getById.invalidate({ id: subPlanId });
+      void utils.subplanRouter.getAll.invalidate();
     },
   });
 
+  const isValidReflection =
+    alternatives >= 1 &&
+    summary >= 1 &&
+    diagrams >= 1 &&
+    adaptation >= 1 &&
+    comment.trim().length > 0;
+
   const handleSubmit = async () => {
+    if (!isValidReflection) {
+      return;
+    }
     // Cria a reflection
     await createReflection.mutateAsync({
       subPlanId,
@@ -44,7 +55,7 @@ export function CompleteReflectionDialog({
       summary,
       diagrams,
       adaptation,
-      comment: comment || undefined,
+      comment: comment.trim(),
     });
     // Atualiza status do plano para Completed
     await updateSubPlan.mutateAsync({
@@ -79,7 +90,7 @@ export function CompleteReflectionDialog({
         />
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            Comment (optional)
+            Comment
           </label>
           <textarea
             value={comment}
@@ -92,6 +103,7 @@ export function CompleteReflectionDialog({
           <Button
             type="button"
             onClick={handleSubmit}
+            disabled={!isValidReflection}
             className="bg-emerald-600 hover:bg-emerald-700"
           >
             Complete Plan

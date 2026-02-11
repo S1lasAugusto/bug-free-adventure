@@ -1,24 +1,85 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { TRPCError } from "@trpc/server";
+
+const reflectionCreateSchema = z
+  .object({
+    subPlanId: z.string(),
+    type: z.string(),
+    control: z.number().min(1).max(5).optional(),
+    awareness: z.number().min(1).max(5).optional(),
+    strengths: z.number().min(1).max(5).optional(),
+    planning: z.number().min(1).max(5).optional(),
+    alternatives: z.number().min(1).max(5).optional(),
+    summary: z.number().min(1).max(5).optional(),
+    diagrams: z.number().min(1).max(5).optional(),
+    adaptation: z.number().min(1).max(5).optional(),
+    comment: z.string().optional(),
+  })
+  .superRefine((value, context) => {
+    if (value.type === "edit_reflection") {
+      const missing =
+        value.control == null ||
+        value.awareness == null ||
+        value.strengths == null ||
+        value.planning == null ||
+        !value.comment?.trim();
+      if (missing) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Edit reflection requires all scale answers (1-5) and a comment.",
+        });
+      }
+    }
+
+    if (value.type === "complete_reflection") {
+      const missing =
+        value.alternatives == null ||
+        value.summary == null ||
+        value.diagrams == null ||
+        value.adaptation == null ||
+        !value.comment?.trim();
+      if (missing) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Complete reflection requires all scale answers (1-5) and a comment.",
+        });
+      }
+    }
+  });
+
+const reflectionUpdateSchema = z.object({
+  id: z.string(),
+  type: z.string().optional(),
+  control: z.number().min(1).max(5).optional(),
+  awareness: z.number().min(1).max(5).optional(),
+  strengths: z.number().min(1).max(5).optional(),
+  planning: z.number().min(1).max(5).optional(),
+  alternatives: z.number().min(1).max(5).optional(),
+  summary: z.number().min(1).max(5).optional(),
+  diagrams: z.number().min(1).max(5).optional(),
+  adaptation: z.number().min(1).max(5).optional(),
+  comment: z.string().optional(),
+});
 
 export const reflectionRouter = createTRPCRouter({
   create: protectedProcedure
-    .input(
-      z.object({
-        subPlanId: z.string(),
-        type: z.string(),
-        control: z.number().optional(),
-        awareness: z.number().optional(),
-        strengths: z.number().optional(),
-        planning: z.number().optional(),
-        alternatives: z.number().optional(),
-        summary: z.number().optional(),
-        diagrams: z.number().optional(),
-        adaptation: z.number().optional(),
-        comment: z.string().optional(),
-      })
-    )
+    .input(reflectionCreateSchema)
     .mutation(async ({ ctx, input }) => {
+      const subPlan = await ctx.prisma.subPlan.findUnique({
+        where: { id: input.subPlanId },
+        select: { userId: true },
+      });
+
+      if (!subPlan || subPlan.userId !== ctx.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Unauthorized access to this sub-plan.",
+        });
+      }
+
       return ctx.prisma.reflection.create({
         data: {
           subPlanId: input.subPlanId,
@@ -39,6 +100,18 @@ export const reflectionRouter = createTRPCRouter({
   getBySubPlan: protectedProcedure
     .input(z.object({ subPlanId: z.string() }))
     .query(async ({ ctx, input }) => {
+      const subPlan = await ctx.prisma.subPlan.findUnique({
+        where: { id: input.subPlanId },
+        select: { userId: true },
+      });
+
+      if (!subPlan || subPlan.userId !== ctx.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Unauthorized access to this sub-plan.",
+        });
+      }
+
       return ctx.prisma.reflection.findMany({
         where: {
           subPlanId: input.subPlanId,
@@ -50,22 +123,29 @@ export const reflectionRouter = createTRPCRouter({
     }),
 
   update: protectedProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        type: z.string().optional(),
-        control: z.number().optional(),
-        awareness: z.number().optional(),
-        strengths: z.number().optional(),
-        planning: z.number().optional(),
-        alternatives: z.number().optional(),
-        summary: z.number().optional(),
-        diagrams: z.number().optional(),
-        adaptation: z.number().optional(),
-        comment: z.string().optional(),
-      })
-    )
+    .input(reflectionUpdateSchema)
     .mutation(async ({ ctx, input }) => {
+      const existingReflection = await ctx.prisma.reflection.findUnique({
+        where: { id: input.id },
+        select: {
+          subPlan: {
+            select: {
+              userId: true,
+            },
+          },
+        },
+      });
+
+      if (
+        !existingReflection ||
+        existingReflection.subPlan.userId !== ctx.user.id
+      ) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Unauthorized access to this reflection.",
+        });
+      }
+
       const { id, ...data } = input;
       return ctx.prisma.reflection.update({
         where: { id },

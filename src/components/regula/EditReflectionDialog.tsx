@@ -6,28 +6,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/utils/api";
 import { CheckCircle2, X } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { ReflectionScale } from "./ReflectionScale";
-
-const LEARNING_STRATEGIES = [
-  "active_recall",
-  "spaced_repetition",
-  "pomodoro_technique",
-  "mind_mapping",
-  "feynman_technique",
-  "practice_by_teaching",
-  "interleaving",
-  "dual_coding",
-  "elaboration",
-  "concrete_examples",
-  "retrieval_practice",
-  "self_explanation",
-];
+import {
+  DEFAULT_STRATEGIES,
+  buildCustomStrategiesPayload,
+  normalizeCustomStrategies,
+  normalizeStrategyIds,
+} from "@/lib/regula/strategies";
 
 const DAYS_OF_WEEK = [
   "Monday",
@@ -38,13 +28,6 @@ const DAYS_OF_WEEK = [
   "Saturday",
   "Sunday",
 ];
-
-const formatStrategyName = (strategy: string) => {
-  return strategy
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-};
 
 interface EditReflectionDialogProps {
   isOpen: boolean;
@@ -68,6 +51,8 @@ interface EditReflectionDialogProps {
     mastery: number;
     hoursPerDay: number;
     selectedDays: string[];
+    selectedStrategies?: string[];
+    customStrategies?: unknown;
   };
 }
 
@@ -85,15 +70,17 @@ export function EditReflectionDialog({
     strengths: reflection.strengths,
     planning: reflection.planning,
     comment: reflection.comment,
-    selectedStrategies: reflection.selectedStrategies,
+    selectedStrategies: normalizeStrategyIds(
+      subPlan?.selectedStrategies ?? reflection.selectedStrategies
+    ),
     mastery: subPlan?.mastery ?? 0,
     hoursPerDay: subPlan?.hoursPerDay ?? 1,
     selectedDays: subPlan?.selectedDays ?? [],
   });
 
-  const [customStrategies, setCustomStrategies] = useState<{
-    [key: string]: string;
-  }>({});
+  const [customStrategies, setCustomStrategies] = useState(
+    normalizeCustomStrategies(subPlan?.customStrategies)
+  );
 
   const utils = api.useUtils();
   const createReflection = api.reflectionRouter.create.useMutation({
@@ -121,6 +108,7 @@ export function EditReflectionDialog({
   const updateSubPlan = api.subplanRouter.update.useMutation({
     onSuccess: () => {
       utils.subplanRouter.getById.invalidate({ id: subPlan.id });
+      utils.subplanRouter.getAll.invalidate();
     },
     onError: (error) => {
       toast.error(`Error updating plan: ${error.message}`);
@@ -137,36 +125,47 @@ export function EditReflectionDialog({
         strengths: reflection.strengths,
         planning: reflection.planning,
         comment: reflection.comment,
-        selectedStrategies: reflection.selectedStrategies,
+        selectedStrategies: normalizeStrategyIds(
+          subPlan.selectedStrategies ?? reflection.selectedStrategies
+        ),
         mastery: subPlan.mastery,
         hoursPerDay: subPlan.hoursPerDay,
         selectedDays: subPlan.selectedDays,
       });
+      setCustomStrategies(normalizeCustomStrategies(subPlan.customStrategies));
       setCurrentStep(1);
     }
   }, [isOpen, subPlan, reflection]);
 
+  const isReflectionStepValid =
+    formData.control >= 1 &&
+    formData.awareness >= 1 &&
+    formData.strengths >= 1 &&
+    formData.planning >= 1 &&
+    formData.comment.trim().length > 0;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Salvando alterações...", { formData, subPlan, reflection });
-
     if (!subPlan?.id) {
-      console.error("ID do subplan não encontrado", subPlan);
       toast.error("Error: Plan ID not found");
       return;
     }
 
+    if (!isReflectionStepValid) {
+      toast.error("Please complete all reflection fields before saving.");
+      return;
+    }
+
     try {
-      // Atualiza o plano
       await updateSubPlan.mutateAsync({
         id: subPlan.id,
         mastery: formData.mastery,
         hoursPerDay: formData.hoursPerDay,
         selectedDays: formData.selectedDays,
-        selectedStrategies: formData.selectedStrategies,
+        selectedStrategies: normalizeStrategyIds(formData.selectedStrategies),
+        customStrategies: buildCustomStrategiesPayload(customStrategies),
       });
 
-      // Atualiza ou cria a reflexão
       if (reflection?.id) {
         await updateReflection.mutateAsync({
           id: reflection.id,
@@ -188,11 +187,7 @@ export function EditReflectionDialog({
           subPlanId: subPlan.id,
         });
       }
-
-      toast.success("Changes saved successfully!");
-      onClose();
     } catch (error) {
-      console.error("Erro ao salvar:", error);
       toast.error("Error saving changes");
     }
   };
@@ -219,21 +214,32 @@ export function EditReflectionDialog({
     const name = prompt("Enter strategy name:");
     if (name) {
       const description = prompt("Enter strategy description:");
-      if (description) {
-        setCustomStrategies((prev) => ({
-          ...prev,
-          [name]: description,
-        }));
-      }
+      const customId = `custom_${name
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/^_+|_+$/g, "")}`;
+      setCustomStrategies((prev) => [
+        ...prev.filter((strategy) => strategy.id !== customId),
+        {
+          id: customId,
+          name: name.trim(),
+          description: description || undefined,
+        },
+      ]);
     }
   };
 
-  const handleCustomStrategyRemove = (name: string) => {
-    setCustomStrategies((prev) => {
-      const newStrategies = { ...prev };
-      delete newStrategies[name];
-      return newStrategies;
-    });
+  const handleCustomStrategyRemove = (id: string) => {
+    setCustomStrategies((prev) =>
+      prev.filter((strategy) => strategy.id !== id)
+    );
+    setFormData((prev) => ({
+      ...prev,
+      selectedStrategies: prev.selectedStrategies.filter(
+        (strategy) => strategy !== id
+      ),
+    }));
   };
 
   const renderStep = () => {
@@ -337,58 +343,58 @@ export function EditReflectionDialog({
                 </Button>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
-                {LEARNING_STRATEGIES.map((strategy) => (
+                {DEFAULT_STRATEGIES.map((strategy) => (
                   <div
-                    key={strategy}
+                    key={strategy.id}
                     className="flex items-center gap-2 rounded-lg border border-gray-200 p-3 transition-colors hover:border-gray-300"
                   >
                     <button
                       type="button"
-                      onClick={() => handleStrategyToggle(strategy)}
+                      onClick={() => handleStrategyToggle(strategy.id)}
                       className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-300 transition-colors hover:border-gray-400"
                     >
-                      {formData.selectedStrategies.includes(strategy) && (
+                      {formData.selectedStrategies.includes(strategy.id) && (
                         <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                       )}
                     </button>
                     <span className="text-sm font-medium text-gray-900">
-                      {formatStrategyName(strategy)}
+                      {strategy.name}
                     </span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {Object.keys(customStrategies).length > 0 && (
+            {customStrategies.length > 0 && (
               <div className="space-y-4">
                 <Label>Custom Strategies</Label>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {Object.entries(customStrategies).map(
-                    ([name, description]) => (
-                      <div
-                        key={name}
-                        className="flex items-start gap-3 rounded-lg border border-gray-200 p-3 transition-colors hover:border-gray-300"
-                      >
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium text-gray-900">
-                              {name}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => handleCustomStrategyRemove(name)}
-                              className="text-gray-400 transition-colors hover:text-gray-600"
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
-                          </div>
-                          <p className="mt-1 text-sm text-gray-600">
-                            {description}
-                          </p>
+                  {customStrategies.map((strategy) => (
+                    <div
+                      key={strategy.id}
+                      className="flex items-start gap-3 rounded-lg border border-gray-200 p-3 transition-colors hover:border-gray-300"
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-gray-900">
+                            {strategy.name}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleCustomStrategyRemove(strategy.id)
+                            }
+                            className="text-gray-400 transition-colors hover:text-gray-600"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
                         </div>
+                        <p className="mt-1 text-sm text-gray-600">
+                          {strategy.description || "No description available"}
+                        </p>
                       </div>
-                    )
-                  )}
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -449,7 +455,7 @@ export function EditReflectionDialog({
               />
 
               <div>
-                <Label htmlFor="comment">Comment (optional)</Label>
+                <Label htmlFor="comment">Comment</Label>
                 <Textarea
                   id="comment"
                   value={formData.comment}
@@ -474,7 +480,7 @@ export function EditReflectionDialog({
               </Button>
               <Button
                 type="submit"
-                onClick={handleSubmit}
+                disabled={!isReflectionStepValid}
                 className="bg-emerald-600 hover:bg-emerald-700"
               >
                 Save Changes

@@ -11,6 +11,7 @@ import { api } from "@/utils/api";
 import { toast } from "react-hot-toast";
 import { useAuth } from "../../contexts/AuthContext";
 import { GradeDialog } from "./GradeDialog";
+import { useRouter } from "next/router";
 
 // Definição da interface do banco de dados
 interface SubPlan {
@@ -64,6 +65,7 @@ const gradeLabels: Record<string, string> = {
 };
 
 export function StudyDashboard() {
+  const router = useRouter();
   const [subPlans, setSubPlans] = useState<SubPlan[]>([]);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
@@ -85,7 +87,7 @@ export function StudyDashboard() {
       setShowDialog(false);
     },
     onError: (err) => {
-      toast.error("Erro ao salvar plano geral: " + err.message);
+      toast.error("Error saving general plan: " + err.message);
     },
   });
 
@@ -103,12 +105,12 @@ export function StudyDashboard() {
         "[CLIENT] StudyDashboard - SubPlan criado com sucesso:",
         data
       );
-      toast.success("SubPlan criado com sucesso!");
+      toast.success("Sub-plan created successfully.");
       refetchStudyPlans();
     },
     onError: (error) => {
       console.error("[CLIENT] StudyDashboard - Erro ao criar subplan:", error);
-      toast.error(`Erro ao criar subplan: ${error.message}`);
+      toast.error(`Error creating sub-plan: ${error.message}`);
       setIsLoading(false);
     },
   });
@@ -375,7 +377,12 @@ export function StudyDashboard() {
           <SubPlanHistoryModal
             open={historyModalOpen}
             onClose={() => setHistoryModalOpen(false)}
-            onViewDetails={() => alert("View Plan Details clicked!")}
+            onViewDetails={() => {
+              if (selectedPlan?.id) {
+                void router.push(`/plan/${selectedPlan.id}`);
+                setHistoryModalOpen(false);
+              }
+            }}
             title={`${selectedPlan.name} - Modification History`}
             subtitle="Detailed log of all reflections for this sub-plan"
             events={reflectionEvents}

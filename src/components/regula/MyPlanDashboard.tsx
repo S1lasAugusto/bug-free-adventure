@@ -55,6 +55,9 @@ export function MyPlanDashboard() {
       console.error("[CLIENT] Dados do erro:", error);
     },
   });
+  const { data: generalPlan } = api.generalPlanRouter.get.useQuery(undefined, {
+    enabled: sessionStatus === "authenticated",
+  });
 
   const createSubPlanMutation = api.subplanRouter.create.useMutation({
     onMutate: (variables) => {
@@ -63,13 +66,13 @@ export function MyPlanDashboard() {
     onSuccess: (data) => {
       console.log("[CLIENT] SubPlan criado com sucesso:", data);
       refetchSubPlans();
-      toast.success("SubPlan criado com sucesso!");
+      toast.success("Sub-plan created successfully.");
     },
     onError: (error) => {
       console.error("[CLIENT] Erro ao criar subplan:", error);
       console.error("[CLIENT] Mensagem de erro:", error.message);
       console.error("[CLIENT] Dados do erro:", error);
-      toast.error(`Erro ao criar subplan: ${error.message}`);
+      toast.error(`Error creating sub-plan: ${error.message}`);
     },
   });
 
@@ -102,7 +105,7 @@ export function MyPlanDashboard() {
     };
 
     fetchSession();
-  }, []);
+  }, [sessionData]);
 
   if (isLoadError) {
     console.error("[CLIENT] Erro na consulta getAll:", loadError);
@@ -129,14 +132,14 @@ export function MyPlanDashboard() {
     // Verificação básica de login
     if (!sessionData) {
       console.error("[CLIENT] handleCreateSubPlan - Sem usuário na sessão");
-      toast.error("Você precisa estar logado para criar um subplan");
+      toast.error("You need to be logged in to create a sub-plan.");
       return;
     }
 
     // Verificação básica de dados
     if (!data || !data.topic) {
       console.error("[CLIENT] handleCreateSubPlan - Dados inválidos:", data);
-      toast.error("Dados inválidos para criar subplan");
+      toast.error("Invalid data to create a sub-plan.");
       return;
     }
 
@@ -168,10 +171,10 @@ export function MyPlanDashboard() {
       console.log("[CLIENT] handleCreateSubPlan - Mutação chamada");
 
       // Mostrar mensagem de sucesso
-      toast.success("Solicitação de criação enviada!");
+      toast.success("Sub-plan creation request submitted.");
     } catch (error) {
       console.error("[CLIENT] handleCreateSubPlan - Erro na execução:", error);
-      toast.error("Erro ao processar solicitação");
+      toast.error("Error processing request.");
     } finally {
       // Sempre fechar o wizard e limpar estado
       setIsLoading(false);
@@ -240,7 +243,9 @@ export function MyPlanDashboard() {
             <div>
               <div className="text-lg font-bold">My Study Plan</div>
               <div className="text-sm text-gray-500">
-                Not set • Target: Not set
+                {(generalPlan?.name || "Not set") +
+                  " • Target: " +
+                  (generalPlan?.gradeGoal || "Not set")}
               </div>
               <div className="text-sm text-gray-400">
                 {subPlans.length === 0

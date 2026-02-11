@@ -12,6 +12,7 @@ interface SubPlanCardProps {
     daysOfWeek: string[];
     hoursPerDay: number;
     strategies: string[];
+    customStrategies?: unknown;
   };
   reflection: {
     id: string;
@@ -116,6 +117,8 @@ export function SubPlanCard({
           mastery: subPlan.mastery,
           hoursPerDay: subPlan.hoursPerDay,
           selectedDays: subPlan.daysOfWeek,
+          selectedStrategies: subPlan.strategies,
+          customStrategies: subPlan.customStrategies,
         }}
       />
 

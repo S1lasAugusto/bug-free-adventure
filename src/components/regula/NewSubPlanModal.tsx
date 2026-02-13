@@ -31,7 +31,10 @@ export function NewSubPlanModal({
 
   return (
     <Dialog open={open} onClose={onClose} className="relative z-50">
-      <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+      <div
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+        aria-hidden="true"
+      />
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <Dialog.Panel className="w-full max-w-md rounded-lg bg-white p-8 shadow-xl">
           <Dialog.Title className="mb-4 text-xl font-bold">

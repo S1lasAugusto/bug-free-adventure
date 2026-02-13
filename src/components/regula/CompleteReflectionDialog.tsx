@@ -127,7 +127,10 @@ export function CompleteReflectionDialog({
 
   return (
     <HeadlessDialog open={open} onClose={onClose} className="relative z-50">
-      <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+      <div
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+        aria-hidden="true"
+      />
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <HeadlessDialog.Panel className="mx-auto max-h-[90vh] max-w-2xl rounded-lg bg-white p-6">
           <HeadlessDialog.Title className="text-lg font-medium leading-6 text-gray-900">

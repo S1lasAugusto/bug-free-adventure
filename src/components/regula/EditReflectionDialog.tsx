@@ -6,11 +6,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/utils/api";
-import { CheckCircle2, X } from "lucide-react";
+
 import { toast } from "react-hot-toast";
 import { ReflectionScale } from "./ReflectionScale";
 import {
@@ -344,91 +344,102 @@ export function EditReflectionDialog({
       case 2:
         return (
           <div className="space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label>Learning Strategies</Label>
+            <div className="mb-2 flex items-center gap-2 text-lg font-semibold">
+              <span className="inline-block rounded-full bg-blue-100 p-2">
+                <svg width="24" height="24" fill="none">
+                  <path d="M12 2v20M2 12h20" stroke="#2563eb" strokeWidth="2" />
+                </svg>
+              </span>
+              Strategy Selection
+            </div>
+            <div className="mb-2 text-gray-500">
+              Choose your preferred learning strategies
+            </div>
+            <div className="mb-4 rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+              <div className="mb-2 font-medium">Add your own strategy:</div>
+              <div className="flex flex-col gap-2 md:flex-row md:items-center">
+                <input
+                  className="rounded-lg border border-zinc-300 px-3 py-2 text-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                  placeholder="Strategy Name"
+                  value={customStrategyName}
+                  onChange={(e) => setCustomStrategyName(e.target.value)}
+                />
+                <input
+                  className="rounded-lg border border-zinc-300 px-3 py-2 text-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 md:ml-2"
+                  placeholder="Description (optional)"
+                  value={customStrategyDescription}
+                  onChange={(e) => setCustomStrategyDescription(e.target.value)}
+                />
                 <Button
                   type="button"
-                  variant="outline"
-                  size="sm"
+                  className="mt-2 rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-700 md:mt-0"
                   onClick={handleCustomStrategyAdd}
                   disabled={!customStrategyName.trim()}
                 >
-                  Add Custom Strategy
+                  Add Strategy
                 </Button>
               </div>
-              <div className="grid gap-2 sm:grid-cols-2">
-                <Input
-                  value={customStrategyName}
-                  onChange={(event) =>
-                    setCustomStrategyName(event.target.value)
-                  }
-                  placeholder="Custom strategy name"
-                />
-                <Input
-                  value={customStrategyDescription}
-                  onChange={(event) =>
-                    setCustomStrategyDescription(event.target.value)
-                  }
-                  placeholder="Custom strategy description (optional)"
-                />
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {DEFAULT_STRATEGIES.map((strategy) => (
-                  <div
-                    key={strategy.id}
-                    className="flex items-center gap-2 rounded-lg border border-gray-200 p-3 transition-colors hover:border-gray-300"
-                  >
+            </div>
+            <div className="mb-2 font-medium">
+              Select your preferred learning strategies:
+            </div>
+            <div className="flex max-h-48 flex-col gap-2 overflow-y-auto">
+              {/* Estratégias padrão */}
+              {DEFAULT_STRATEGIES.map((strategy) => (
+                <button
+                  key={strategy.id}
+                  type="button"
+                  className={`flex flex-col items-start rounded-lg border px-4 py-2 text-left text-sm font-medium transition-all duration-200 ${
+                    formData.selectedStrategies.includes(strategy.id)
+                      ? "border-blue-600 bg-blue-600 text-white shadow"
+                      : "border-zinc-300 bg-gray-100 text-gray-700 hover:bg-blue-50"
+                  }`}
+                  onClick={() => handleStrategyToggle(strategy.id)}
+                >
+                  <span className="font-semibold">{strategy.name}</span>
+                  <span className="text-xs text-gray-400">
+                    {strategy.description}
+                  </span>
+                </button>
+              ))}
+              {/* Estratégias customizadas */}
+              {customStrategies.map((strategy) => {
+                const isSelected = formData.selectedStrategies.includes(
+                  strategy.id
+                );
+                return (
+                  <div key={strategy.id} className="relative">
                     <button
                       type="button"
+                      className={`flex w-full flex-col items-start rounded-lg border px-4 py-2 text-left text-sm font-medium transition-all duration-200 ${
+                        isSelected
+                          ? "border-blue-600 bg-blue-600 text-white shadow"
+                          : "border-zinc-300 bg-gray-100 text-gray-700 hover:bg-blue-50"
+                      }`}
                       onClick={() => handleStrategyToggle(strategy.id)}
-                      className="flex h-5 w-5 items-center justify-center rounded-full border border-gray-300 transition-colors hover:border-gray-400"
                     >
-                      {formData.selectedStrategies.includes(strategy.id) && (
-                        <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                      <span className="font-semibold">{strategy.name}</span>
+                      {strategy.description && (
+                        <span className="text-xs text-gray-400">
+                          {strategy.description}
+                        </span>
                       )}
                     </button>
-                    <span className="text-sm font-medium text-gray-900">
-                      {strategy.name}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {customStrategies.length > 0 && (
-              <div className="space-y-4">
-                <Label>Custom Strategies</Label>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {customStrategies.map((strategy) => (
-                    <div
-                      key={strategy.id}
-                      className="flex items-start gap-3 rounded-lg border border-gray-200 p-3 transition-colors hover:border-gray-300"
+                    <button
+                      className="absolute right-2 top-2 z-10 text-xs text-red-500 hover:underline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCustomStrategyRemove(strategy.id);
+                      }}
+                      tabIndex={-1}
+                      type="button"
                     >
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium text-gray-900">
-                            {strategy.name}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleCustomStrategyRemove(strategy.id)
-                            }
-                            className="text-gray-400 transition-colors hover:text-gray-600"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        </div>
-                        <p className="mt-1 text-sm text-gray-600">
-                          {strategy.description || "No description available"}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+                      Remove
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
 
             <div className="flex justify-between">
               <Button

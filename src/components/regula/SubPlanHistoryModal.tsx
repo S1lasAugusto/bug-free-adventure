@@ -39,7 +39,7 @@ export function SubPlanHistoryModal({
   return (
     <Dialog open={open} onClose={onClose} className="relative z-50">
       <div
-        className="fixed inset-0 bg-black/30 transition-opacity duration-300"
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300"
         aria-hidden="true"
       />
       <div className="fixed inset-0 flex items-center justify-center p-4">

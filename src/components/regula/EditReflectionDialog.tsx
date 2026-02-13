@@ -540,7 +540,7 @@ export function EditReflectionDialog({
         if (!open) onClose();
       }}
     >
-      <DialogContent className="max-h-[90vh] overflow-y-auto bg-white">
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto bg-white">
         <DialogHeader className="border-b border-gray-200 pb-4">
           <DialogTitle className="text-xl font-semibold text-gray-900">
             Edit Plan and Reflection

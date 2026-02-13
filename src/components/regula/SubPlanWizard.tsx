@@ -478,10 +478,10 @@ export function SubPlanWizard({
                       .replace(/^_+|_+$/g, "")}` || `custom_${idx}`;
                   const isSelected = selectedStrategies.includes(customId);
                   return (
-                    <div key={customId} className="relative">
+                    <div key={customId} className="flex items-center gap-2">
                       <button
                         type="button"
-                        className={`flex w-full flex-col items-start rounded-lg border px-4 py-2 text-left text-sm font-medium transition-all duration-200 ${
+                        className={`flex flex-1 flex-col items-start rounded-lg border px-4 py-2 text-left text-sm font-medium transition-all duration-200 ${
                           isSelected
                             ? "border-blue-600 bg-blue-600 text-white shadow"
                             : "border-zinc-300 bg-gray-100 text-gray-700 hover:bg-blue-50"
@@ -502,11 +502,10 @@ export function SubPlanWizard({
                         )}
                       </button>
                       <button
-                        className="absolute right-2 top-2 z-10 text-xs text-red-500 hover:underline"
+                        className="shrink-0 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-600 transition-colors hover:bg-red-100"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleRemoveCustomStrategy(idx);
-                          // Remove da seleção se estiver selecionada
                           setSelectedStrategies((prev) =>
                             prev.filter((d) => d !== customId)
                           );
